@@ -11,6 +11,8 @@ Requirements:
 
 * GNU make
 
+* postgresql (for demo)
+
 Building:
 
     $ make
@@ -18,13 +20,13 @@ Building:
 ## Running (demo)
 
 
-copy `contrib/waveguided.ini` to `/etc/waveguided.ini`
+copy `contrib/waveguide.ini` to `waveguide.ini`
 
 Run frontend server:
 
-    $ ./waveguided frontend
+    $ PORT=28800 ./waveguided frontend
     
 Run worker server:
     
-    $ ./waveguided worker
+    $ PORT=38800 ./waveguided worker
 

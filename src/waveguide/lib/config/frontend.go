@@ -6,9 +6,10 @@ import (
 
 type FrontendConfig struct {
 	TemplateDir string
+	DB          DBConfig
 }
 
 func (c *FrontendConfig) Load(s *parser.Section) error {
 	c.TemplateDir = s.ValueOf("templates")
-	return nil
+	return c.DB.Load(s)
 }
