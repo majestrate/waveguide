@@ -1,9 +1,9 @@
 package version
 
-const Git = ""
+var Git string = ""
 
-const Major = "0"
-const Minir = "0"
-const Patch = "0"
+var Major = "0"
+var Minor = "0"
+var Patch = "0"
 
-const Version = "waveguided-" + Major + "." + Minor + "." + Patch + Git
+var Version = "waveguided-" + Major + "." + Minor + "." + Patch + Git
