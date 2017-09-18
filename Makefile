@@ -13,7 +13,7 @@ GOPATH := $(REPO)
 build: clean $(WAVED)
 
 $(WAVED):
-	GOPATH=$(GOPATH) $(GO) build -ldflags "-X waveguide/lib/version.Git=-$(shell git rev-parse --short HEAD)" -o $(WAVED)
+	GOPATH=$(GOPATH) $(GO) build -v -ldflags "-X waveguide/lib/version.Git=-$(shell git rev-parse --short HEAD)" -o $(WAVED)
 
 test:
 	GOPATH=$(GOPATH) $(GO) test -v waveguide/...
