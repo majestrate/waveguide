@@ -2,6 +2,7 @@ package frontend
 
 import (
 	"github.com/gin-gonic/gin"
+	"net/http"
 	"path/filepath"
 	"waveguide/lib/config"
 	"waveguide/lib/database"
@@ -10,6 +11,7 @@ import (
 )
 
 func Run() {
+	log.SetLevel("debug")
 	var conf config.Config
 
 	err := conf.Load("waveguide.ini")
@@ -31,8 +33,17 @@ func Run() {
 	router.SetFuncMap(funcs)
 	// load templates
 	router.LoadHTMLGlob(filepath.Join(conf.Frontend.TemplateDir, "*.html.tmpl"))
+
+	// static resources
+	router.Static("/static", conf.Frontend.StaticDir)
+	router.GET("/favicon.ico", func(c *gin.Context) {
+		c.Redirect(http.StatusMovedPermanently, "/static/favicon.png")
+	})
+
 	// setup routes
-	router.GET("/", routes.Index)
+	router.GET("/", routes.ServeIndex)
+	router.GET("/v/:VideoID/", routes.ServeVideo)
+	router.GET("/u/:UserID/", routes.ServeUser)
 	// run router
 	router.Run()
 }

@@ -10,13 +10,15 @@ WAVED := $(REPO)/waveguided
 
 GOPATH := $(REPO)
 
-build: clean $(WAVED)
+all: clean build test
+
+build: $(WAVED)
 
 $(WAVED):
 	GOPATH=$(GOPATH) $(GO) build -v -ldflags "-X waveguide/lib/version.Git=-$(shell git rev-parse --short HEAD)" -o $(WAVED)
 
 test:
-	GOPATH=$(GOPATH) $(GO) test -v waveguide/...
+	GOPATH=$(GOPATH) $(GO) test waveguide/...
 
 clean:
 	GOPATH=$(GOPATH) $(GO) clean

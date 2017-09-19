@@ -7,6 +7,8 @@ import (
 type Database interface {
 	Init() error
 	GetFrontpageVideos() (model.VideoList, error)
+	RegisterVideo(v *model.VideoInfo) error
+	GetVideoInfo(id int64) (*model.VideoInfo, error)
 }
 
 func NewDatabase(url string) Database {

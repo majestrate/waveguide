@@ -1,0 +1,27 @@
+{{define "video.html"}}
+<!doctype html>
+<html>
+    <head>
+        <title> {{ .Video.Title }} </title>
+        <script type="text/javascript" src="/static/waveguide.min.js"></script>
+    </head>
+    <body>
+        <video id="player"></video>
+        <script type="text/javascript">
+         /** webtorrent webseeds */
+         var client = new WebTorrent();
+         client.add("{{ .Video.TorrentURL }}", function(t) {
+             {{ range .Video.WebSeeds }}
+             t.addWebSeed("{{.}}");
+             {{ end }}
+             t.on("ready", function() {
+                 t.files[0].renderTo("video#player", {}, function(err, elem) {
+                     if(err) throw err;
+                 });
+             });
+         });
+
+        </script>
+    </body>
+</html>
+{{end}}
