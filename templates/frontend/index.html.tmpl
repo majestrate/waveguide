@@ -3,6 +3,8 @@
 <html>
     <head>
         <title> WaveGuide Server Demo </title>
+        <link rel="stylesheet" href="/static/waveguide.css">
+        <script type="text/javascript" src="/static/waveguide.min.js"></script>
     </head>
     <body>
         <h3> Recent Uploads </h3>
@@ -24,6 +26,10 @@
                 {{ end }}
             </tbody>
         </table>
+        <script type="text/javascript">
+         var guide = waveguide.New();
+         var info = guide.FindVideo();
+        </script>
     </body>
 </html>
 {{end}}

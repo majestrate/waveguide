@@ -2,3 +2,13 @@
 *\#*
 
 waveguided
+
+*.min.js
+*.js.map
+
+node_modules/*
+
+src/github.com
+src/golang.org
+pkg
+bin/gopherjs

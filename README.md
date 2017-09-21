@@ -19,7 +19,6 @@ Building:
     
 ## Running (demo)
 
-
 copy `contrib/waveguide.ini` to `waveguide.ini`
 
 Run frontend server:
