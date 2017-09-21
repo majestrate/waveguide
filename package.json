@@ -1,0 +1,15 @@
+{
+  "name": "waveguide",
+  "version": "0.0.1",
+  "description": "waveguide frontend",
+  "author": "Jeff Becker <jeff@i2p.rocks>",
+  "license": "MIT",
+  "dependencies": {
+    "browserify": "^14.4.0",
+    "jquery": "^3.2.1",
+    "uglify-es": "^3.1.1"
+  },
+  "scripts": {
+    "dist": "browserify lib/main.js | uglifyjs > static/waveguide.min.js"
+  }
+}

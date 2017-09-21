@@ -11,34 +11,31 @@ GO ?= $(shell which go)
 WAVED := $(REPO)/waveguided
 
 JS = $(REPO)/static/waveguide.min.js
-GOPHERJS = $(GOPATH)/bin/gopherjs
 
 all: build
 
-build: $(WAVED) $(JS)
+build: $(WAVED) js
 
-
-
-$(GOPHERJS):
-	GOPATH=$(GOPATH) $(GO) get -v github.com/gopherjs/gopherjs
-
-$(WAVED): $(GOPHERJS)
+$(WAVED):
 	GOPATH=$(GOPATH) $(GO) build -v -ldflags "-X waveguide/lib/version.Git=-$(shell git rev-parse --short HEAD)" -o $(WAVED)
 
-$(JS): $(GOPHERJS)
-	GOPATH=$(GOPATH) $(GOPHERJS) build waveguide/js/waveguide -v -m -o $(JS)
+js: $(JS)
+
+$(JS): 
+	yarn install
+	yarn dist
 
 test:
 	GOPATH=$(GOPATH) $(GO) test waveguide/...
 
-clean:
-	rm -fr $(GOPATH)/pkg
+clean: clean-js clean-go
+
+clean-go:
+	GOPATH=$(GOPATH) $(GO) clean -v
 	rm -f $(WAVED)
+
+clean-js:
 	rm -f $(JS)
 
 distclean: clean
-	rm -f $(GOPHERJS)
-	rm -fr $(GOPATH)/src/github.com
-	rm -fr $(GOPATH)/src/golang.org
 	rm -fr $(REPO)/node_modules
-	rm -fr $(GOPATH)/pkg
