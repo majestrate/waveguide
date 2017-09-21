@@ -9,6 +9,8 @@ Requirements:
 
 * go 1.9
 
+* yarn
+
 * GNU make
 
 * postgresql (for demo)
