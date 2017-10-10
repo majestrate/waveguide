@@ -4,12 +4,15 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
+	"waveguide/lib/api"
 	"waveguide/lib/database"
 	"waveguide/lib/model"
 )
 
 type Routes struct {
-	DB database.Database
+	DB        database.Database
+	api       *api.Client
+	workerURL string
 }
 
 func (r *Routes) Error(c *gin.Context, err error) {
@@ -50,5 +53,12 @@ func (r *Routes) ServeVideo(c *gin.Context) {
 }
 
 func (r *Routes) ServeUser(c *gin.Context) {
+	// TODO: implement
+}
 
+func (r *Routes) ServeUpload(c *gin.Context) {
+	u := r.GetCurrentUser(c)
+	c.HTML(http.StatusOK, "upload.html", map[string]interface{}{
+		"User": u,
+	})
 }

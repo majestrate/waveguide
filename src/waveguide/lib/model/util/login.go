@@ -12,7 +12,7 @@ func CheckLogin(login, password string) bool {
 	return bcrypt.CompareHashAndPassword(hashed, []byte(password)) == nil
 }
 
-func UpdatePassword(password string) string {
+func NewPassword(password string) string {
 	hashed, _ := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	return base64.StdEncoding.EncodeToString(hashed)
 }

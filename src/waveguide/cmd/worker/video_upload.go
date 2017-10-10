@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"waveguide/lib/api"
 	"waveguide/lib/log"
 )
 
@@ -24,8 +25,8 @@ func (w *Worker) EncodeVideo(tmpname, fname string, callback, upload_url *url.UR
 }
 
 func (w *Worker) VideoEncode(c *gin.Context, callback *url.URL) error {
-	fname := filepath.Clean(c.Query("filename"))
-	upload_url, err := url.Parse(c.Query("upload_url"))
+	fname := filepath.Clean(c.Query(api.ParamFilename))
+	upload_url, err := url.Parse(c.Query(api.ParamUploadURL))
 	if err != nil {
 		return err
 	}

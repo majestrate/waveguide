@@ -24,5 +24,6 @@ func Run() {
 
 	router := gin.Default()
 	router.POST("/api/:Method", app.ServeAPI)
+	router.GET("/callback", app.ServeCallback)
 	router.Run()
 }

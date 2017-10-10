@@ -1,0 +1,15 @@
+{{define "video.html"}}
+{{ template "header.html" }}
+<video id="player"></video>
+<script type="text/javascript">
+  /** webtorrent webseeds */
+  var wg = new WaveGuide();
+  var player = wg.VideoPlayer("player");
+  var webseeds = [];
+  {{ range .Video.WebSeeds }}
+  webseeds.push("{{.}}");
+         {{ end }}
+  player.SetInfo("{{ .Video.TorrentURL }}", webseeds, function() { player.Start(); });
+</script>
+{{ template "footer.html" }}
+{{end}}

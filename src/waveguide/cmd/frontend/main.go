@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"path/filepath"
+	"waveguide/lib/api"
 	"waveguide/lib/config"
 	"waveguide/lib/database"
 	"waveguide/lib/log"
@@ -26,13 +27,15 @@ func Run() {
 		log.Fatalf("failed to open database: %s", err)
 	}
 
+	routes.api = api.NewClient(conf.Frontend.WorkerURL)
+	routes.workerURL = conf.Frontend.WorkerURL
 	// make router
 	router := gin.Default()
 	// set up template utils
 	funcs := templates.Funcs()
 	router.SetFuncMap(funcs)
 	// load templates
-	router.LoadHTMLGlob(filepath.Join(conf.Frontend.TemplateDir, "*.html.tmpl"))
+	router.LoadHTMLGlob(filepath.Join(conf.Frontend.TemplateDir, "*.html"))
 
 	// static resources
 	router.Static("/static", conf.Frontend.StaticDir)
@@ -44,6 +47,8 @@ func Run() {
 	router.GET("/", routes.ServeIndex)
 	router.GET("/v/:VideoID/", routes.ServeVideo)
 	router.GET("/u/:UserID/", routes.ServeUser)
+	router.GET("/upload/", routes.ServeUpload)
+	router.POST("/upload/", routes.HandleUpload)
 	// run router
 	router.Run()
 }

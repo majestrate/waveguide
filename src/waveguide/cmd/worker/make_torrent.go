@@ -4,12 +4,13 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/url"
 	"path/filepath"
+	"waveguide/lib/api"
 	"waveguide/lib/util"
 )
 
 func (w *Worker) MakeTorrent(c *gin.Context, u *url.URL) error {
-	fname := filepath.Clean(c.Query("filename"))
-	uploadURL, err := url.Parse(c.Query("upload_url"))
+	fname := filepath.Clean(c.Query(api.ParamFilename))
+	uploadURL, err := url.Parse(api.ParamUploadURL)
 	if err == nil {
 		torrent := new(util.Buffer)
 		go func(c *gin.Context) {

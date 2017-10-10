@@ -1,9 +1,21 @@
 package model
 
+import (
+	"waveguide/lib/model/util"
+)
+
 type UserInfo struct {
 	UserID   int64
 	Name     string
 	Email    string `form:"email" binding:"required"`
 	Login    string
 	Password string `form:"password" binding:"required"`
+}
+
+func (u *UserInfo) CheckLogin(passwd string) bool {
+	return util.CheckLogin(u.Login, passwd)
+}
+
+func (u *UserInfo) ChangePassword(newpasswd string) {
+	u.Login = util.NewPassword(newpasswd)
 }

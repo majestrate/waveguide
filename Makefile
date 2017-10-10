@@ -12,14 +12,16 @@ WAVED := $(REPO)/waveguided
 
 JS = $(REPO)/static/waveguide.min.js
 
-all: build
+all: clean build
 
-build: $(WAVED) js
+build: go js
+
+go: $(WAVED)
 
 $(WAVED):
 	GOPATH=$(GOPATH) $(GO) build -v -ldflags "-X waveguide/lib/version.Git=-$(shell git rev-parse --short HEAD)" -o $(WAVED)
 
-js: $(JS)
+js: clean-js $(JS)
 
 $(JS): 
 	yarn install

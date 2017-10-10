@@ -1,0 +1,10 @@
+{{define "upload.html"}}
+{{ template "header.html" }}
+<div id="upload_widget"></div>
+<script type="text/javascript">
+  var guide = new WaveGuide();
+  var upload = guide.UploadWidget("upload_widget");
+  upload.Setup();
+</script>
+{{ template "footer.html" }}
+{{end}}

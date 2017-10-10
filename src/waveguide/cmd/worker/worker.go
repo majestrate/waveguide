@@ -30,7 +30,7 @@ func (w *Worker) APIError(c *gin.Context, err error) {
 }
 
 func (w *Worker) ServeAPI(c *gin.Context) {
-	callbackUrl := c.Query("callback")
+	callbackUrl := c.Query(api.ParamCallbackURL)
 	u, err := url.Parse(callbackUrl)
 	if err != nil {
 		w.APIError(c, err)
