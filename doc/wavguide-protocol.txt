@@ -1,0 +1,19 @@
+waveguide protocol spec
+
+waveguide is a bittorrent based p2p livestreaming protocol.
+
+The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+"SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
+document are to be interpreted as described in RFC 2119 [RFC2119].
+
+
+
+This protocol defines a way to broadcast audio/video over bittorrent using BEP-0044 mutable dht entries [1]
+
+
+The contents of the v value in a 
+
+
+References:
+
+[1] http://bittorrent.org/beps/bep_0044.html

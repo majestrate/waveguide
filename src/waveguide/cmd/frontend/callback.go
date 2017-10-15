@@ -2,10 +2,12 @@ package frontend
 
 import (
 	"net/url"
+	"waveguide/lib/model"
 )
 
-func (r *Routes) GenerateCallbackURL() *url.URL {
+func (r *Routes) VideoDoneCallbackURL(v *model.VideoInfo) *url.URL {
+	// TODO: session nounce
+	nounce := ""
 	u, _ := url.Parse(r.workerURL)
-	u.Path = "/callback"
-	return u
+	return v.VideoReadyURL(u, nounce)
 }

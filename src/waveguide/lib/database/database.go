@@ -9,6 +9,7 @@ type Database interface {
 	GetFrontpageVideos() (model.VideoList, error)
 	RegisterVideo(v *model.VideoInfo) error
 	GetVideoInfo(id int64) (*model.VideoInfo, error)
+	NextVideoID() (int64, error)
 }
 
 func NewDatabase(url string) Database {

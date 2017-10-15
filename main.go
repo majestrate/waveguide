@@ -10,7 +10,7 @@ import (
 )
 
 func printUsage() {
-	fmt.Printf("usage: %s [worker|frontend]", os.Args[0])
+	fmt.Printf("usage: %s [frontend|worker]", os.Args[0])
 	fmt.Println()
 }
 
@@ -19,15 +19,14 @@ func main() {
 		printUsage()
 		return
 	}
-	args := os.Args[1:]
-	mode := strings.ToUpper(args[0])
-	fmt.Printf("%s starting up %s", version.Version, mode)
+	fmt.Printf("%s starting up", version.Version)
 	fmt.Println()
+	mode := strings.ToUpper(os.Args[1])
 	switch mode {
-	case "WORKER":
-		worker.Run()
 	case "FRONTEND":
 		frontend.Run()
+	case "WORKER":
+		worker.Run()
 	default:
 		printUsage()
 	}

@@ -45,6 +45,14 @@ func (db *pgDB) CreateTables() (err error) {
 	return
 }
 
+func (db *pgDB) NextVideoID() (id int64, err error) {
+	err = db.conn.QueryRow("SELECT max(video_id) FROM videos").Scan(&id)
+	if err == sql.ErrNoRows {
+		err = nil
+	}
+	return
+}
+
 func (db *pgDB) GetFrontpageVideos() (list model.VideoList, err error) {
 	var rows *sql.Rows
 	rows, err = db.conn.Query("SELECT video_id, video_name, video_upload_date FROM videos ORDER BY video_upload_date DESC LIMIT 10")
