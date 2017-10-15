@@ -31,3 +31,27 @@ Run worker server:
     
     $ PORT=38800 ./waveguided worker
 
+
+
+## project structure
+
+
+### lib
+
+javascript frontend code
+
+### src
+
+go webapp code
+
+### static
+
+static web files
+
+### contrib
+
+configs and stuff
+
+### templates
+
+golang templates for webapp
