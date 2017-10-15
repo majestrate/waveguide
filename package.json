@@ -11,6 +11,6 @@
     "webtorrent": "^0.98.19"
   },
   "scripts": {
-    "dist": "browserify lib/main.js | uglifyjs > static/waveguide.min.js"
+    "dist": "browserify js/main.js | uglifyjs > static/waveguide.min.js"
   }
 }

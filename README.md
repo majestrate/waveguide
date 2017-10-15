@@ -35,8 +35,7 @@ Run worker server:
 
 ## project structure
 
-
-### lib
+### js
 
 javascript frontend code
 
@@ -55,3 +54,35 @@ configs and stuff
 ### templates
 
 golang templates for webapp
+
+
+## makefile targets
+
+### all
+
+default target, runs `clean` and `build`
+
+### js
+
+only build js frontend
+
+### go
+
+only build webapp daemon
+
+### clean
+
+clean all files
+
+### distclean
+
+clear all js files and run `clean` target
+
+### clean-js
+
+clean js frontend files only
+
+### clean-go
+
+clean go files only
+
