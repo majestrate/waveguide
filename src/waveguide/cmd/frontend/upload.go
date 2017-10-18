@@ -9,6 +9,7 @@ import (
 )
 
 func (r *Routes) HandleUpload(c *gin.Context) {
+	var videoURL string
 	u := r.GetCurrentUser(c)
 	video, err := c.FormFile("video")
 	if err == nil {
@@ -25,14 +26,23 @@ func (r *Routes) HandleUpload(c *gin.Context) {
 					Title:      video.Filename,
 					UploadedAt: time.Now().Unix(),
 				}
-				callbackURL := r.VideoDoneCallbackURL(info)
-				err = r.api.UploadVideo(callbackURL.String(), video.Filename, body)
+				videoURL = info.GetURL(r.FrontendURL).String()
+				body, err = video.Open()
+				if err == nil {
+					err = r.api.Do(info.VideoUploadRequest(r.workerURL, video.Filename, body))
+				}
 			}
 		}
 	}
 	if err == nil {
-		c.HTML(http.StatusOK, "upload_processing.html", map[string]interface{}{})
+		c.JSON(http.StatusCreated, map[string]interface{}{
+			"url":   videoURL,
+			"error": nil,
+		})
 	} else {
-		r.Error(c, err)
+		c.JSON(http.StatusOK, map[string]interface{}{
+			"url":   videoURL,
+			"error": err.Error(),
+		})
 	}
 }

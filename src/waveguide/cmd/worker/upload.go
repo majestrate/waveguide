@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"waveguide/lib/api"
 )
 
 func (w *Worker) UploadFileRequest(u *url.URL, fname string) *http.Request {
@@ -23,6 +24,21 @@ func (w *Worker) UploadRequest(u *url.URL, body io.ReadCloser) *http.Request {
 		URL:    u,
 		Method: "PUT",
 		Body:   body,
+	}
+}
+
+func (w *Worker) MkTorrentRequest(outfile string, callback *url.URL) *http.Request {
+	u := w.GetNextWorkerURL()
+	u.Path = fmt.Sprintf("/api/%s", api.MakeTorrent)
+	q := u.Query()
+	q.Add(api.ParamCallbackURL, callback.String())
+	u.RawQuery = q.Encode()
+	return &http.Request{
+		URL: u,
+		GetBody: func() (io.ReadCloser, error) {
+			return os.Open(outfile)
+		},
+		Method: "POST",
 	}
 }
 

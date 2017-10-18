@@ -7,13 +7,14 @@ import (
 type FrontendConfig struct {
 	StaticDir   string
 	TemplateDir string
-	DB          DBConfig
 	WorkerURL   string
+	FrontendURL string
 }
 
 func (c *FrontendConfig) Load(s *parser.Section) error {
 	c.TemplateDir = s.ValueOf("templates")
 	c.StaticDir = s.ValueOf("staticfiles")
 	c.WorkerURL = s.ValueOf("worker")
-	return c.DB.Load(s)
+	c.FrontendURL = s.ValueOf("url")
+	return nil
 }

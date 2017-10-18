@@ -1,5 +1,5 @@
 package api
 
-const VideoEncode = "encode"
-const MakeTorrent = "mktorrent"
-const VideoReady = "video_ready"
+const EncodeVideo = "encode_video"
+const MakeTorrent = "mk_torrent"
+const RegisterVideo = "register_video"

@@ -11,12 +11,14 @@ type Configurable interface {
 type Config struct {
 	Worker   WorkerConfig
 	Frontend FrontendConfig
+	DB       DBConfig
 }
 
 func (c *Config) Load(fname string) error {
 	sects := map[string]Configurable{
 		"worker":   &c.Worker,
 		"frontend": &c.Frontend,
+		"database": &c.DB,
 	}
 	cfg, err := parser.Read(fname)
 	if err != nil {

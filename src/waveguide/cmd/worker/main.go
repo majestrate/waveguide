@@ -3,6 +3,7 @@ package worker
 import (
 	"github.com/gin-gonic/gin"
 	"waveguide/lib/config"
+	"waveguide/lib/database"
 	"waveguide/lib/log"
 	"waveguide/lib/video"
 )
@@ -15,11 +16,18 @@ func Run() {
 	if err != nil {
 		log.Fatalf("Error loading config: %s", err)
 	}
-
+	// TODO: changeme
+	app.WorkerURL = conf.Frontend.WorkerURL
 	app.TempDir = conf.Worker.TempDir
 	app.Encoder, err = video.NewEncoder(&conf.Worker.Encoder)
 	if err != nil {
 		log.Fatalf("Error creating video encoder: %s", err)
+	}
+
+	app.DB = database.NewDatabase(conf.DB.URL)
+	err = app.DB.Init()
+	if err != nil {
+		log.Fatalf("failed to initialize database: %s", err)
 	}
 
 	router := gin.Default()

@@ -25,7 +25,7 @@ func (cl *Client) getHTTP() *http.Client {
 	return new(http.Client)
 }
 
-func (cl *Client) doRequest(r *http.Request) error {
+func (cl *Client) Do(r *http.Request) error {
 	c := cl.getHTTP()
 	resp, err := c.Do(r)
 	if err != nil {

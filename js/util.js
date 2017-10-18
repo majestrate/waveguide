@@ -25,7 +25,9 @@ var new_div = function(id, cl) {
 };
 
 var new_button = function(id, cl) {
-  return new_elem("button", id, cl);
+  var btn = new_elem("input", id, cl);
+  btn.setAttribute("type", "button");
+  return btn;
 };
 
 var new_submit = function(id, cl) {

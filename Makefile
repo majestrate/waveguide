@@ -16,12 +16,18 @@ all: clean build
 
 build: go js
 
+dev: clean-go go js-dev
+
 go: $(WAVED)
 
 $(WAVED):
 	GOPATH=$(GOPATH) $(GO) build -v -ldflags "-X waveguide/lib/version.Git=-$(shell git rev-parse --short HEAD)" -o $(WAVED)
 
 js: clean-js $(JS)
+
+js-dev: clean-js
+	yarn install
+	yarn no-mini
 
 $(JS): 
 	yarn install

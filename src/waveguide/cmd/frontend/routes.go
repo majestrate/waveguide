@@ -3,6 +3,7 @@ package frontend
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"net/url"
 	"strconv"
 	"waveguide/lib/api"
 	"waveguide/lib/database"
@@ -10,9 +11,10 @@ import (
 )
 
 type Routes struct {
-	DB        database.Database
-	api       *api.Client
-	workerURL string
+	DB          database.Database
+	api         *api.Client
+	workerURL   string
+	FrontendURL *url.URL
 }
 
 func (r *Routes) Error(c *gin.Context, err error) {

@@ -5,15 +5,24 @@ import (
 	"net/http"
 	"net/url"
 	"waveguide/lib/api"
+	"waveguide/lib/database"
 	"waveguide/lib/log"
 	"waveguide/lib/torrent"
 	"waveguide/lib/video"
 )
 
 type Worker struct {
-	Encoder video.Encoder
-	Torrent torrent.Factory
-	TempDir string
+	WorkerURL string
+	Encoder   video.Encoder
+	Torrent   torrent.Factory
+	TempDir   string
+	DB        database.Database
+}
+
+// get next worker in worker pool
+func (w *Worker) GetNextWorkerURL() *url.URL {
+	u, _ := url.Parse(w.WorkerURL)
+	return u
 }
 
 func (w *Worker) APIAccepted(c *gin.Context) {
@@ -39,7 +48,7 @@ func (w *Worker) ServeAPI(c *gin.Context) {
 
 	method := c.Param("Method")
 	switch method {
-	case api.VideoEncode:
+	case api.EncodeVideo:
 		err = w.VideoEncode(c, u)
 	case api.MakeTorrent:
 		err = w.MakeTorrent(c, u)

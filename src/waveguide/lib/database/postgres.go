@@ -46,7 +46,7 @@ func (db *pgDB) CreateTables() (err error) {
 }
 
 func (db *pgDB) NextVideoID() (id int64, err error) {
-	err = db.conn.QueryRow("SELECT max(video_id) FROM videos").Scan(&id)
+	err = db.conn.QueryRow("SELECT coalesce(max(video_id),0) FROM videos").Scan(&id)
 	if err == sql.ErrNoRows {
 		err = nil
 	}

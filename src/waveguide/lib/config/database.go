@@ -9,6 +9,6 @@ type DBConfig struct {
 }
 
 func (c *DBConfig) Load(s *parser.Section) error {
-	c.URL = s.ValueOf("db_url")
+	c.URL = s.ValueOf("url")
 	return nil
 }

@@ -19,7 +19,6 @@ func (w *Worker) MakeTorrent(c *gin.Context, u *url.URL) error {
 			if err == nil {
 				err = w.DoRequest(w.UploadRequest(uploadURL, torrent))
 				w.InformCallback(u, err)
-
 			}
 		}(c.Copy())
 	}

@@ -1,13 +1,16 @@
 package frontend
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"net/url"
 	"path/filepath"
 	"waveguide/lib/api"
 	"waveguide/lib/config"
 	"waveguide/lib/database"
 	"waveguide/lib/log"
+	"waveguide/lib/model"
 	"waveguide/lib/templates"
 )
 
@@ -21,7 +24,12 @@ func Run() {
 	}
 	var routes Routes
 
-	routes.DB = database.NewDatabase(conf.Frontend.DB.URL)
+	routes.FrontendURL, err = url.Parse(conf.Frontend.FrontendURL)
+	if err != nil {
+		log.Fatalf("failed to parse frontend url: %s", err)
+	}
+
+	routes.DB = database.NewDatabase(conf.DB.URL)
 	err = routes.DB.Init()
 	if err != nil {
 		log.Fatalf("failed to open database: %s", err)
@@ -45,7 +53,7 @@ func Run() {
 
 	// setup routes
 	router.GET("/", routes.ServeIndex)
-	router.GET("/v/:VideoID/", routes.ServeVideo)
+	router.GET(fmt.Sprintf("%s/:VideoID/", model.VideoURLBase), routes.ServeVideo)
 	router.GET("/u/:UserID/", routes.ServeUser)
 	router.GET("/upload/", routes.ServeUpload)
 	router.POST("/upload/", routes.HandleUpload)

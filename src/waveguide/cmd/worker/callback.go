@@ -22,5 +22,4 @@ func (w *Worker) InformCallback(callback *url.URL, err error) {
 }
 
 func (w *Worker) ServeCallback(context *gin.Context) {
-
 }
