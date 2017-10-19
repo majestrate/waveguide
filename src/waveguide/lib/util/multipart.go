@@ -11,7 +11,7 @@ type MimePart struct {
 }
 
 type MultipartPipe struct {
-	Parts []MimePart
+	parts []MimePart
 	pr    *io.PipeReader
 	pw    *io.PipeWriter
 }
@@ -27,12 +27,12 @@ func (p *MultipartPipe) Close() error {
 func (p *MultipartPipe) Run() {
 	var buff [65536]byte
 	mpw := multipart.NewWriter(p.pw)
-	for _, info := range p.Parts {
+	for _, info := range p.parts {
 		body, err := mpw.CreateFormFile(info.PartName, "")
 		if err == nil {
 			io.CopyBuffer(body, info.Body, buff[:])
-			info.Body.Close()
 		}
+		info.Body.Close()
 	}
 	mpw.Close()
 	p.pw.Close()
@@ -41,7 +41,7 @@ func (p *MultipartPipe) Run() {
 func NewMultipartPipe(parts []MimePart) *MultipartPipe {
 	pr, pw := io.Pipe()
 	p := &MultipartPipe{
-		Parts: parts,
+		parts: parts,
 		pr:    pr,
 		pw:    pw,
 	}
