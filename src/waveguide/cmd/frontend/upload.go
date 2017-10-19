@@ -35,6 +35,7 @@ func (r *Routes) HandleUpload(c *gin.Context) {
 						Title:      video.Filename,
 						UploadedAt: time.Now().Unix(),
 					}
+					videoURL = info.GetURL(r.FrontendURL).String()
 					ext := filepath.Ext(video.Filename)
 					tmpFile := util.TempFileName(r.TempDir, ext)
 					c.SaveUploadedFile(video, tmpFile)
