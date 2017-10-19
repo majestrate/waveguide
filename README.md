@@ -29,8 +29,11 @@ Run frontend server:
     
 Run worker server:
     
-    $ PORT=38800 ./waveguided worker
+    $ ./waveguided worker
 
+Run CDN Server, make sure to firewall it.
+
+    $ PORT=48800 ./waveguided cdn
 
 
 ## project structure
