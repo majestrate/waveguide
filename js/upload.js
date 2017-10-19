@@ -57,11 +57,21 @@ UploadWidget.prototype.Error = function(msg)
   self.SetMessage(msg, "error");
 };
 
+UploadWidget.prototype.Clear = function()
+{
+  var self = this;
+  self.file.files = [];
+  self.SetMessage("", "");
+};
+
 UploadWidget.prototype.Success = function(msg)
 {
   var self = this;
   self._EnterState(state_Ready);
   self.SetMessage(msg, "success");
+  setTimeout(function() {
+    self.Clear();
+  }, 1000);
 };
 
 UploadWidget.prototype.SetMessage = function(msg, cls)

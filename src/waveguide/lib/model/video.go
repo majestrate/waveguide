@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/url"
 	"waveguide/lib/api"
+	"waveguide/lib/log"
 )
 
 const VideoURLBase = "/v"
@@ -19,7 +20,10 @@ type VideoInfo struct {
 }
 
 func (v *VideoInfo) GetURL(frontend *url.URL) *url.URL {
-	u, _ := url.Parse(frontend.String())
+	u, err := url.Parse(frontend.String())
+	if err != nil {
+		log.Errorf("waveguide/lib/model/Video.GetURL: %s", err)
+	}
 	u.Path = fmt.Sprintf("%s/%d/", VideoURLBase, v.VideoID)
 	return u
 }
