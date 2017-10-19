@@ -5,7 +5,6 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"os"
 	"waveguide/lib/api"
 	"waveguide/lib/log"
 )
@@ -18,22 +17,18 @@ func (w *Worker) UploadRequest(u *url.URL, body io.ReadCloser) *http.Request {
 	}
 }
 
-func (w *Worker) MkTorrentRequest(outfile string, callback *url.URL) *http.Request {
-	u := w.GetNextWorkerURL()
-	u.Path = fmt.Sprintf("/api/%s", api.MakeTorrent)
-	q := u.Query()
-	q.Add(api.ParamCallbackURL, callback.String())
-	u.RawQuery = q.Encode()
-	return &http.Request{
-		URL: u,
-		GetBody: func() (io.ReadCloser, error) {
-			return os.Open(outfile)
+func (w *Worker) MkTorrentRequest(infile *url.URL, filename string) *api.Request {
+	return &api.Request{
+		Method: api.MakeTorrent,
+		Args: map[string]interface{}{
+			api.ParamFilename: filename,
+			api.ParamFileURL:  infile.String(),
 		},
-		Method: "POST",
 	}
 }
 
 func (w *Worker) DoRequest(r *http.Request) error {
+	log.Debugf("do request %s %s", r.Method, r.URL.String())
 	resp, err := http.DefaultClient.Do(r)
 	if err != nil {
 		log.Errorf("error doing request: %s", err)

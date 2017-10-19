@@ -15,6 +15,7 @@ type Routes struct {
 	api         *api.Client
 	workerURL   string
 	FrontendURL *url.URL
+	TempDir     string
 }
 
 func (r *Routes) Error(c *gin.Context, err error) {

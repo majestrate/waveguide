@@ -1,14 +1,12 @@
 package worker
 
 import (
-	"fmt"
 	"os"
-	"path/filepath"
-	"time"
+	"waveguide/lib/util"
 )
 
 func (w *Worker) TempFileName(ext string) string {
-	return filepath.Join(w.TempDir, fmt.Sprintf("file-%d%s", time.Now().UnixNano(), ext))
+	return util.TempFileName(w.TempDir, ext)
 }
 
 func (w *Worker) AcquireTempFile(ext string) (f *os.File, err error) {

@@ -79,7 +79,7 @@ func (i *Info) BuildSingle(r io.Reader) error {
 		if err == nil {
 			h := sha1.Sum(piece)
 			i.Pieces = append(i.Pieces, h[:]...)
-		} else if err == io.EOF {
+		} else if err == io.EOF || err == io.ErrUnexpectedEOF {
 			h := sha1.Sum(piece[:n])
 			i.Pieces = append(i.Pieces, h[:]...)
 			err = nil

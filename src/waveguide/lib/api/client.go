@@ -2,53 +2,35 @@ package api
 
 import (
 	"encoding/json"
-	"fmt"
-	"net/http"
-	"net/url"
+	"github.com/streadway/amqp"
+	"waveguide/lib/config"
 )
 
 type Client struct {
-	url string
+	conn *mqConn
 }
 
-func (cl *Client) createURL(method, callbackURL string) *url.URL {
-	u, _ := url.Parse(cl.url)
-	u.Path = "/api/" + method
-	q := u.Query()
-	q.Add(ParamCallbackURL, callbackURL)
-	u.RawQuery = q.Encode()
-	return u
-}
-
-func (cl *Client) getHTTP() *http.Client {
-	// TODO: pooling
-	return new(http.Client)
-}
-
-func (cl *Client) Do(r *http.Request) error {
-	c := cl.getHTTP()
-	resp, err := c.Do(r)
+func (cl *Client) Do(r *Request) error {
+	body, err := json.Marshal(r)
 	if err != nil {
 		return err
 	}
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("bad backend status code: %d", resp.StatusCode)
-	}
-	j := make(map[string]interface{})
-	err = json.NewDecoder(resp.Body).Decode(&j)
-	if err == nil {
-		emsg, ok := j["Error"]
-		if ok {
-			if emsg != nil {
-				err = fmt.Errorf("%s", emsg)
-			}
-		}
-	}
-	return err
+	return cl.conn.ensureQueue(func(q amqp.Queue, ch *amqp.Channel) error {
+		return ch.Publish(
+			"",     // exchnage
+			q.Name, // routing key
+			false,  // manditory
+			false,
+			amqp.Publishing{
+				DeliveryMode: amqp.Persistent,
+				ContentType:  mqContentType,
+				Body:         body,
+			})
+	})
 }
 
-func NewClient(url string) *Client {
+func NewClient(mq *config.MQConfig) *Client {
 	return &Client{
-		url: url,
+		conn: newConn(mq),
 	}
 }

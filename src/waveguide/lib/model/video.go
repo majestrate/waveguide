@@ -1,13 +1,9 @@
 package model
 
 import (
-	"encoding/json"
 	"fmt"
-	"io"
-	"net/http"
 	"net/url"
 	"waveguide/lib/api"
-	"waveguide/lib/util"
 )
 
 const VideoURLBase = "/v"
@@ -28,34 +24,14 @@ func (v *VideoInfo) GetURL(frontend *url.URL) *url.URL {
 	return u
 }
 
-func (v *VideoInfo) VideoUploadRequest(worker, callback_url, filename string, body io.ReadCloser) *http.Request {
-	u, _ := url.Parse(worker)
-	u.Path = "/api/" + api.EncodeVideo
-	q := u.Query()
-	q.Add(api.ParamFilename, filename)
-	q.Add(api.ParamCallbackURL, callback_url)
-	u.RawQuery = q.Encode()
-	buff := new(util.Buffer)
-	json.NewEncoder(buff).Encode(v)
-	boundary := util.RandStr(16)
-	requestBody := util.NewMultipartPipe(boundary,
-		[]util.MimePart{
-			util.MimePart{
-				Body:     body,
-				PartName: api.ParamVideoFile,
-			},
-			util.MimePart{
-				Body:     buff,
-				PartName: api.ParamVideoInfoJSON,
-			},
-		})
-	return &http.Request{
-		URL:    u,
-		Method: "POST",
-		Header: map[string][]string{
-			"Content-Type": []string{fmt.Sprintf("multipart/mixed; boundary=%s", boundary)},
+func (v *VideoInfo) VideoUploadRequest(fileURL *url.URL, filename string) *api.Request {
+	return &api.Request{
+		Method: api.EncodeVideo,
+		Args: map[string]interface{}{
+			api.ParamVideoInfoJSON: v,
+			api.ParamFilename:      filename,
+			api.ParamFileURL:       fileURL.String(),
 		},
-		Body: requestBody,
 	}
 }
 

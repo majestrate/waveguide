@@ -2,10 +2,12 @@ package frontend
 
 import (
 	"github.com/gin-gonic/gin"
-	"io"
 	"net/http"
+	"net/url"
+	"path/filepath"
 	"time"
 	"waveguide/lib/model"
+	"waveguide/lib/util"
 )
 
 func (r *Routes) HandleUpload(c *gin.Context) {
@@ -13,24 +15,25 @@ func (r *Routes) HandleUpload(c *gin.Context) {
 	u := r.GetCurrentUser(c)
 	video, err := c.FormFile("video")
 	if err == nil {
-		var body io.ReadCloser
-		body, err = video.Open()
+		var vidID int64
+		vidID, err = r.DB.NextVideoID()
 		if err == nil {
-			var vidID int64
-			vidID, err = r.DB.NextVideoID()
-			if err == nil {
 
-				info := &model.VideoInfo{
-					UserID:     u.UserID,
-					VideoID:    vidID,
-					Title:      video.Filename,
-					UploadedAt: time.Now().Unix(),
-				}
-				videoURL = info.GetURL(r.FrontendURL).String()
-				body, err = video.Open()
-				if err == nil {
-					err = r.api.Do(info.VideoUploadRequest(r.workerURL, info.VideoReadyURL(r.getNextWorkerURL(), "").String(), video.Filename, body))
-				}
+			info := &model.VideoInfo{
+				UserID:     u.UserID,
+				VideoID:    vidID,
+				Title:      video.Filename,
+				UploadedAt: time.Now().Unix(),
+			}
+			ext := filepath.Ext(video.Filename)
+			tmpFile := util.TempFileName(r.TempDir, ext)
+			c.SaveUploadedFile(video, tmpFile)
+			fileURL := &url.URL{
+				Scheme: "file",
+				Path:   tmpFile,
+			}
+			if err == nil {
+				err = r.api.Do(info.VideoUploadRequest(fileURL, video.Filename))
 			}
 		}
 	}

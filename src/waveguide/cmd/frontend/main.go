@@ -24,6 +24,8 @@ func Run() {
 	}
 	var routes Routes
 
+	routes.TempDir = conf.Storage.TempDir
+
 	routes.FrontendURL, err = url.Parse(conf.Frontend.FrontendURL)
 	if err != nil {
 		log.Fatalf("failed to parse frontend url: %s", err)
@@ -35,7 +37,7 @@ func Run() {
 		log.Fatalf("failed to open database: %s", err)
 	}
 
-	routes.api = api.NewClient(conf.Frontend.WorkerURL)
+	routes.api = api.NewClient(&conf.MQ)
 	routes.workerURL = conf.Frontend.WorkerURL
 	// make router
 	router := gin.Default()

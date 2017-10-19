@@ -4,13 +4,14 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"waveguide/cmd/cdn"
 	"waveguide/cmd/frontend"
 	"waveguide/cmd/worker"
 	"waveguide/lib/version"
 )
 
 func printUsage() {
-	fmt.Printf("usage: %s [frontend|worker]", os.Args[0])
+	fmt.Printf("usage: %s [frontend|worker|cdn]", os.Args[0])
 	fmt.Println()
 }
 
@@ -27,6 +28,8 @@ func main() {
 		frontend.Run()
 	case "WORKER":
 		worker.Run()
+	case "CDN":
+		cdn.Run()
 	default:
 		printUsage()
 	}

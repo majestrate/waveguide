@@ -12,6 +12,8 @@ type Config struct {
 	Worker   WorkerConfig
 	Frontend FrontendConfig
 	DB       DBConfig
+	MQ       MQConfig
+	Storage  StorageConfig
 }
 
 func (c *Config) Load(fname string) error {
@@ -19,6 +21,8 @@ func (c *Config) Load(fname string) error {
 		"worker":   &c.Worker,
 		"frontend": &c.Frontend,
 		"database": &c.DB,
+		"rabbitmq": &c.MQ,
+		"storage":  &c.Storage,
 	}
 	cfg, err := parser.Read(fname)
 	if err != nil {
