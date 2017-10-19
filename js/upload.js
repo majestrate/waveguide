@@ -60,7 +60,7 @@ UploadWidget.prototype.Error = function(msg)
 UploadWidget.prototype.Clear = function()
 {
   var self = this;
-  self.file.files = [];
+  self.file.value = "";
   self.SetMessage("", "");
 };
 
