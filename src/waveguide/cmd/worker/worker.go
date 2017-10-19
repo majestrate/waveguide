@@ -14,7 +14,7 @@ import (
 type Worker struct {
 	WorkerURL string
 	Encoder   video.Encoder
-	Torrent   torrent.Factory
+	Torrent   *torrent.Factory
 	TempDir   string
 	DB        database.Database
 }

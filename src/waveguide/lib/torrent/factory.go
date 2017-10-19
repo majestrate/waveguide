@@ -8,6 +8,14 @@ import (
 	"waveguide/lib/torrent/metainfo"
 )
 
+func NewFactory() (*Factory, error) {
+	return &Factory{
+		AnnounceURL: "wss://tracker.btorrent.xyz",
+		/* 1 MB */
+		PieceLength: 1048576,
+	}, nil
+}
+
 type Factory struct {
 	AnnounceURL string
 	PieceLength uint32

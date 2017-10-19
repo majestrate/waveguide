@@ -28,43 +28,46 @@ func (v *VideoInfo) GetURL(frontend *url.URL) *url.URL {
 	return u
 }
 
-func (v *VideoInfo) VideoUploadRequest(worker, filename string, body io.ReadCloser) *http.Request {
+func (v *VideoInfo) VideoUploadRequest(worker, callback_url, filename string, body io.ReadCloser) *http.Request {
 	u, _ := url.Parse(worker)
 	u.Path = "/api/" + api.EncodeVideo
+	q := u.Query()
+	q.Add(api.ParamFilename, filename)
+	q.Add(api.ParamCallbackURL, callback_url)
+	u.RawQuery = q.Encode()
 	buff := new(util.Buffer)
 	json.NewEncoder(buff).Encode(v)
+	boundary := util.RandStr(16)
+	requestBody := util.NewMultipartPipe(boundary,
+		[]util.MimePart{
+			util.MimePart{
+				Body:     body,
+				PartName: api.ParamVideoFile,
+			},
+			util.MimePart{
+				Body:     buff,
+				PartName: api.ParamVideoInfoJSON,
+			},
+		})
 	return &http.Request{
-		URL: u,
-		GetBody: func() (io.ReadCloser, error) {
-			return util.NewMultipartPipe(
-				[]util.MimePart{
-					util.MimePart{
-						Body:     body,
-						PartName: api.ParamVideoFile,
-					},
-					util.MimePart{
-						Body:     buff,
-						PartName: api.ParamVideoInfoJSON,
-					}}), nil
+		URL:    u,
+		Method: "POST",
+		Header: map[string][]string{
+			"Content-Type": []string{fmt.Sprintf("multipart/mixed; boundary=%s", boundary)},
 		},
+		Body: requestBody,
 	}
 }
 
 // generate an http request that does the video ready callback
-func (v *VideoInfo) VideoReadyRequest(baseurl, callback *url.URL, nounce string) *http.Request {
+func (v *VideoInfo) VideoReadyURL(baseurl *url.URL, nounce string) *url.URL {
 	u, _ := url.Parse(baseurl.String())
-	u.Path = "/api/" + api.RegisterVideo
+	u.Path = "/callback"
 	q := u.Query()
 	q.Add(api.ParamNounce, nounce)
-	q.Add(api.ParamCallbackURL, callback.String())
+	q.Add(api.ParamVideoID, fmt.Sprintf("%d", v.VideoID))
+	q.Add(api.ParamState, api.StateVideoReady)
+	q.Add(api.ParamAction, api.ActionVideoState)
 	u.RawQuery = q.Encode()
-	return &http.Request{
-		Method: "POST",
-		URL:    u,
-		GetBody: func() (io.ReadCloser, error) {
-			buff := new(util.Buffer)
-			err := json.NewEncoder(buff).Encode(v)
-			return buff, err
-		},
-	}
+	return u
 }

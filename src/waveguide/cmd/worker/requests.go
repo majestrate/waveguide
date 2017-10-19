@@ -7,17 +7,8 @@ import (
 	"net/url"
 	"os"
 	"waveguide/lib/api"
+	"waveguide/lib/log"
 )
-
-func (w *Worker) UploadFileRequest(u *url.URL, fname string) *http.Request {
-	return &http.Request{
-		URL:    u,
-		Method: "PUT",
-		GetBody: func() (io.ReadCloser, error) {
-			return os.Open(fname)
-		},
-	}
-}
 
 func (w *Worker) UploadRequest(u *url.URL, body io.ReadCloser) *http.Request {
 	return &http.Request{
@@ -44,6 +35,10 @@ func (w *Worker) MkTorrentRequest(outfile string, callback *url.URL) *http.Reque
 
 func (w *Worker) DoRequest(r *http.Request) error {
 	resp, err := http.DefaultClient.Do(r)
+	if err != nil {
+		log.Errorf("error doing request: %s", err)
+		return err
+	}
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("http status code %d", resp.StatusCode)
 	}

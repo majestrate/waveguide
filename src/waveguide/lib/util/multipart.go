@@ -24,9 +24,10 @@ func (p *MultipartPipe) Close() error {
 	return p.pr.Close()
 }
 
-func (p *MultipartPipe) Run() {
+func (p *MultipartPipe) Run(boundary string) {
 	var buff [65536]byte
 	mpw := multipart.NewWriter(p.pw)
+	mpw.SetBoundary(boundary)
 	for _, info := range p.parts {
 		body, err := mpw.CreateFormFile(info.PartName, "")
 		if err == nil {
@@ -38,13 +39,13 @@ func (p *MultipartPipe) Run() {
 	p.pw.Close()
 }
 
-func NewMultipartPipe(parts []MimePart) *MultipartPipe {
+func NewMultipartPipe(boundary string, parts []MimePart) *MultipartPipe {
 	pr, pw := io.Pipe()
 	p := &MultipartPipe{
 		parts: parts,
 		pr:    pr,
 		pw:    pw,
 	}
-	go p.Run()
+	go p.Run(boundary)
 	return p
 }

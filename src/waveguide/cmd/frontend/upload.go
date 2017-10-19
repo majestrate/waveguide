@@ -29,7 +29,7 @@ func (r *Routes) HandleUpload(c *gin.Context) {
 				videoURL = info.GetURL(r.FrontendURL).String()
 				body, err = video.Open()
 				if err == nil {
-					err = r.api.Do(info.VideoUploadRequest(r.workerURL, video.Filename, body))
+					err = r.api.Do(info.VideoUploadRequest(r.workerURL, info.VideoReadyURL(r.getNextWorkerURL(), "").String(), video.Filename, body))
 				}
 			}
 		}

@@ -19,13 +19,13 @@ import (
 var ErrNoVideoFile = errors.New("no video file")
 var ErrNoVideoInfo = errors.New("no video info")
 
-func (w *Worker) EncodeVideo(tmpname, fname string, callback, upload_url *url.URL) {
-	outfile := w.TempFileName("mp4")
+func (w *Worker) EncodeVideo(tmpname, fname string, callback *url.URL) {
+	outfile := w.TempFileName(".mp4")
 	log.Infof("Encoding %s to %s", fname, outfile)
 	err := w.Encoder.EncodeFile(tmpname, outfile)
 	os.Remove(tmpname)
 	if err == nil {
-		log.Infof("Upload video file %s to %s", outfile, upload_url.String())
+		log.Infof("make torrent for %s", outfile)
 		err = w.DoRequest(w.MkTorrentRequest(outfile, callback))
 	}
 	if err != nil {
@@ -35,15 +35,6 @@ func (w *Worker) EncodeVideo(tmpname, fname string, callback, upload_url *url.UR
 
 func (w *Worker) VideoEncode(c *gin.Context, callback *url.URL) error {
 	fname := filepath.Clean(c.Query(api.ParamFilename))
-	upload_url_str := c.Query(api.ParamUploadURL)
-	var upload_url *url.URL
-	var err error
-	if upload_url_str != "" {
-		upload_url, err = url.Parse(upload_url_str)
-		if err != nil {
-			return err
-		}
-	}
 	f, err := w.AcquireTempFile(filepath.Ext(fname))
 	if err != nil {
 		return err
@@ -83,6 +74,6 @@ func (w *Worker) VideoEncode(c *gin.Context, callback *url.URL) error {
 		defer os.Remove(f.Name())
 		return err
 	}
-	go w.EncodeVideo(f.Name(), fname, callback, upload_url)
+	go w.EncodeVideo(f.Name(), fname, callback)
 	return nil
 }
