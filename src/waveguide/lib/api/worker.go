@@ -47,7 +47,12 @@ func (w *Worker) Run() error {
 			if err == nil {
 				worker, ok := w.findWorker(req.Method)
 				if ok {
-					err = worker(req)
+					go func(r *Request) {
+						e := worker(r)
+						if e != nil {
+							log.Errorf("failed to handle request: %s", err)
+						}
+					}(req)
 				} else {
 					err = ErrNoSuchMethod
 				}

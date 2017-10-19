@@ -7,3 +7,5 @@ waveguided
 *.js.map
 
 node_modules/*
+
+cdn_files/

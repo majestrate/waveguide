@@ -31,5 +31,6 @@ func (w *Worker) ApiMakeTorrent(r *api.Request) error {
 	if err == nil {
 		err = w.DoRequest(w.UploadRequest(uploadURL, torrent))
 	}
+	util.RemoveURL(fileURL)
 	return err
 }
