@@ -55,6 +55,7 @@ func (w *Worker) ApiEncodeVideo(r *api.Request) error {
 	}
 	if err != nil {
 		log.Errorf("failed to encode video: %s", err)
+		os.Remove(outfile)
 	}
 	return err
 }
