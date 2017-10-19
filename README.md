@@ -13,7 +13,9 @@ Requirements:
 
 * GNU make
 
-* postgresql (for demo)
+* postgresql
+
+* rabbitmq
 
 Building:
 
@@ -27,7 +29,7 @@ Run frontend server:
 
     $ PORT=28800 ./waveguided frontend
     
-Run worker server:
+Run a worker daemon or as many instances as desired:
     
     $ ./waveguided worker
 
@@ -38,13 +40,34 @@ Run CDN Server, make sure to firewall it.
 
 ## project structure
 
+### src/
+
+all golang code
+
+### src/waveguide/lib
+
+all core libraries for all daemons
+
+### src/vendor
+
+vendored dependencies
+
+### src/waveguide/cmd/worker
+
+worker daemon
+
+### src/waveguide/cmd/frontend
+
+frontend webapp
+
+### src/waveguide/cmd/cdn
+
+simple demo cdn server
+
 ### js
 
 javascript frontend code
 
-### src
-
-go webapp code
 
 ### static
 
