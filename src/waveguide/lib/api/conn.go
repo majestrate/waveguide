@@ -19,6 +19,10 @@ type mqConn struct {
 }
 
 func (c *mqConn) Close() error {
+	if c.chnl != nil {
+		c.chnl.Close()
+		c.chnl = nil
+	}
 	if c.conn == nil {
 		return nil
 	}

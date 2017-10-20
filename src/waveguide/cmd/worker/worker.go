@@ -39,10 +39,11 @@ func (w *Worker) configure(conf *config.Config, reload bool) (err error) {
 	if err != nil {
 		return
 	}
-	w.DB = database.NewDatabase(conf.DB.URL)
-	if !reload {
-		err = w.DB.Init()
+	if w.DB != nil {
+		w.DB.Close()
 	}
+	w.DB = database.NewDatabase(conf.DB.URL)
+	err = w.DB.Init()
 	if err != nil {
 		return
 	}
@@ -52,6 +53,11 @@ func (w *Worker) configure(conf *config.Config, reload bool) (err error) {
 	if err != nil {
 		return
 	}
+
+	if w.API != nil {
+		w.API.Close()
+	}
+
 	w.API, err = api.NewClient(&conf.MQ)
 	return
 }

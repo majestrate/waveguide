@@ -41,13 +41,21 @@ func (r *Routes) configure(c *config.Config, reload bool) (err error) {
 		return
 	}
 
-	r.DB = database.NewDatabase(c.DB.URL)
-	if !reload {
-		err = r.DB.Init()
-		if err != nil {
-			return
-		}
+	if r.DB != nil {
+		r.DB.Close()
 	}
+
+	r.DB = database.NewDatabase(c.DB.URL)
+
+	err = r.DB.Init()
+	if err != nil {
+		return
+	}
+
+	if r.api != nil {
+		r.api.Close()
+	}
+
 	r.api, err = api.NewClient(&c.MQ)
 	return
 }

@@ -50,8 +50,10 @@ func Run() {
 				listener.Close()
 				routes.Close()
 			case syscall.SIGHUP:
+				log.Info("SIGHUP")
 				err := conf.Load(configFname)
 				if err == nil {
+					log.Info("reconfiguring")
 					err = routes.Reconfigure(&conf)
 				}
 				if err != nil {
@@ -80,5 +82,6 @@ func Run() {
 	router.GET("/upload/", routes.ServeUpload)
 	router.POST("/upload/", routes.HandleUpload)
 	// run router
+	log.Infof("running on %s", listener.Addr())
 	http.Serve(listener, router)
 }
