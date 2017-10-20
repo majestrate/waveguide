@@ -10,6 +10,10 @@ type Client struct {
 	conn *mqConn
 }
 
+func (cl *Client) Close() error {
+	return cl.conn.Close()
+}
+
 func (cl *Client) Do(r *Request) error {
 	body, err := json.Marshal(r)
 	if err != nil {
@@ -29,8 +33,15 @@ func (cl *Client) Do(r *Request) error {
 	})
 }
 
-func NewClient(mq *config.MQConfig) *Client {
-	return &Client{
+func NewClient(mq *config.MQConfig) (*Client, error) {
+	cl := &Client{
 		conn: newConn(mq),
 	}
+	err := cl.conn.ensureConnection(func(_ *amqp.Connection) error {
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return cl, nil
 }

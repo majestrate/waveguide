@@ -3,12 +3,13 @@ package frontend
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"net"
 	"net/http"
-	"net/url"
+	"os"
+	"os/signal"
 	"path/filepath"
-	"waveguide/lib/api"
+	"syscall"
 	"waveguide/lib/config"
-	"waveguide/lib/database"
 	"waveguide/lib/log"
 	"waveguide/lib/model"
 	"waveguide/lib/templates"
@@ -18,29 +19,48 @@ func Run() {
 	log.SetLevel("debug")
 	var conf config.Config
 
-	err := conf.Load("waveguide.ini")
+	const configFname = "waveguide.ini"
+
+	err := conf.Load(configFname)
 	if err != nil {
 		log.Fatalf("failed to load config: %s", err)
 	}
-	var routes Routes
+	routes := new(Routes)
 
-	routes.TempDir = conf.Storage.TempDir
-
-	routes.FrontendURL, err = url.Parse(conf.Frontend.FrontendURL)
+	err = routes.Configure(&conf)
 	if err != nil {
-		log.Fatalf("failed to parse frontend url: %s", err)
+		log.Fatalf("failed to configure frontend: %s", err)
 	}
 
-	routes.DB = database.NewDatabase(conf.DB.URL)
-	err = routes.DB.Init()
+	// make net listener
+	var listener net.Listener
+	listener, err = net.Listen("tcp", conf.Frontend.Addr)
 	if err != nil {
-		log.Fatalf("failed to open database: %s", err)
+		log.Fatal(err.Error())
 	}
 
-	routes.api = api.NewClient(&conf.MQ)
-	routes.workerURL = conf.Frontend.WorkerURL
 	// make router
 	router := gin.Default()
+	sigchnl := make(chan os.Signal)
+	signal.Notify(sigchnl, os.Interrupt, syscall.SIGHUP)
+	go func(chnl chan os.Signal) {
+		for sig := range chnl {
+			switch sig {
+			case os.Interrupt:
+				listener.Close()
+				routes.Close()
+			case syscall.SIGHUP:
+				err := conf.Load(configFname)
+				if err == nil {
+					err = routes.Reconfigure(&conf)
+				}
+				if err != nil {
+					log.Errorf("failed to reconfigure: %s", err)
+				}
+			}
+		}
+	}(sigchnl)
+
 	// set up template utils
 	funcs := templates.Funcs()
 	router.SetFuncMap(funcs)
@@ -60,5 +80,5 @@ func Run() {
 	router.GET("/upload/", routes.ServeUpload)
 	router.POST("/upload/", routes.HandleUpload)
 	// run router
-	router.Run()
+	http.Serve(listener, router)
 }

@@ -21,6 +21,10 @@ func (db *pgDB) Init() (err error) {
 	return
 }
 
+func (db *pgDB) Close() error {
+	return db.conn.Close()
+}
+
 func (db *pgDB) CreateTables() (err error) {
 	tables := map[string]string{
 		"video_users": "user_id SERIAL PRIMARY KEY, user_name VARCHAR(255) NOT NULL, user_email VARCHAR(255) NOT NULL, user_logincred VARCHAR(255) NOT NULL",

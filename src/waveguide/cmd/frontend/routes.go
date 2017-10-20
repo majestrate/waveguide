@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"strconv"
 	"waveguide/lib/api"
+	"waveguide/lib/config"
 	"waveguide/lib/database"
 	"waveguide/lib/model"
 )
@@ -13,9 +14,42 @@ import (
 type Routes struct {
 	DB          database.Database
 	api         *api.Client
-	workerURL   string
 	FrontendURL *url.URL
 	TempDir     string
+}
+
+func (r *Routes) Close() error {
+	r.DB.Close()
+	r.api.Close()
+	return nil
+}
+
+func (r *Routes) Configure(c *config.Config) error {
+	return r.configure(c, false)
+}
+
+func (r *Routes) Reconfigure(c *config.Config) error {
+	return r.configure(c, true)
+}
+
+func (r *Routes) configure(c *config.Config, reload bool) (err error) {
+
+	r.TempDir = c.Storage.TempDir
+
+	r.FrontendURL, err = url.Parse(c.Frontend.FrontendURL)
+	if err != nil {
+		return
+	}
+
+	r.DB = database.NewDatabase(c.DB.URL)
+	if !reload {
+		err = r.DB.Init()
+		if err != nil {
+			return
+		}
+	}
+	r.api, err = api.NewClient(&c.MQ)
+	return
 }
 
 func (r *Routes) Error(c *gin.Context, err error) {

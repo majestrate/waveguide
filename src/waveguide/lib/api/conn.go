@@ -18,6 +18,15 @@ type mqConn struct {
 	queue  amqp.Queue
 }
 
+func (c *mqConn) Close() error {
+	if c.conn == nil {
+		return nil
+	}
+	err := c.conn.Close()
+	c.conn = nil
+	return err
+}
+
 func (c *mqConn) ensureConnection(visit func(*amqp.Connection) error) (err error) {
 	if c.conn == nil {
 		c.conn, err = amqp.Dial(c.mqConf.URL)

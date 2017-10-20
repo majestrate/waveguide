@@ -25,6 +25,10 @@ func NewWorker(c *config.MQConfig, f WorkFinder) *Worker {
 	}
 }
 
+func (w *Worker) Close() error {
+	return w.conn.Close()
+}
+
 func (w *Worker) Run() error {
 	if w.findWorker == nil {
 		return ErrWorkerNotReady
