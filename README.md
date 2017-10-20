@@ -27,7 +27,7 @@ copy `contrib/waveguide.ini` to `waveguide.ini`
 
 Run frontend server:
 
-    $ PORT=28800 ./waveguided frontend
+    $ ./waveguided frontend
     
 Run a worker daemon or as many instances as desired:
     
@@ -35,7 +35,7 @@ Run a worker daemon or as many instances as desired:
 
 Run CDN Server, make sure to firewall it.
 
-    $ PORT=48800 ./waveguided cdn
+    $ ADDR=:48800 ./waveguided cdn
 
 
 ## project structure

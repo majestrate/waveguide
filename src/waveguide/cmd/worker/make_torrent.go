@@ -30,6 +30,12 @@ func (w *Worker) ApiMakeTorrent(r *api.Request) error {
 	f.Close()
 	if err == nil {
 		err = w.DoRequest(w.UploadRequest(uploadURL, torrent))
+		if err == nil {
+			vidid := r.GetInt(api.ParamVideoID, 0)
+			if vidid > 0 {
+				err = w.DB.SetVideoMetaInfo(vidid, w.ToPublicCDN(uploadURL).String())
+			}
+		}
 	}
 	util.RemoveURL(fileURL)
 	return err

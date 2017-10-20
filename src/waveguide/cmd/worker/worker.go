@@ -1,6 +1,7 @@
 package worker
 
 import (
+	"net/url"
 	"waveguide/lib/api"
 	"waveguide/lib/config"
 	"waveguide/lib/database"
@@ -17,6 +18,7 @@ type Worker struct {
 	DB        database.Database
 	API       *api.Client
 	quit      bool
+	CDN       config.CDNConfig
 }
 
 func (w *Worker) Continue() bool {
@@ -35,6 +37,7 @@ func (w *Worker) Reconfigure(conf *config.Config) error {
 }
 
 func (w *Worker) configure(conf *config.Config, reload bool) (err error) {
+	w.CDN = conf.CDN
 	w.Torrent, err = torrent.NewFactory()
 	if err != nil {
 		return
@@ -60,6 +63,12 @@ func (w *Worker) configure(conf *config.Config, reload bool) (err error) {
 
 	w.API, err = api.NewClient(&conf.MQ)
 	return
+}
+
+func (w *Worker) ToPublicCDN(u *url.URL) *url.URL {
+	// TODO: implement this
+	cdn, _ := url.Parse(u.String())
+	return cdn
 }
 
 func (w *Worker) FindWorker(method string) (api.WorkerFunc, bool) {

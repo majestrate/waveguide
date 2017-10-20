@@ -28,7 +28,7 @@ func (db *pgDB) Close() error {
 func (db *pgDB) CreateTables() (err error) {
 	tables := map[string]string{
 		"video_users": "user_id SERIAL PRIMARY KEY, user_name VARCHAR(255) NOT NULL, user_email VARCHAR(255) NOT NULL, user_logincred VARCHAR(255) NOT NULL",
-		"videos":      "video_id SERIAL PRIMARY KEY, video_name VARCHAR(255) NOT NULL, video_uploader INTEGER REFERENCES video_users(user_id) ON DELETE CASCADE, video_upload_date INTEGER NOT NULL, video_description TEXT NOT NULL, video_torrent_url VARCHAR(255) NOT NULL",
+		"videos":      "video_id SERIAL PRIMARY KEY, video_name VARCHAR(255) NOT NULL, video_uploader INTEGER REFERENCES video_users(user_id) ON DELETE CASCADE, video_upload_date INTEGER NOT NULL, video_description TEXT NOT NULL, video_metainfo_url TEXT NOT NULL",
 		"webseeds":    "webseed_url TEXT NOT NULL, video_id INTEGER REFERENCES videos(video_id) ON DELETE CASCADE",
 	}
 
@@ -49,24 +49,16 @@ func (db *pgDB) CreateTables() (err error) {
 	return
 }
 
-func (db *pgDB) NextVideoID() (id int64, err error) {
-	err = db.conn.QueryRow("SELECT coalesce(max(video_id),0) FROM videos").Scan(&id)
-	if err == sql.ErrNoRows {
-		err = nil
-	}
-	return
-}
-
 func (db *pgDB) GetFrontpageVideos() (list model.VideoList, err error) {
 	var rows *sql.Rows
-	rows, err = db.conn.Query("SELECT video_id, video_name, video_upload_date FROM videos ORDER BY video_upload_date DESC LIMIT 10")
+	rows, err = db.conn.Query("SELECT video_id, video_name, video_upload_date, video_metainfo_url FROM videos ORDER BY video_upload_date DESC LIMIT 10")
 	if err == sql.ErrNoRows {
 		err = nil
 		return
 	} else if err == nil {
 		for rows.Next() {
 			var info model.VideoInfo
-			rows.Scan(&info.VideoID, &info.Title, &info.UploadedAt)
+			rows.Scan(&info.VideoID, &info.Title, &info.UploadedAt, &info.TorrentURL)
 			list = append(list, info)
 		}
 		rows.Close()
@@ -75,24 +67,27 @@ func (db *pgDB) GetFrontpageVideos() (list model.VideoList, err error) {
 }
 
 func (db *pgDB) RegisterVideo(video *model.VideoInfo) error {
-	result, err := db.conn.Exec("INSERT INTO videos (video_name, video_description, video_upload_date, video_torrent_url) VALUES ( $1, $2, $3, $4)", video.Title, video.Description, video.UploadedAt, video.TorrentURL)
-	if err == nil {
-		video.VideoID, err = result.LastInsertId()
-		if err == nil {
-			for idx := range video.WebSeeds {
-				_, err = db.conn.Exec("INSERT INTO webseeds(video_id, webseed_url) VALUES ($1, $2)", video.VideoID, video.WebSeeds[idx])
-				if err != nil {
-					return err
-				}
-			}
-		}
+	return db.conn.QueryRow("INSERT INTO videos (video_name, video_description, video_upload_date, video_metainfo_url) VALUES ($1, $2, $3, $4) RETURNING video_id", video.Title, video.Description, video.UploadedAt, "").Scan(&video.VideoID)
+}
+
+func (db *pgDB) SetVideoMetaInfo(id int64, url string) (err error) {
+	_, err = db.conn.Exec("UPDATE videos SET video_metainfo_url = $1 WHERE video_id = $2", url, id)
+	if err == sql.ErrNoRows {
+		err = nil
 	}
-	return err
+	return
+}
+
+func (db *pgDB) AddWebseed(id int64, url string) (err error) {
+	_, err = db.conn.Exec("INSERT INTO webseeds(video_id, webseed_url) VALUES ($1, $2)", id, url)
+	return
 }
 
 func (db *pgDB) GetVideoInfo(id int64) (info *model.VideoInfo, err error) {
-	info = new(model.VideoInfo)
-	err = db.conn.QueryRow("SELECT video_id, video_name, video_description, video_upload_date, video_torrent_url FROM videos WHERE video_id = $1", id).Scan(&info.VideoID, &info.Title, &info.Description, &info.UploadedAt, &info.TorrentURL)
+	info = &model.VideoInfo{
+		VideoID: id,
+	}
+	err = db.conn.QueryRow("SELECT video_name, video_description, video_upload_date, video_metainfo_url FROM videos WHERE video_id = $1", id).Scan(&info.Title, &info.Description, &info.UploadedAt, &info.TorrentURL)
 	if err == nil {
 		var rows *sql.Rows
 		rows, err = db.conn.Query("SELECT webseed_url FROM webseeds WHERE video_id = $1", id)

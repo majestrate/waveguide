@@ -25,16 +25,14 @@ func (r *Routes) HandleUpload(c *gin.Context) {
 		if ctype != "" {
 			mtype, _, _ := mime.ParseMediaType(ctype)
 			if strings.HasPrefix(mtype, "video/") {
-				var vidID int64
-				vidID, err = r.DB.NextVideoID()
-				if err == nil {
 
-					info := &model.VideoInfo{
-						UserID:     u.UserID,
-						VideoID:    vidID,
-						Title:      video.Filename,
-						UploadedAt: time.Now().Unix(),
-					}
+				info := &model.VideoInfo{
+					UserID:     u.UserID,
+					Title:      video.Filename,
+					UploadedAt: time.Now().Unix(),
+				}
+				err = r.DB.RegisterVideo(info)
+				if err == nil {
 					videoURL = info.GetURL(r.FrontendURL).String()
 					ext := filepath.Ext(video.Filename)
 					tmpFile := util.TempFileName(r.TempDir, ext)

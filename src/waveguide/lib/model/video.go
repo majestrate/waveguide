@@ -32,22 +32,9 @@ func (v *VideoInfo) VideoUploadRequest(fileURL *url.URL, filename string) *api.R
 	return &api.Request{
 		Method: api.EncodeVideo,
 		Args: map[string]interface{}{
-			api.ParamVideoInfoJSON: v,
-			api.ParamFilename:      filename,
-			api.ParamFileURL:       fileURL.String(),
+			api.ParamVideoID:  v.VideoID,
+			api.ParamFilename: filename,
+			api.ParamFileURL:  fileURL.String(),
 		},
 	}
-}
-
-// generate an http request that does the video ready callback
-func (v *VideoInfo) VideoReadyURL(baseurl *url.URL, nounce string) *url.URL {
-	u, _ := url.Parse(baseurl.String())
-	u.Path = "/callback"
-	q := u.Query()
-	q.Add(api.ParamNounce, nounce)
-	q.Add(api.ParamVideoID, fmt.Sprintf("%d", v.VideoID))
-	q.Add(api.ParamState, api.StateVideoReady)
-	q.Add(api.ParamAction, api.ActionVideoState)
-	u.RawQuery = q.Encode()
-	return u
 }

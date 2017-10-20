@@ -54,7 +54,7 @@ func (w *Worker) Run() error {
 					go func(r *Request) {
 						e := worker(r)
 						if e != nil {
-							log.Errorf("failed to handle request: %s", err)
+							log.Errorf("failed to handle request: %s", e)
 						}
 					}(req)
 				} else {

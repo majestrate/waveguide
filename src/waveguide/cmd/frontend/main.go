@@ -3,12 +3,14 @@ package frontend
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/itsjamie/gin-cors"
 	"net"
 	"net/http"
 	"os"
 	"os/signal"
 	"path/filepath"
 	"syscall"
+	"time"
 	"waveguide/lib/config"
 	"waveguide/lib/log"
 	"waveguide/lib/model"
@@ -41,6 +43,19 @@ func Run() {
 
 	// make router
 	router := gin.Default()
+
+	// set up cors
+	router.Use(cors.Middleware(cors.Config{
+		// TODO: configure origins for CORS
+		Origins:         "*",
+		Methods:         "GET",
+		RequestHeaders:  "Origin, Authorization, Content-Type",
+		ExposedHeaders:  "",
+		MaxAge:          50 * time.Second,
+		Credentials:     true,
+		ValidateHeaders: false,
+	}))
+
 	sigchnl := make(chan os.Signal)
 	signal.Notify(sigchnl, os.Interrupt, syscall.SIGHUP)
 	go func(chnl chan os.Signal) {

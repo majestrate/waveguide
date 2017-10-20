@@ -12,6 +12,7 @@ import (
 
 var ErrNoFileName = errors.New("no filename provided")
 var ErrNoFilePath = errors.New("no local filepath provided")
+var ErrNoVideoID = errors.New("no videoid provided")
 
 func (w *Worker) ApiEncodeVideo(r *api.Request) error {
 	outfile := w.TempFileName(".mp4")
@@ -20,7 +21,10 @@ func (w *Worker) ApiEncodeVideo(r *api.Request) error {
 	if fname == "" {
 		return ErrNoFileName
 	}
-
+	vidid := r.GetInt(api.ParamVideoID, 0)
+	if vidid == 0 {
+		return ErrNoVideoID
+	}
 	infileURL, err := url.Parse(r.GetString(api.ParamFileURL, ""))
 	if err != nil {
 		return err
@@ -44,11 +48,14 @@ func (w *Worker) ApiEncodeVideo(r *api.Request) error {
 				err = w.DoRequest(w.UploadRequest(uploadURL, f))
 				f.Close()
 				if err == nil {
-					log.Infof("make torrent for %s", outfile)
-					err = w.API.Do(w.MkTorrentRequest(&url.URL{
-						Path:   outfile,
-						Scheme: "file",
-					}, fname))
+					err = w.DB.AddWebseed(vidid, w.ToPublicCDN(uploadURL).String())
+					if err == nil {
+						log.Infof("make torrent for %s", outfile)
+						err = w.API.Do(w.MkTorrentRequest(&url.URL{
+							Path:   outfile,
+							Scheme: "file",
+						}, vidid, fname))
+					}
 				}
 			}
 		}

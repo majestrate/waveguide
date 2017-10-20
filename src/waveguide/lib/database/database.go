@@ -8,8 +8,9 @@ type Database interface {
 	Init() error
 	GetFrontpageVideos() (model.VideoList, error)
 	RegisterVideo(v *model.VideoInfo) error
+	SetVideoMetaInfo(id int64, url string) error
+	AddWebseed(id int64, url string) error
 	GetVideoInfo(id int64) (*model.VideoInfo, error)
-	NextVideoID() (int64, error)
 	Close() error
 }
 
