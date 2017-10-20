@@ -2,7 +2,6 @@ package cdn
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/itsjamie/gin-cors"
 	"io"
 	"net"
 	"net/http"
@@ -10,8 +9,8 @@ import (
 	"os/signal"
 	"path/filepath"
 	"syscall"
-	"time"
 	"waveguide/lib/log"
+	"waveguide/lib/util"
 )
 
 type CDNServer struct {
@@ -44,16 +43,7 @@ func Run() {
 	}
 	router := gin.Default()
 	// set up cors
-	router.Use(cors.Middleware(cors.Config{
-		// TODO: configure origins for CORS
-		Origins:         "*",
-		Methods:         "GET",
-		RequestHeaders:  "Origin, Authorization, Content-Type, Range",
-		ExposedHeaders:  "Range",
-		MaxAge:          50 * time.Second,
-		Credentials:     true,
-		ValidateHeaders: false,
-	}))
+	router.Use(util.CORSMiddleware())
 
 	router.PUT("/:filename", cdn.HandlePUT)
 	router.Static("/", cdn.rootdir)
