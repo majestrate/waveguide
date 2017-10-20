@@ -1,13 +1,12 @@
 # waveguide
 
-video cdn server that offloads via webtorrent
-
+video sharing server that offloads via webtorrent
 
 ## building
 
 Requirements:
 
-* go 1.9
+* go 1.9.x
 
 * yarn
 
@@ -33,9 +32,9 @@ Run a worker daemon or as many instances as desired:
     
     $ ./waveguided worker
 
-Run CDN Server, make sure to firewall it.
+Run CDN Server:
 
-    $ ADDR=:48800 ./waveguided cdn
+    $ ADDR=127.0.0.1:48800 ./waveguided cdn
 
 
 ## project structure

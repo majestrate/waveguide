@@ -7,7 +7,6 @@ function Player(wg, elem)
 {
   this.root = elem;
   this.elem = document.createElement("video");
-  this.elem.setAttribute("controls", "controls");
   this.client = new WebTorrent();
   this.torrent = null;
   this.err = util.div("player_error", "error");
@@ -24,6 +23,7 @@ Player.prototype.SetInfo = function(url, webseeds, cb)
     self.Error("video not yet ready try again later");
     return;
   }
+  self.elem.setAttribute("controls", "controls");
   self.client.on("error", function(err) {
     self.Error(err);
   });
