@@ -7,6 +7,8 @@ function Player(wg, elem)
 {
   this.root = elem;
   this.elem = document.createElement("video");
+  this.elem.setAttribute("id", "video-player");
+  this.elem.setAttribute("type", "video/mp4");
   this.client = new WebTorrent();
   this.torrent = null;
   this.err = util.div("player_error", "error");
@@ -33,18 +35,21 @@ Player.prototype.SetInfo = function(url, webseeds, cb)
     
     for (var idx = 0; idx < webseeds.length; idx ++)
       t.addWebSeed(webseeds[idx]);
-    
-    t.on("ready", function() {
-      console.log("torrent ready");
-      t.files[0].renderTo(self.elem);
+
+    t.files[0].getBlobURL(function(err, url) {
+      if(err) self.Error(err);
+      else
+      {
+        self.elem.src = url;
+      }
     });
+    
     t.on("error", function(err) {
       self.Error(err);
     });
 
     t.on("done", function() {
       console.log("download is done");
-      t.files[0].renderTo(self.elem);
     });
     
     if(cb) cb();
