@@ -66,8 +66,9 @@ func (w *Worker) configure(conf *config.Config, reload bool) (err error) {
 }
 
 func (w *Worker) ToPublicCDN(u *url.URL) *url.URL {
-	// TODO: implement this
-	cdn, _ := url.Parse(u.String())
+	// TODO: implement this better
+	cdn, _ := url.Parse(w.CDN.WebseedServers[0])
+	cdn.Path += u.Path[1:]
 	return cdn
 }
 
