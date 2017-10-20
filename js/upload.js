@@ -68,7 +68,7 @@ UploadWidget.prototype.Success = function(url)
 {
   var self = this;
   self._EnterState(state_Ready);
-  self.SetMessage(msg, "success");
+  self.SetMessage("upload okay", "success");
   setTimeout(function() {
     window.location = url;
   }, 1000);
