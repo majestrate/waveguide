@@ -64,13 +64,13 @@ UploadWidget.prototype.Clear = function()
   self.SetMessage("", "");
 };
 
-UploadWidget.prototype.Success = function(msg)
+UploadWidget.prototype.Success = function(url)
 {
   var self = this;
   self._EnterState(state_Ready);
   self.SetMessage(msg, "success");
   setTimeout(function() {
-    self.Clear();
+    window.location = url;
   }, 1000);
 };
 

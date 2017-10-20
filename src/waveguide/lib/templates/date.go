@@ -4,6 +4,6 @@ import (
 	"time"
 )
 
-func FormatDate(t time.Time) string {
-	return t.Format(time.ANSIC)
+func FormatDate(t int64) string {
+	return time.Unix(t, 0).Format(time.ANSIC)
 }
