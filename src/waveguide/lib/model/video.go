@@ -28,6 +28,17 @@ func (v *VideoInfo) GetURL(frontend *url.URL) *url.URL {
 	return u
 }
 
+func (v *VideoInfo) WebseedUploadRequest(remoteFile *url.URL) *api.Request {
+	return &api.Request{
+		Method: api.MakeTorrent,
+		Args: map[string]interface{}{
+			api.ParamVideoID:  v.VideoID,
+			api.ParamFilename: v.Title,
+			api.ParamFileURL:  remoteFile.String(),
+		},
+	}
+}
+
 func (v *VideoInfo) VideoUploadRequest(fileURL *url.URL, filename string) *api.Request {
 	return &api.Request{
 		Method: api.EncodeVideo,

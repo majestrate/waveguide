@@ -44,6 +44,10 @@ var new_form = function(url, method) {
   return b;
 };
 
+var new_input = function(id, cl) {
+  return new_elem("input", id, cl);
+};
+
 var new_form_file = function(id, cl) {
   var f = new_elem("input", id, cl);
   f.setAttribute("type", "file");
@@ -57,5 +61,6 @@ module.exports = {
   "button": new_button,
   "form": new_form,
   "file": new_form_file,
-  "submit": new_submit
+  "submit": new_submit,
+  "input": new_input
 };

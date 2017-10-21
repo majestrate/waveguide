@@ -14,6 +14,7 @@ function UploadWidget(parent, elem)
   this.file = null;
   this.form = null;
   this.message = null;
+  this.webseed_url = null;
   this._state = state_Ready;
 }
 
@@ -46,8 +47,13 @@ UploadWidget.prototype.Setup = function()
   var message_id = "upload_message";
   self.message = util.div(message_id, "upload-label");
   self.form.appendChild(self.message);
+
+  var webseed_id = "upload_webseed";
+  self.webseed_url = util.input(webseed_id, "upload-label");
+  self.form.appendChild(self.webseed_url);
   
   self.elem.appendChild(self.form);
+  
 };
 
 UploadWidget.prototype.Error = function(msg)
@@ -104,8 +110,17 @@ UploadWidget.prototype.Submit = function()
 
   var formdata = new FormData();
   if(self.file.files.length == 1)
+  {
     formdata.append("video", self.file.files[0]);
-  else
+  }
+  else if(self.webseed_url.value.length > 0)
+  {
+    var parts = self.webseed_url.value.split("/");
+    console.log(parts);
+    formdata.append("webseed", self.webseed_url.value);
+    formdata.append("title", parts[parts.length-1]);
+  }
+  else 
   {
     self.Error("no video provided");
     return;

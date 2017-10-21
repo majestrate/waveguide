@@ -15,41 +15,64 @@ import (
 
 var ErrBadMediaType = errors.New("bad media type")
 var ErrBadContentType = errors.New("bad content type")
+var ErrNoWebseedFileName = errors.New("no title provided")
 
 func (r *Routes) HandleUpload(c *gin.Context) {
+	var err error
 	var videoURL string
 	u := r.GetCurrentUser(c)
-	video, err := c.FormFile("video")
-	if err == nil {
-		ctype := mime.TypeByExtension(filepath.Ext(video.Filename))
-		if ctype != "" {
-			mtype, _, _ := mime.ParseMediaType(ctype)
-			if strings.HasPrefix(mtype, "video/") {
-
-				info := &model.VideoInfo{
-					UserID:     u.UserID,
-					Title:      video.Filename,
-					UploadedAt: time.Now().Unix(),
-				}
-				err = r.DB.RegisterVideo(info)
+	info := &model.VideoInfo{
+		UserID:     u.UserID,
+		UploadedAt: time.Now().Unix(),
+	}
+	webseed, ok := c.GetPostForm("webseed")
+	if ok {
+		info.Title, ok = c.GetPostForm("title")
+		if ok {
+			err = r.DB.RegisterVideo(info)
+			if err == nil {
+				videoURL = info.GetURL(r.FrontendURL).String()
+				var webseedURL *url.URL
+				webseedURL, err = url.Parse(webseed)
 				if err == nil {
-					videoURL = info.GetURL(r.FrontendURL).String()
-					ext := filepath.Ext(video.Filename)
-					tmpFile := util.TempFileName(r.TempDir, ext)
-					c.SaveUploadedFile(video, tmpFile)
-					fileURL := &url.URL{
-						Scheme: "file",
-						Path:   tmpFile,
-					}
+					err = r.DB.AddWebseed(info.VideoID, webseedURL.String())
 					if err == nil {
-						err = r.api.Do(info.VideoUploadRequest(fileURL, video.Filename))
+						err = r.api.Do(info.WebseedUploadRequest(webseedURL))
 					}
 				}
-			} else {
-				err = ErrBadMediaType
 			}
 		} else {
-			err = ErrBadContentType
+			err = ErrNoWebseedFileName
+		}
+	} else {
+		video, err := c.FormFile("video")
+		if err == nil {
+			ctype := mime.TypeByExtension(filepath.Ext(video.Filename))
+			if ctype != "" {
+				mtype, _, _ := mime.ParseMediaType(ctype)
+				if strings.HasPrefix(mtype, "video/") {
+
+					info.Title = video.Filename
+					err = r.DB.RegisterVideo(info)
+					if err == nil {
+						videoURL = info.GetURL(r.FrontendURL).String()
+						ext := filepath.Ext(video.Filename)
+						tmpFile := util.TempFileName(r.TempDir, ext)
+						c.SaveUploadedFile(video, tmpFile)
+						fileURL := &url.URL{
+							Scheme: "file",
+							Path:   tmpFile,
+						}
+						if err == nil {
+							err = r.api.Do(info.VideoUploadRequest(fileURL, video.Filename))
+						}
+					}
+				} else {
+					err = ErrBadMediaType
+				}
+			} else {
+				err = ErrBadContentType
+			}
 		}
 	}
 	if err == nil {
