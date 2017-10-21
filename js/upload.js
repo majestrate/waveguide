@@ -37,12 +37,16 @@ UploadWidget.prototype.Setup = function()
   self.submit = util.button(button_id, "upload-button");
   self.submit.value = "upload";
   self.submit.onclick = function() { self.Submit(); };
-  
-  self.form.appendChild(self.submit);
+
+  var e = util.div(null, "upload");
+  e.appendChild(self.submit);
+  self.form.appendChild(e);
   
   var file_id = "upload_file";
   self.file = util.file(file_id, "upload-file");
-  self.form.appendChild(self.file);
+  var e = util.div(null, "upload");
+  e.appendChild(self.file);
+  self.form.appendChild(e);
 
   var message_id = "upload_message";
   self.message = util.div(message_id, "upload-label");
@@ -50,7 +54,11 @@ UploadWidget.prototype.Setup = function()
 
   var webseed_id = "upload_webseed";
   self.webseed_url = util.input(webseed_id, "upload-label");
-  self.form.appendChild(self.webseed_url);
+
+  e = util.div(null, "upload");
+  e.appendChild(self.webseed_url);
+  e.appendChild(document.createTextNode("webseed url (optional)"));
+  self.form.appendChild(e);
   
   self.elem.appendChild(self.form);
   

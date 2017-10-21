@@ -49,14 +49,3 @@ clean-js:
 
 distclean: clean
 	rm -fr $(REPO)/node_modules
-
-upload: upload-files upload-daemon upload-worker
-
-upload-files:
-	scp -r $(STATIC) $(TEMPLATES) $(REPO)/contrib/waveguide-supervisor.ini "ubuntu@gitgud.tv:waveguide"
-
-upload-daemon:
-	scp -r $(WAVED) "ubuntu@gitgud.tv:waveguide/"
-
-upload-worker:
-	scp -r $(WAVED) "ubuntu@gitgud.tv:waveguide/workerd"

@@ -86,6 +86,8 @@ func Run() {
 	router.GET("/u/:UserID/", routes.ServeUser)
 	router.GET("/upload/", routes.ServeUpload)
 	router.POST("/upload/", routes.HandleUpload)
+	// chat callback url
+	router.StaticFile("/chat/", filepath.Join(conf.Frontend.StaticDir, "chat.html"))
 	// run router
 	log.Infof("running on %s", listener.Addr())
 	http.Serve(listener, router)
