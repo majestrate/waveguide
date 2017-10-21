@@ -53,7 +53,7 @@ distclean: clean
 upload: upload-files upload-daemon upload-worker
 
 upload-files:
-	scp -r $(STATIC) $(TEMPLATES) $(REPO)/contrib/waveguiede-supervisor.ini "ubuntu@gitgud.tv:waveguide"
+	scp -r $(STATIC) $(TEMPLATES) $(REPO)/contrib/waveguide-supervisor.ini "ubuntu@gitgud.tv:waveguide"
 
 upload-daemon:
 	scp -r $(WAVED) "ubuntu@gitgud.tv:waveguide/"
