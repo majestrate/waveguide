@@ -38,7 +38,7 @@ func (w *Worker) Reconfigure(conf *config.Config) error {
 
 func (w *Worker) configure(conf *config.Config, reload bool) (err error) {
 	w.CDN = conf.CDN
-	w.Torrent, err = torrent.NewFactory()
+	w.Torrent, err = torrent.NewFactory(&conf.Worker.Torrent)
 	if err != nil {
 		return
 	}

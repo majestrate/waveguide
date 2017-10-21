@@ -87,6 +87,12 @@ UploadWidget.prototype.SetMessage = function(msg, cls)
   self.message.setAttribute("class", cls);
 };
 
+UploadWidget.prototype.Progress = function(progress)
+{
+  var self = this;
+  self.SetMessage("uploading... "+(parseInt(progress*10)/10)+"%", "upload");
+};
+
 UploadWidget.prototype.Submit = function()
 {
   var self = this;
@@ -128,6 +134,12 @@ UploadWidget.prototype.Submit = function()
       }
     }
   };
+  ajax.upload.addEventListener("progress", function(ev) {
+    if(ev.lengthComputable)
+    {
+      self.Progress(ev.loaded / ev.total);
+    }
+  });
   ajax.open("POST", ".");
   ajax.send(formdata);
 };

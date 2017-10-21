@@ -5,15 +5,15 @@ import (
 	"os"
 	"path/filepath"
 	"time"
+	"waveguide/lib/config"
 	"waveguide/lib/log"
 	"waveguide/lib/torrent/metainfo"
 )
 
-func NewFactory() (*Factory, error) {
+func NewFactory(c *config.TorrentConfig) (*Factory, error) {
 	return &Factory{
-		AnnounceURL: "wss://tracker.btorrent.xyz",
-		/* 64 KB */
-		PieceLength: 65536,
+		AnnounceURL: c.TrackerURL,
+		PieceLength: c.PieceSize,
 	}, nil
 }
 

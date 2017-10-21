@@ -58,8 +58,6 @@ func (w *Worker) Run() error {
 						if e != nil {
 							log.Warnf("failed to ack delivery: %s", e)
 						}
-					} else {
-						requeue = true
 					}
 				} else {
 					err = ErrNoSuchMethod
@@ -68,7 +66,9 @@ func (w *Worker) Run() error {
 			if err != nil {
 				log.Errorf("worker failed to dispatch job: %s", err)
 				e := delivery.Nack(false, requeue)
-				log.Warnf("failed to nack delivery: %s", e)
+				if e != nil {
+					log.Warnf("failed to nack delivery: %s", e)
+				}
 			}
 		}
 		return nil

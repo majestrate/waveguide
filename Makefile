@@ -51,4 +51,4 @@ distclean: clean
 	rm -fr $(REPO)/node_modules
 
 upload:
-	scp -r $(WAVED) $(STATIC) $(TEMPLATES) "ubuntu@gitgud.tv:waveguide"
+	scp -r $(WAVED) $(STATIC) $(TEMPLATES) $(REPO)/contrib/waveguiede-supervisor.ini "ubuntu@gitgud.tv:waveguide"
