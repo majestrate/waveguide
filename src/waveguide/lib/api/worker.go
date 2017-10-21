@@ -37,7 +37,7 @@ func (w *Worker) Run() error {
 		chnl, err := ch.Consume(
 			q.Name, // queue
 			"",     // consumer
-			true,   // auto ack
+			false,  // auto ack
 			false,  // exclusive
 			false,  // no-local
 			false,  // no-wait,
@@ -46,23 +46,29 @@ func (w *Worker) Run() error {
 			return err
 		}
 		for delivery := range chnl {
+			requeue := false
 			req := new(Request)
 			err = json.Unmarshal(delivery.Body, req)
 			if err == nil {
 				worker, ok := w.findWorker(req.Method)
 				if ok {
-					go func(r *Request) {
-						e := worker(r)
+					err = worker(req)
+					if err == nil {
+						e := delivery.Ack(false)
 						if e != nil {
-							log.Errorf("failed to handle request: %s", e)
+							log.Warnf("failed to ack delivery: %s", e)
 						}
-					}(req)
+					} else {
+						requeue = true
+					}
 				} else {
 					err = ErrNoSuchMethod
 				}
 			}
 			if err != nil {
 				log.Errorf("worker failed to dispatch job: %s", err)
+				e := delivery.Nack(false, requeue)
+				log.Warnf("failed to nack delivery: %s", e)
 			}
 		}
 		return nil

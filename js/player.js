@@ -36,13 +36,8 @@ Player.prototype.SetInfo = function(url, webseeds, cb)
     for (var idx = 0; idx < webseeds.length; idx ++)
       t.addWebSeed(webseeds[idx]);
 
-    t.files[0].getBlobURL(function(err, url) {
-      if(err) self.Error(err);
-      else
-      {
-        self.elem.src = url;
-      }
-    });
+    var file = t.files[0];
+    file.renderTo(self.elem);
     
     t.on("error", function(err) {
       self.Error(err);

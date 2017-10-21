@@ -12,8 +12,8 @@ import (
 func NewFactory() (*Factory, error) {
 	return &Factory{
 		AnnounceURL: "wss://tracker.btorrent.xyz",
-		/* 1 MB */
-		PieceLength: 1048576,
+		/* 64 KB */
+		PieceLength: 65536,
 	}, nil
 }
 

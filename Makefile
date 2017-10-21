@@ -9,8 +9,10 @@ GOPATH := $(REPO)
 GO ?= $(shell which go)
 
 WAVED := $(REPO)/waveguided
+STATIC := $(REPO)/static/
+TEMPLATES := $(REPO)/templates/
 
-JS = $(REPO)/static/waveguide.min.js
+JS = $(STATIC)/waveguide.min.js
 
 all: clean build
 
@@ -47,3 +49,6 @@ clean-js:
 
 distclean: clean
 	rm -fr $(REPO)/node_modules
+
+upload:
+	scp -r $(WAVED) $(STATIC) $(TEMPLATES) "ubuntu@gitgud.tv:waveguide"
