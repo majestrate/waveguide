@@ -90,7 +90,7 @@ UploadWidget.prototype.SetMessage = function(msg, cls)
 UploadWidget.prototype.Progress = function(progress)
 {
   var self = this;
-  self.SetMessage("uploading... "+(parseInt(progress*10)/10)+"%", "upload");
+  self.SetMessage("uploading... "+(parseInt(progress*1000)/10)+"%", "upload");
 };
 
 UploadWidget.prototype.Submit = function()
