@@ -20,6 +20,10 @@ var new_elem = function(tag, id, cl) {
   return e;
 };
 
+var new_span = function(id, cl) {
+  return new_elem("span", id, cl);
+};
+
 var new_div = function(id, cl) {
   return new_elem("div", id, cl);
 };
@@ -54,13 +58,46 @@ var new_form_file = function(id, cl) {
   return f;
 };
 
+var set_text = function(e, txt) {
+  var inner = new_elem("span");
+  inner.appendChild(document.createTextNode(txt));
+  while(e.children.length > 0)
+    e.firstChild.remove();
+  e.appendChild(inner);
+};
+
+const rates = ["B", "KB", "MB", "GB"];
+
+var fmt_rate = function(n) {
+  var idx = 0;
+  if(n <= 1024) {
+    n = (n * 10) / 10;
+  } else {
+    while(n > 1024) {
+      n /= 1024;
+      idx ++;
+    }
+  }
+  return n + " " +
+    rates[idx] + "/s";
+};
+
+var fmt_float = function(f, n) {
+  if (!n) n = 10;
+  return "" + ((f * n ) / n);
+};
+
 module.exports = {
   "get_id": get_id,
   "for_each_class": for_each_class,
   "div": new_div,
+  "span": new_span,
   "button": new_button,
   "form": new_form,
   "file": new_form_file,
   "submit": new_submit,
-  "input": new_input
+  "input": new_input,
+  "set_text": set_text,
+  "format_rate": fmt_rate,
+  "format_float": fmt_float
 };
