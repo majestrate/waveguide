@@ -16,6 +16,8 @@ Requirements:
 
 * rabbitmq
 
+* ffmpeg
+
 Building:
 
     $ make
