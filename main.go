@@ -16,13 +16,12 @@ func printUsage() {
 }
 
 func main() {
-	if len(os.Args) == 1 {
-		printUsage()
-		return
-	}
 	fmt.Printf("%s starting up", version.Version)
 	fmt.Println()
-	mode := strings.ToUpper(os.Args[1])
+	var mode string
+	if len(os.Args) > 1 {
+		mode = strings.ToUpper(os.Args[1])
+	}
 	switch mode {
 	case "FRONTEND":
 		frontend.Run()
@@ -31,6 +30,8 @@ func main() {
 	case "CDN":
 		cdn.Run()
 	default:
-		printUsage()
+		go frontend.Run()
+		go worker.Run()
+		cdn.Run()
 	}
 }

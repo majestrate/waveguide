@@ -37,6 +37,9 @@ func Run() {
 	}
 	os.Mkdir(cdn.rootdir, 0700)
 	addr := os.Getenv("ADDR")
+	if addr == "" {
+		addr = "127.0.0.1:48800"
+	}
 	listener, err := net.Listen("tcp", addr)
 	if err != nil {
 		log.Fatalf("%s", err.Error())

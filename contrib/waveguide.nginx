@@ -1,0 +1,22 @@
+
+server {
+       listen 80 static.yoursite.tld;
+       server_name static.yoursite.tld;
+
+       location / {
+                if ( $request_method = PUT ) {
+                   return 403;
+                }
+                proxy_pass http://127.0.0.1:48800/;
+       }
+}
+
+server {
+       listen 80;
+       server_name yoursite.tld;
+
+       location / {
+                client_max_body_size 100M;
+                proxy_pass http://127.0.0.1:28800/;
+       }
+}
