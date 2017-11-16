@@ -24,17 +24,15 @@ Building:
 
 copy `contrib/waveguide.ini` to `waveguide.ini`
 
-Run frontend server:
+**make sure to set your domains correctly in the config**
 
-    $ ./waveguided frontend
+Run it:
+
+    $ ./waveguided
     
-Run a worker daemon or as many instances as desired:
-    
-    $ ./waveguided worker
+and throw nginx in front:
 
-Run CDN Server:
-
-    $ ADDR=127.0.0.1:48800 ./waveguided cdn
+    # cp contrib/waveguide.nginx /etc/nginx/sites-enabled/waveguide
 
 
 ## project structure
