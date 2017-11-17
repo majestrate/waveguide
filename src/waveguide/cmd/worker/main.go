@@ -12,7 +12,6 @@ import (
 
 func Run() {
 	const configFname = "waveguide.ini"
-	log.SetLevel("debug")
 	var app Worker
 	var conf config.Config
 	err := conf.Load(configFname)

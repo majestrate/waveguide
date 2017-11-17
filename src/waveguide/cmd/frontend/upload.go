@@ -17,7 +17,7 @@ var ErrBadMediaType = errors.New("bad media type")
 var ErrBadContentType = errors.New("bad content type")
 var ErrNoWebseedFileName = errors.New("no title provided")
 
-func (r *Routes) HandleUpload(c *gin.Context) {
+func (r *Routes) ApiUpload(c *gin.Context) {
 	var err error
 	var videoURL string
 	u := r.GetCurrentUser(c)

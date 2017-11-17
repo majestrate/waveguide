@@ -77,7 +77,7 @@ func (r *Routes) ServeIndex(c *gin.Context) {
 		return
 	}
 	c.HTML(http.StatusOK, "index.html", map[string]interface{}{
-		"Videos": videos,
+		"Videos": videos.Videos,
 	})
 }
 
@@ -95,10 +95,6 @@ func (r *Routes) ServeVideo(c *gin.Context) {
 		}
 	}
 	r.NotFound(c)
-}
-
-func (r *Routes) ServeUser(c *gin.Context) {
-	// TODO: implement
 }
 
 func (r *Routes) ServeUpload(c *gin.Context) {

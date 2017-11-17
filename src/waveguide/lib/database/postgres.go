@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	_ "github.com/lib/pq"
+	"time"
 	"waveguide/lib/log"
 	"waveguide/lib/model"
 )
@@ -59,7 +60,10 @@ func (db *pgDB) GetFrontpageVideos() (list model.VideoList, err error) {
 		for rows.Next() {
 			var info model.VideoInfo
 			rows.Scan(&info.VideoID, &info.Title, &info.UploadedAt, &info.TorrentURL)
-			list = append(list, info)
+			list.Videos = append(list.Videos, info)
+			if list.LastUpdated.Unix() < info.UploadedAt {
+				list.LastUpdated = time.Unix(info.UploadedAt, 0)
+			}
 		}
 		rows.Close()
 	}
@@ -101,6 +105,33 @@ func (db *pgDB) GetVideoInfo(id int64) (info *model.VideoInfo, err error) {
 		}
 	} else {
 		info = nil
+	}
+	return
+}
+
+func (db *pgDB) GetUserByName(name string) (user *model.UserInfo, err error) {
+
+	return
+}
+
+func (db *pgDB) GetVideosForUserByName(name string) (list *model.VideoFeed, err error) {
+	var user *model.UserInfo
+	user, err = db.GetUserByName(name)
+	if err == nil {
+		var rows *sql.Rows
+		rows, err = db.conn.Query("SELECT video_id, video_name, video_description, video_upload_date, video_metainfo_url FROM videos WHERE video_uploader = $1", user.UserID)
+		if err == sql.ErrNoRows {
+			err = nil
+		} else if err == nil {
+			list = new(model.VideoFeed)
+			for rows.Next() {
+				var info model.VideoInfo
+				info.UserID = user.UserID
+				rows.Scan(&info.VideoID, &info.Title, &info.Description, &info.UploadedAt, &info.TorrentURL)
+				list.List.Videos = append(list.List.Videos, info)
+				list.Owner = user
+			}
+		}
 	}
 	return
 }
