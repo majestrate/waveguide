@@ -26,18 +26,11 @@ type AtomFeedEntry interface {
 	CreatedAt() time.Time
 }
 
-type AtomFeed struct {
+type atomFeedImpl struct {
 	Title    string          `xml:"title"`
 	SubTitle string          `xml:"subtitle"`
 	ID       string          `xml:"id"`
 	Link     Link            `xml:"link"`
 	Updated  time.Time       `xml:"updated"`
 	Entries  []AtomFeedEntry `xml:"entry"`
-}
-
-func (feed *AtomFeed) MarshalXML(e *xml.Encoder, start xml.StartElement) (err error) {
-	start.Name.Local = "feed"
-	start.Name.Space = "http://www.w3.org/2005/Atom"
-	err = e.EncodeElement(feed, start)
-	return
 }

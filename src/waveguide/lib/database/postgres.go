@@ -110,27 +110,35 @@ func (db *pgDB) GetVideoInfo(id int64) (info *model.VideoInfo, err error) {
 }
 
 func (db *pgDB) GetUserByName(name string) (user *model.UserInfo, err error) {
-
+	user = new(model.UserInfo)
+	err = db.conn.QueryRow("SELECT user_id, user_name FROM video_users WHERE user_name = $1", name).Scan(&user.UserID, &user.Name)
+	if err == sql.ErrNoRows {
+		user = nil
+		err = nil
+	} else if err != nil {
+		user = nil
+	}
 	return
 }
 
 func (db *pgDB) GetVideosForUserByName(name string) (list *model.VideoFeed, err error) {
 	var user *model.UserInfo
 	user, err = db.GetUserByName(name)
-	if err == nil {
+	if user != nil {
 		var rows *sql.Rows
 		rows, err = db.conn.Query("SELECT video_id, video_name, video_description, video_upload_date, video_metainfo_url FROM videos WHERE video_uploader = $1", user.UserID)
 		if err == sql.ErrNoRows {
 			err = nil
 		} else if err == nil {
 			list = new(model.VideoFeed)
+			list.Owner = user
 			for rows.Next() {
 				var info model.VideoInfo
 				info.UserID = user.UserID
 				rows.Scan(&info.VideoID, &info.Title, &info.Description, &info.UploadedAt, &info.TorrentURL)
 				list.List.Videos = append(list.List.Videos, info)
-				list.Owner = user
 			}
+			rows.Close()
 		}
 	}
 	return

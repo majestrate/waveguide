@@ -1,6 +1,7 @@
 package model
 
 import (
+	"encoding/xml"
 	"net/url"
 	"time"
 	"waveguide/lib/util"
@@ -33,7 +34,7 @@ func (feed *VideoFeed) ID() string {
 	return util.SHA256(feed.URL.String())
 }
 
-func (feed *VideoFeed) ToAtom() *AtomFeed {
+func (feed *VideoFeed) MarshalXML(e *xml.Encoder, start xml.StartElement) (err error) {
 
 	latest := time.Unix(0, 0)
 	for _, v := range feed.List.Videos {
@@ -44,13 +45,15 @@ func (feed *VideoFeed) ToAtom() *AtomFeed {
 	}
 
 	u := feed.URL
-
-	return &AtomFeed{
+	start.Name.Local = "feed"
+	start.Name.Space = "http://www.w3.org/2005/Atom"
+	err = e.EncodeElement(&atomFeedImpl{
 		Title:    feed.Title(),
 		SubTitle: feed.Title(),
 		Link:     NewLink(u.Host, u.RequestURI()),
 		ID:       feed.ID(),
 		Entries:  feed.Entries(),
 		Updated:  feed.List.LastUpdated,
-	}
+	}, start)
+	return
 }

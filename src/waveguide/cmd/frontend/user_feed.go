@@ -13,7 +13,7 @@ func (r *Routes) ServeUserVideosFeed(c *gin.Context) {
 			feed.URL, err = url.Parse(r.FrontendURL.String())
 			feed.URL.Path = c.Request.RequestURI
 			if err == nil {
-				c.XML(http.StatusOK, feed.ToAtom())
+				c.XML(http.StatusOK, feed)
 				return
 			}
 		}
