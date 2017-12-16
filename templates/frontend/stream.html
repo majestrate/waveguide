@@ -1,0 +1,10 @@
+{{define "stream.html"}}
+{{ template "header.html" }}
+<video id="cam" autoplay>
+</video>
+<div id="player">
+</div>
+username <input id="username"></input>
+<button onclick="window.guide.Streamer(document.getElementById('username').value)">stream</button>
+{{ template "footer.html" }}
+{{end}}

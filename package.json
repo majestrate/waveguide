@@ -6,12 +6,16 @@
   "license": "MIT",
   "dependencies": {
     "browserify": "^14.4.0",
+    "deamdify": "^0.3.0",
+    "deglobalify": "^0.2.0",
+    "es6ify": "^1.6.0",
     "jquery": "^3.2.1",
+    "supercop.wasm": "^4.1.0",
     "uglify-es": "^3.1.1",
     "webtorrent": "^0.98.19"
   },
   "scripts": {
-    "dist": "browserify js/main.js | uglifyjs > static/waveguide.min.js",
-    "no-mini": "browserify js/main.js > static/waveguide.min.js"
+    "dist": "browserify -t deamdify -t es6ify -t deglobalify js/main.js | uglifyjs > static/waveguide.min.js",
+    "no-mini": "browserify -t deamdify -t es6ify -t deglobalify js/main.js > static/waveguide.min.js"
   }
 }

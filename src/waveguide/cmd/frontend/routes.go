@@ -9,6 +9,7 @@ import (
 	"waveguide/lib/config"
 	"waveguide/lib/database"
 	"waveguide/lib/model"
+	"waveguide/lib/streaming"
 )
 
 type Routes struct {
@@ -16,6 +17,7 @@ type Routes struct {
 	api         *api.Client
 	FrontendURL *url.URL
 	TempDir     string
+	Streaming   *streaming.Context
 }
 
 func (r *Routes) Close() error {
@@ -25,6 +27,7 @@ func (r *Routes) Close() error {
 }
 
 func (r *Routes) Configure(c *config.Config) error {
+	r.Streaming = streaming.NewContext()
 	return r.configure(c, false)
 }
 

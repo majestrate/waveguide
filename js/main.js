@@ -1,5 +1,9 @@
-'use strict';
 
-window.WaveGuide = require("./waveguide.js").WaveGuide;
+const WaveGuide = require("./waveguide.js").WaveGuide;
+
+window.onload = function() {
+  window.guide = new WaveGuide();
+}
+
 
 
