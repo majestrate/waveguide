@@ -10,7 +10,6 @@
     "deglobalify": "^0.2.0",
     "es6ify": "^1.6.0",
     "jquery": "^3.2.1",
-    "supercop.wasm": "^4.1.0",
     "uglify-es": "^3.1.1",
     "webtorrent": "^0.98.19"
   },

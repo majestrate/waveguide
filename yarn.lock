@@ -1647,10 +1647,6 @@ subarg@^1.0.0:
   dependencies:
     minimist "^1.1.0"
 
-supercop.wasm@^4.1.0:
-  version "4.1.0"
-  resolved "https://registry.yarnpkg.com/supercop.wasm/-/supercop.wasm-4.1.0.tgz#58f861d405936bc4e8a848bd9ec2eedca6e96bf0"
-
 syntax-error@^1.1.1:
   version "1.3.0"
   resolved "https://registry.yarnpkg.com/syntax-error/-/syntax-error-1.3.0.tgz#1ed9266c4d40be75dc55bf9bb1cb77062bb96ca1"

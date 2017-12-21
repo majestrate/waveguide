@@ -9,7 +9,7 @@ function Streamer(source, key)
 {
   this._key = key || null;
   this._source = source;
-  this._rewind = 2;
+  this._rewind = 3;
   this._interval = null;
   this._segments = null;
   this._video = null;
@@ -57,18 +57,16 @@ Streamer.prototype._queueSegment = function(f)
   self._segments.push(f);
 };
 
-Streamer.prototype._popSegmentBlob = function(cb)
+Streamer.prototype._popSegmentBlob = function()
 {
   var self = this;
-  var seg = self._segments.pop();
+  var seg = self._segments.pop(0);
   if(seg)
   {
-    seg.getBlobURL(function(err, url) {
-      cb(err, url);
-    });
+    return seg;
   }
   else
-    cb(null, null);
+    return null;
 };
 
 Streamer.prototype._nextSegment = function(url)
@@ -80,24 +78,21 @@ Streamer.prototype._nextSegment = function(url)
     {
       console.log("add torrent "+tfile.infoHash);
       self.torrent.add(parse_torrent.toTorrentFile(tfile), function(t) {
-        self._queueSegment(t.files[0]);
+        t.files[0].getBlobURL(function(err, url) {
+          if(err) console.error(err);
+          else self._queueSegment(url);
+        });
         console.log(self._video.src);
         if (!self._video.src)
         {
           console.log("pop segment");
-          self._popSegmentBlob(function(err, blob) {
-            if(err) console.error(err);
-            else if(blob)
-            {
-              console.log(blob);
-              self._video.src = blob;
-              self._video.play();
-            }
-            else
-            {
-              console.log("no blob");
-            }
-          });
+          var blob = self._popSegmentBlob();
+          console.log(blob);
+          if(blob)
+          {
+            self._video.src = blob;
+            self._video.play();
+          }
         }   
       });
     }
@@ -117,20 +112,17 @@ Streamer.prototype._onStarted = function()
     self._video = util.get_id("player");
     var next = function() {
       console.log("pop next segment");
-      self._popSegmentBlob(function(err, blob) {
-        if(err) console.error(err);
-        else if(blob)
-        {
-          console.log("next()");
-          self._video.src = blob;
-          self._video.play();
-          self._video.onended = next;
-        }
-        else
-        {
-          console.log("no blob");
-        }
-      });
+      var blob = self._popSegmentBlob();
+      if(blob)
+      {
+        self._video.src = blob;
+        self._video.play();
+        self._video.onended = next;
+      }
+      else
+        setTimeout(function() {
+          next();
+        }, 1000);
     };
     self._video.onended = next;
     // self._video.onerror = next;
