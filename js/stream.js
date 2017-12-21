@@ -9,7 +9,7 @@ function Streamer(source, key)
 {
   this._key = key || null;
   this._source = source;
-  this._rewind = 5;
+  this._rewind = 2;
   this._interval = null;
   this._segments = null;
   this._video = null;
@@ -89,6 +89,7 @@ Streamer.prototype._nextSegment = function(url)
             if(err) console.error(err);
             else if(blob)
             {
+              console.log(blob);
               self._video.src = blob;
               self._video.play();
             }
@@ -114,17 +115,25 @@ Streamer.prototype._onStarted = function()
   if (self._key)
   {    
     self._video = util.get_id("player");
-    self._video.onended = function() {
+    var next = function() {
       console.log("pop next segment");
-      self._popSegmentBlob(function(err, url) {
+      self._popSegmentBlob(function(err, blob) {
         if(err) console.error(err);
+        else if(blob)
+        {
+          console.log("next()");
+          self._video.src = blob;
+          self._video.play();
+          self._video.onended = next;
+        }
         else
         {
-          self._video.src = url;
-          self._video.play();
+          console.log("no blob");
         }
       });
     };
+    self._video.onended = next;
+    // self._video.onerror = next;
     var url = location.protocol+"//"+location.host+"/wg-api/v1/stream/"+self._key;
     self._interval = setInterval(function() {
       self._nextSegment(url);
@@ -134,7 +143,7 @@ Streamer.prototype._onStarted = function()
   else
   {
     self._segmenter = new Segmenter(self._source);
-    self._segmenter.Begin(function(data) {
+    self._segmenterCB = function(data) {
       self.torrent.seed(data, function(t) {
         console.log("submit magnet: "+ t.magnetURI);
         var ajax = new XMLHttpRequest();
@@ -146,8 +155,10 @@ Streamer.prototype._onStarted = function()
         ajax.open("POST", "/wg-api/v1/authed/stream-update");
         ajax.send(t.torrentFile);
         self.Cleanup();
+        self._segmenter.Begin(self._segmenterCB);
       });
-    });
+    };
+    self._segmenter.Begin(self._segmenterCB);
   }
 };
 
