@@ -57,24 +57,49 @@ Streamer.prototype._queueSegment = function(f)
   self._segments.push(f);
 };
 
-Streamer.prototype._popSegmentBlob = function()
+Streamer.prototype._popSegmentBlob = function(cb)
 {
   var self = this;
   var seg = self._segments.pop();
-  if(seg) return seg.getBlobURL();
-  return null;
+  if(seg)
+  {
+    seg.getBlobURL(function(err, url) {
+      cb(err, url);
+    });
+  }
+  else
+    cb(null, null);
 };
 
 Streamer.prototype._nextSegment = function(url)
 {
   var self = this;
-  self.torrent.add(url, function(t) {
-    self._queueSegment(t.files[0]);
-    if (!self._video.src)
+  parse_torrent.remote(url, function(err, tfile) {
+    if(err) console.log(err);
+    else if (!self.torrent.get(tfile.infoHash))
     {
-      self._video.src = self._popSegmentBlob();
-      self._video.play();
-    } 
+      console.log("add torrent "+tfile.infoHash);
+      self.torrent.add(parse_torrent.toTorrentFile(tfile), function(t) {
+        self._queueSegment(t.files[0]);
+        console.log(self._video.src);
+        if (!self._video.src)
+        {
+          console.log("pop segment");
+          self._popSegmentBlob(function(err, blob) {
+            if(err) console.error(err);
+            else if(blob)
+            {
+              self._video.src = blob;
+              self._video.play();
+            }
+            else
+            {
+              console.log("no blob");
+            }
+          });
+        }   
+      });
+    }
   });
   self.Cleanup();
 };
@@ -91,12 +116,20 @@ Streamer.prototype._onStarted = function()
     self._video = util.get_id("player");
     self._video.onended = function() {
       console.log("pop next segment");
-      self._video.src = self._popSegmentBlob();
-      self._video.play();
+      self._popSegmentBlob(function(err, url) {
+        if(err) console.error(err);
+        else
+        {
+          self._video.src = url;
+          self._video.play();
+        }
+      });
     };
+    var url = location.protocol+"//"+location.host+"/wg-api/v1/stream/"+self._key;
     self._interval = setInterval(function() {
-      self._nextSegment(location.protocol+"//"+location.host+"/wg-api/v1/stream/"+self._key);
+      self._nextSegment(url);
     }, 10000);
+    self._nextSegment(url);
   }
   else
   {
