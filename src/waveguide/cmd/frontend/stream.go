@@ -15,16 +15,16 @@ func (r *Routes) ServeStream(c *gin.Context) {
 }
 
 func (r *Routes) ApiStreamMagnets(c *gin.Context) {
-	var magnets []string
+	magnet := ""
 	status := http.StatusNotFound
 	key := c.GetInt64("UserID")
 
 	stream := r.Streaming.Find(key)
 	if stream != nil {
-		magnets = append(magnets, stream.Magnets...)
 		status = http.StatusOK
+		magnet = stream.LastMagnet()
 	}
-	c.AbortWithStatusJSON(status, magnets)
+	c.String(status, magnet)
 }
 
 func (r *Routes) ApiStreamUpdate(c *gin.Context) {

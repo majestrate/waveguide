@@ -21,7 +21,7 @@ Segmenter.prototype.Begin = function(cb)
 {
   var self = this;
   try {
-    self._collector = new MediaRecorder(self._source, {mimeType: "video/webm"});
+    self._collector = new MediaRecorder(self._source, {mimeType: "video/x-matroska;codecs=avc1"});
   } catch ( ex ) {
     console.error("failed to begin capture: " + ex);
   }
@@ -30,7 +30,7 @@ Segmenter.prototype.Begin = function(cb)
     console.log("starting...");
     self._collector.ondataavailable = function(ev) {
       console.log("got chunk of size "+ev.data.size);
-      ev.data.name = "segment.webm";
+      ev.data.name = "segment.m4v";
       cb(ev.data);
     };
     self._collector.start(1000 * 30);

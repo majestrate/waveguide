@@ -20,8 +20,9 @@
     {{ end }}
   </tbody>
 </table>
-<script type="text/javascript">
-  var guide = new window.WaveGuide();
+<video id="player" autoplay controls></video>
+<script>
+  setTimeout(function() { window.guide.Streamer("0"); }, 1000);
 </script>
 {{ template "footer.html" }}
 {{end}}
