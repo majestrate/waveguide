@@ -20,13 +20,12 @@ Segmenter.prototype.Stop = function()
   }
 }
 
-Segmenter.prototype.MakeData = function(ev)
+Segmenter.prototype.MakeData = function(ev, cb)
 {
   var self = this;
-  self._collector.stop();
   console.log("got chunk of size "+ev.data.size);
   ev.data.name = "segment" + settings.SegExt;
-  self.cb(ev.data);
+  cb(ev.data);
 };
 
 Segmenter.prototype.Begin = function(cb)
@@ -35,7 +34,10 @@ Segmenter.prototype.Begin = function(cb)
   self._collector = new MediaRecorder(self._source, {mimeType: settings.SegMime});
   console.log("starting...");
   self.cb = cb;
-  self._collector.ondataavailable = self.MakeData;
+  self._collector.ondataavailable = function(ev) {
+    self._collector.stop();
+    self.MakeData(ev, cb);
+  };
   self._collector.start(settings.SegLen);
 };
 

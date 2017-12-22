@@ -14,6 +14,7 @@ function Streamer(source, key)
   this._interval = null;
   this._segments = null;
   this._video = null;
+  this.torrent = new WebTorrent();
   if(source)
     util.get_id("cam").src = window.URL.createObjectURL(source);
   else
@@ -23,7 +24,6 @@ function Streamer(source, key)
 Streamer.prototype.Start = function()
 {
   var self = this;
-  self.torrent = new WebTorrent();
   self._onStarted();
 };
 
@@ -84,7 +84,7 @@ Streamer.prototype._nextSegment = function(url)
           else self._queueSegment(url);
         });
         console.log(self._video.src);
-        if (!self._video.src)
+        if (self._video.src === settings.SegPlaceholder)
         {
           console.log("pop segment");
           var blob = self._popSegmentBlob();
@@ -102,23 +102,27 @@ Streamer.prototype._nextSegment = function(url)
   self.Cleanup();
 };
 
-Streamer.BWLabel = function(upload, download)
+Streamer.prototype.BWLabel = function(upload, download)
 {
   var e = util.get_id("tx");
-  e.innerHTML = "Upload: " + util.fmt_rate(upload);
+  if(e)
+    e.innerHTML = "Upload: " + util.format_rate(upload);
   e = util.get_id("rx");
-  e.innerHTML = "Download: " + util.fmt_rate(download);
+  if(e)
+    e.innerHTML = "Download: " + util.format_rate(download);
 };
 
-Streamer.PeersLabel = function(peers)
+Streamer.prototype.PeersLabel = function(peers)
 {
   var e = util.get_id("peers");
-  e.innerHTML = "Viewers: "+peers;
+  if(e)
+    e.innerHTML = "Viewers: "+peers;
 };
 
-Streamer.prototype._segmenterCB = function(data)
+Streamer.prototype._segmenterCB = function(torrent, data)
 {
-  self.torrent.seed(data, function(t) {
+  var self = this;
+  torrent.seed(data, function(t) {
     console.log("submit magnet: "+ t.magnetURI);
     var ajax = new XMLHttpRequest();
     ajax.onreadystatechange = function() {
@@ -129,7 +133,9 @@ Streamer.prototype._segmenterCB = function(data)
     ajax.open("POST", "/wg-api/v1/authed/stream-update");
     ajax.send(t.torrentFile);
     self.Cleanup();
-    self._segmenter.Begin(self._segmenterCB);
+    self._segmenter.Begin(function(data) {
+      self._segmenterCB(torrent, data);
+    });
   });
 };
 
@@ -139,7 +145,6 @@ Streamer.prototype._onStarted = function()
   
   setInterval(function() {
     self.BWLabel(self.torrent.uploadSpeed, self.torrent.downloadSpeed);
-    self.PeersLabel(self.torrent.numPeers);
   }, 1000);
   if (self._key)
   {    
@@ -172,7 +177,9 @@ Streamer.prototype._onStarted = function()
   else
   {
     self._segmenter = new Segmenter(self._source);
-    self._segmenter.Begin(self._segmenterCB);
+    self._segmenter.Begin(function(data) {
+      self._segmenterCB(self.torrent, data);
+    });
   }
 };
 

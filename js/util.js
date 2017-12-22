@@ -67,6 +67,10 @@ var set_text = function(e, txt) {
 };
 
 const rates = ["B", "KB", "MB", "GB"];
+var fmt_float = function(f, n) {
+  if (!n) n = 10;
+  return "" + ((f * n ) / n);
+};
 
 var fmt_rate = function(n) {
   var idx = 0;
@@ -78,13 +82,8 @@ var fmt_rate = function(n) {
       idx ++;
     }
   }
-  return n + " " +
+  return fmt_float(n) + " " +
     rates[idx] + "/s";
-};
-
-var fmt_float = function(f, n) {
-  if (!n) n = 10;
-  return "" + ((f * n ) / n);
 };
 
 module.exports = {

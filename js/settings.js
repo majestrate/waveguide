@@ -1,11 +1,11 @@
 /** settings.js */
 
 
-const SegmentLength = 30;
+const SegmentLength = 30 * 1000;
 const RefreshInterval = SegmentLength / 4;
-const SegMime = "video/x-matroska;codecs=avc1";
-const SegExt = ".m4v";
-const SegPlaceholder = "/static/waiting" + SegExt;
+const SegMime = "video/webm;codecs=vp8";
+const SegExt = ".webm";
+const SegPlaceholder = "https://"+location.host+"/static/loading" + SegExt;
 
 module.exports = {
   SegLen: SegmentLength,
