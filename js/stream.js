@@ -4,6 +4,7 @@ const WebTorrent = require("webtorrent");
 const Segmenter = require("./segment.js").Segmenter;
 const util = require("./util.js");
 const parse_torrent = require('parse-torrent');
+const settings = require("./settings.js");
 
 function Streamer(source, key)
 {
@@ -90,6 +91,7 @@ Streamer.prototype._nextSegment = function(url)
           console.log(blob);
           if(blob)
           {
+            self._video.loop = false;
             self._video.src = blob;
             self._video.play();
           }
@@ -100,21 +102,57 @@ Streamer.prototype._nextSegment = function(url)
   self.Cleanup();
 };
 
+Streamer.BWLabel = function(upload, download)
+{
+  var e = util.get_id("tx");
+  e.innerHTML = "Upload: " + util.fmt_rate(upload);
+  e = util.get_id("rx");
+  e.innerHTML = "Download: " + util.fmt_rate(download);
+};
+
+Streamer.PeersLabel = function(peers)
+{
+  var e = util.get_id("peers");
+  e.innerHTML = "Viewers: "+peers;
+};
+
+Streamer.prototype._segmenterCB = function(data)
+{
+  self.torrent.seed(data, function(t) {
+    console.log("submit magnet: "+ t.magnetURI);
+    var ajax = new XMLHttpRequest();
+    ajax.onreadystatechange = function() {
+      if (ajax.readyState == 4 && ajax.status != 200) {
+        self.Stop();
+      }
+    };
+    ajax.open("POST", "/wg-api/v1/authed/stream-update");
+    ajax.send(t.torrentFile);
+    self.Cleanup();
+    self._segmenter.Begin(self._segmenterCB);
+  });
+};
+
 Streamer.prototype._onStarted = function()
 {
   var self = this;
   
   setInterval(function() {
-    console.log(self.torrent.uploadSpeed, self.torrent.downloadSpeed);
+    self.BWLabel(self.torrent.uploadSpeed, self.torrent.downloadSpeed);
+    self.PeersLabel(self.torrent.numPeers);
   }, 1000);
   if (self._key)
   {    
     self._video = util.get_id("player");
+    self._video.src = settings.SegPlaceholder;
+    self._video.loop = true;
+    self._video.play();
     var next = function() {
       console.log("pop next segment");
       var blob = self._popSegmentBlob();
       if(blob)
       {
+        self._video.loop = false;
         self._video.src = blob;
         self._video.play();
         self._video.onended = next;
@@ -125,8 +163,7 @@ Streamer.prototype._onStarted = function()
         }, 1000);
     };
     self._video.onended = next;
-    // self._video.onerror = next;
-    var url = location.protocol+"//"+location.host+"/wg-api/v1/stream/"+self._key;
+    var url = "https://"+location.host+"/wg-api/v1/stream/"+self._key;
     self._interval = setInterval(function() {
       self._nextSegment(url);
     }, 10000);
@@ -135,21 +172,6 @@ Streamer.prototype._onStarted = function()
   else
   {
     self._segmenter = new Segmenter(self._source);
-    self._segmenterCB = function(data) {
-      self.torrent.seed(data, function(t) {
-        console.log("submit magnet: "+ t.magnetURI);
-        var ajax = new XMLHttpRequest();
-        ajax.onreadystatechange = function() {
-          if (ajax.readyState == 4 && ajax.status != 200) {
-            self.Stop();
-          }
-        };
-        ajax.open("POST", "/wg-api/v1/authed/stream-update");
-        ajax.send(t.torrentFile);
-        self.Cleanup();
-        self._segmenter.Begin(self._segmenterCB);
-      });
-    };
     self._segmenter.Begin(self._segmenterCB);
   }
 };

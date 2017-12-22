@@ -1,6 +1,7 @@
 /** segment.js */
 
 var Buffer = require("buffer").Buffer;
+var settings = require("./settings.js");
 
 function Segmenter(source)
 {
@@ -19,19 +20,23 @@ Segmenter.prototype.Stop = function()
   }
 }
 
+Segmenter.prototype.MakeData = function(ev)
+{
+  var self = this;
+  self._collector.stop();
+  console.log("got chunk of size "+ev.data.size);
+  ev.data.name = "segment" + settings.SegExt;
+  self.cb(ev.data);
+};
+
 Segmenter.prototype.Begin = function(cb)
 {
   var self = this;
-  self._collector = new MediaRecorder(self._source, {mimeType: "video/webm"});
+  self._collector = new MediaRecorder(self._source, {mimeType: settings.SegMime});
   console.log("starting...");
-  var c = function(ev) {
-    console.log("got chunk of size "+ev.data.size);
-    ev.data.name = "segment.webm";
-    self._collector.stop();
-    cb(ev.data);
-  };
-  self._collector.ondataavailable = c;
-  self._collector.start(1000 * 30);
+  self.cb = cb;
+  self._collector.ondataavailable = self.MakeData;
+  self._collector.start(settings.SegLen);
 };
 
 module.exports = {
