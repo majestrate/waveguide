@@ -1,6 +1,6 @@
 {{define "index.html"}}
 {{ template "header.html" }}
-<!-- <a href="/upload/"><h3>Upload Video</h3></a> -->
+<!-- <a href="/upload/"><h3>Upload Video</h3></a> 
 <h3> Recent Uploads </h3>
 <table>
   <thead>
@@ -19,8 +19,13 @@
     </tr>
     {{ end }}
   </tbody>
-</table>
-<video id="player" controls></video>
+</table> -->
+<video id="player" controls=controls></video>
+<div> 
+  <span id="rx"></span>
+  <span id="tx"></span>
+</div>
+<div id="peers"></div>
 <script>
   setTimeout(function() { window.guide.Streamer("0"); }, 1000);
 </script>
