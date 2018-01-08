@@ -31,7 +31,7 @@ Segmenter.prototype.MakeData = function(ev, cb)
 Segmenter.prototype.Begin = function(cb)
 {
   var self = this;
-  self._collector = new MediaRecorder(self._source, {mimeType: settings.SegMime, videoBitsPerSecond: settings.SegBitrate});
+  self._collector = new MediaRecorder(self._source, {mimeType: settings.SegMime, bitsPerSecond: settings.SegBitrate});
   console.log("starting...");
   self.cb = cb;
   self._collector.ondataavailable = function(ev) {
