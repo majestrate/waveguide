@@ -104,9 +104,9 @@ Streamer.prototype._nextSegment = function(url)
         {
           self.log("pop segment");
           var blob = self._popSegmentBlob();
-          self.log("got segment: "+blob);
           if(blob)
           {
+            self.log("got segment: "+blob);
             self._video.loop = false;
             self._video.src = blob;
             self._video.play();
@@ -194,7 +194,7 @@ Streamer.prototype._onStarted = function()
     var url = "https://"+location.host+"/wg-api/v1/stream/"+self._key;
     self._interval = setInterval(function() {
       self._nextSegment(url);
-    }, 10000);
+    }, 2500);
     self._nextSegment(url);
   }
   else
