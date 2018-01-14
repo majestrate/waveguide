@@ -180,9 +180,10 @@ Streamer.prototype._onStarted = function()
   if (util.isAndroid())
   {
     var playbutton = util.button();
-    playbutton.innerHTML = "play video";
-    playbutton.onclicked = function(ev) {
+    playbutton.value = "play video";
+    playbutton.onclick = function(ev) {
       self._video.play();
+      self.log("play pressed");
     };
     document.body.appendChild(playbutton);
   }
