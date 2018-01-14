@@ -82,7 +82,7 @@ var fmt_rate = function(n) {
       idx ++;
     }
   }
-  return fmt_float(n) + " " +
+  return fmt_float(Math.floor(n), 100) + " " +
     rates[idx] + "/s";
 };
 
