@@ -161,7 +161,12 @@ Streamer.prototype._onStarted = function()
   
   setInterval(function() {
     self.BWLabel(self.torrent.uploadSpeed, self.torrent.downloadSpeed);
-    self.PeersLabel(self.torrent.numPeers || 0);
+    var numPeers = 0;
+    for(var idx = 0 ; idx < self.torrent.torrents.length; idx ++)
+    {
+      numPeers += self.torrent.torrents[idx].numPeers || 0;
+    }
+    self.PeersLabel(numPeers);
   }, 1000);
   if (self._key)
   {    
