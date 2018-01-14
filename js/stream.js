@@ -166,6 +166,8 @@ Streamer.prototype._onStarted = function()
     {
       numPeers += self.torrent.torrents[idx].numPeers || 0;
     }
+    if(self.torrent.torrents.length)
+      numPeers /= self.torrent.torrents.length;
     self.PeersLabel(numPeers);
   }, 1000);
   if (self._key)
