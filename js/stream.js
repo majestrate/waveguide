@@ -108,7 +108,7 @@ Streamer.prototype._nextSegment = function(url)
           {
             self._video.loop = false;
             self._video.src = blob;
-            /* self._video.play(); */
+            self._video.play();
           }
         }   
       });
