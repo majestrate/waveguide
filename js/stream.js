@@ -34,6 +34,7 @@ Streamer.prototype.log = function(msg)
   if(self._logelem)
   {
     var e = util.span();
+    msg += "\n";
     e.appendChild(document.createTextNode(msg));
     self._logelem.appendChild(e);
     while(self._logelem.children.length > 10)
