@@ -177,6 +177,15 @@ Streamer.prototype._onStarted = function()
     self.log("no webrtc support this stream will not work D:");
     return;
   }
+  if (util.isAndroid())
+  {
+    var playbutton = util.button();
+    playbutton.innerHTML = "play video";
+    playbutton.onclicked = function(ev) {
+      self._video.play();
+    };
+    document.body.appendChild(playbutton);
+  }
   setInterval(function() {
     self.BWLabel(self.torrent.uploadSpeed, self.torrent.downloadSpeed);
     var numPeers = 0;
