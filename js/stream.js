@@ -158,7 +158,12 @@ Streamer.prototype._segmenterCB = function(torrent, data)
 Streamer.prototype._onStarted = function()
 {
   var self = this;
-  
+
+  if(!WebTorrent.WEBRTC_SUPPORT)
+  {
+    self.log("no webrtc support this stream will not work D:");
+    return;
+  }
   setInterval(function() {
     self.BWLabel(self.torrent.uploadSpeed, self.torrent.downloadSpeed);
     var numPeers = 0;
