@@ -132,7 +132,7 @@ Streamer.prototype.PeersLabel = function(peers)
 {
   var e = util.get_id("peers");
   if(e)
-    e.innerHTML = "Viewers: "+peers;
+    e.innerHTML = "Active Peers: "+peers;
 };
 
 Streamer.prototype._segmenterCB = function(torrent, data)
