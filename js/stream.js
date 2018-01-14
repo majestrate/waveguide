@@ -87,7 +87,7 @@ Streamer.prototype._popSegmentBlob = function()
     return null;
 };
 
-Streamer.prototype._nextSegment = function(url)
+Streamer.prototype._nextSegment = function(url, tick)
 {
   var self = this;
   parse_torrent.remote(url, function(err, tfile) {
@@ -115,6 +115,7 @@ Streamer.prototype._nextSegment = function(url)
       });
     }
   });
+  if(tick) tick();
   self.Cleanup();
 };
 
@@ -193,9 +194,9 @@ Streamer.prototype._onStarted = function()
     self._video.onended = next;
     var url = "https://"+location.host+"/wg-api/v1/stream/"+self._key;
     self._interval = setInterval(function() {
-      self._nextSegment(url);
+      self._nextSegment(url, next);
     }, 2500);
-    self._nextSegment(url);
+    self._nextSegment(url, next);
   }
   else
   {
