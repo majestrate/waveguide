@@ -33,7 +33,9 @@ Streamer.prototype.log = function(msg)
   var self = this;
   if(self._logelem)
   {
-    self._logelem.appendChild(document.createTextNode(msg+"\n"));
+    var e = util.span();
+    e.appendChild(document.createTextNode(msg));
+    self._logelem.appendChild(e);
     while(self._logelem.children.length > 10)
     {
       self._logelem.removeChild(self._logelem.firstChild);
