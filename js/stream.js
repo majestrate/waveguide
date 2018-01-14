@@ -91,7 +91,7 @@ Streamer.prototype._nextSegment = function(url)
 {
   var self = this;
   parse_torrent.remote(url, function(err, tfile) {
-    if(err) self.log(err);
+    if(err) self.log("no stream online");
     else if (!self.torrent.get(tfile.infoHash))
     {
       self.log("add torrent "+tfile.infoHash);
