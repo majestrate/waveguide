@@ -14,6 +14,7 @@ function Streamer(source, key)
   this._interval = null;
   this._segments = null;
   this._video = null;
+  this._logelem = util.get_id("log");
   this.torrent = new WebTorrent();
   if(source)
     util.get_id("cam").src = window.URL.createObjectURL(source);
@@ -27,10 +28,23 @@ Streamer.prototype.Start = function()
   self._onStarted();
 };
 
+Streamer.prototype.log = function(msg)
+{
+  var self = this;
+  if(self._logelem)
+  {
+    self._logelem.appendChild(document.createTextNode(msg+"\n"));
+    while(self._logelem.children.length > 10)
+    {
+      self._logelem.removeChild(self._logelem.firstChild);
+    }
+  }
+};
+
 Streamer.prototype.Cleanup = function()
 {
   var self = this;
-  console.log("cleanup torrents");
+  self.log("cleanup torrents");
   var torrents = self.torrent.torrents;
   while(torrents.length > self._rewind)
   {
@@ -38,8 +52,8 @@ Streamer.prototype.Cleanup = function()
     torrents.pop();
     if(ih) {
       self.torrent.remove(ih, function(err) {
-        if(err) console.error("failed to remove torrent: "+err);
-        else console.log("removed torrent: "+ih);
+        if(err) self.log("failed to remove torrent: "+err);
+        else self.log("removed torrent: "+ih);
       });
     }
   }
@@ -74,26 +88,25 @@ Streamer.prototype._nextSegment = function(url)
 {
   var self = this;
   parse_torrent.remote(url, function(err, tfile) {
-    if(err) console.log(err);
+    if(err) self.log(err);
     else if (!self.torrent.get(tfile.infoHash))
     {
-      console.log("add torrent "+tfile.infoHash);
+      self.log("add torrent "+tfile.infoHash);
       self.torrent.add(parse_torrent.toTorrentFile(tfile), function(t) {
         t.files[0].getBlobURL(function(err, url) {
-          if(err) console.error(err);
+          if(err) self.log(err);
           else self._queueSegment(url);
         });
-        console.log(self._video.src);
         if (self._video.src === settings.SegPlaceholder)
         {
-          console.log("pop segment");
+          self.log("pop segment");
           var blob = self._popSegmentBlob();
-          console.log(blob);
+          self.log("got segment: "+blob);
           if(blob)
           {
             self._video.loop = false;
             self._video.src = blob;
-            self._video.play();
+            /* self._video.play(); */
           }
         }   
       });
@@ -123,7 +136,7 @@ Streamer.prototype._segmenterCB = function(torrent, data)
 {
   var self = this;
   torrent.seed(data, function(t) {
-    console.log("submit magnet: "+ t.magnetURI);
+    self.log("submit magnet: "+ t.magnetURI);
     var ajax = new XMLHttpRequest();
     ajax.onreadystatechange = function() {
       if (ajax.readyState == 4 && ajax.status != 200) {
@@ -153,13 +166,13 @@ Streamer.prototype._onStarted = function()
     self._video.loop = true;
     self._video.play();
     var next = function() {
-      console.log("pop next segment");
       var blob = self._popSegmentBlob();
       if(blob)
       {
+        self.log("popped next segment");
         self._video.loop = false;
         self._video.src = blob;
-        self._video.play();
+        /** self._video.play(); */
         self._video.onended = next;
       }
       else

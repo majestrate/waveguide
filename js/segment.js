@@ -23,7 +23,7 @@ Segmenter.prototype.Stop = function()
 Segmenter.prototype.MakeData = function(ev, cb)
 {
   var self = this;
-  console.log("got chunk of size "+ev.data.size);
+  //console.log("got chunk of size "+ev.data.size);
   ev.data.name = "segment" + settings.SegExt;
   cb(ev.data);
 };
@@ -32,7 +32,7 @@ Segmenter.prototype.Begin = function(cb)
 {
   var self = this;
   self._collector = new MediaRecorder(self._source, {mimeType: settings.SegMime, bitsPerSecond: settings.SegBitrate});
-  console.log("starting...");
+  //console.log("starting...");
   self.cb = cb;
   self._collector.ondataavailable = function(ev) {
     self._collector.stop();
