@@ -4,5 +4,7 @@
 </video>
 username <input id="username"></input>
 <button onclick="window.guide.Streamer(document.getElementById('username').value)">stream</button>
+{{ template "stats.html" }}
+{{ template "log.html" }}
 {{ template "footer.html" }}
 {{end}}

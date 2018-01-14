@@ -1,11 +1,7 @@
 {{define "player.html"}}
 <div class="videoplayer">
   <video id="player"></video>
-  <div id="bw"> 
-    <span id="rx"></span>
-    <span id="tx"></span>
-  </div>
-  <div id="peers"></div>
-  <pre id="log"></pre>
+  {{ template "stats.html" }}
+  {{ template "log.html" }}
 </div>
 {{end}}
