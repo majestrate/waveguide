@@ -160,6 +160,7 @@ Streamer.prototype._onStarted = function()
   
   setInterval(function() {
     self.BWLabel(self.torrent.uploadSpeed, self.torrent.downloadSpeed);
+    self.PeersLabel(self.torrent.numPeers || 0);
   }, 1000);
   if (self._key)
   {    
@@ -174,7 +175,7 @@ Streamer.prototype._onStarted = function()
         self.log("popped next segment");
         self._video.loop = false;
         self._video.src = blob;
-        /** self._video.play(); */
+        self._video.play();
         self._video.onended = next;
       }
       else
