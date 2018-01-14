@@ -112,10 +112,23 @@ Streamer.prototype._nextSegment = function(url)
       self.log("got segment: "+blob);
       self._video.loop = false;
       self._video.src = blob;
-      self._video.play();
+      self._playVideo();
     }
   }
   self.Cleanup();
+};
+
+
+
+Streamer.prototype._playVideo = function()
+{
+  var self = this;
+  if (self._video)
+  {
+    if (util.isAndroid())
+      return;
+    self._video.play();
+  }
 };
 
 Streamer.prototype.BWLabel = function(upload, download)
@@ -179,7 +192,7 @@ Streamer.prototype._onStarted = function()
     self._video = util.get_id("player");
     self._video.src = settings.SegPlaceholder;
     self._video.loop = true;
-    self._video.play();
+    self._playVideo();
     var next = function() {
       var blob = self._popSegmentBlob();
       if(blob)
@@ -187,7 +200,7 @@ Streamer.prototype._onStarted = function()
         self.log("popped next segment");
         self._video.loop = false;
         self._video.src = blob;
-        self._video.play();
+        self._playVideo();
         self._video.onended = next;
       }
       else

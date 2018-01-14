@@ -86,6 +86,10 @@ var fmt_rate = function(n) {
     rates[idx] + "/s";
 };
 
+var is_android = function() {
+  return navigator.userAgent.indexOf("Android") >= 0;
+};
+
 module.exports = {
   "get_id": get_id,
   "for_each_class": for_each_class,
@@ -98,5 +102,6 @@ module.exports = {
   "input": new_input,
   "set_text": set_text,
   "format_rate": fmt_rate,
-  "format_float": fmt_float
+  "format_float": fmt_float,
+  "isAndroid": is_android
 };
