@@ -6,7 +6,7 @@ const RefreshInterval = SegmentLength / 4;
 const SegMime = "video/webm;codecs=vp8";
 const SegExt = ".webm";
 const SegPlaceholder = "https://"+location.host+"/static/loading" + SegExt;
-const SegBitrate = 50000;
+const SegBitrate = 500000;
 
 module.exports = {
   SegLen: SegmentLength,
