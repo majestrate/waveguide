@@ -87,7 +87,7 @@ Streamer.prototype._popSegmentBlob = function()
     return null;
 };
 
-Streamer.prototype._nextSegment = function(url, tick)
+Streamer.prototype._nextSegment = function(url)
 {
   var self = this;
   parse_torrent.remote(url, function(err, tfile) {
@@ -100,22 +100,21 @@ Streamer.prototype._nextSegment = function(url, tick)
           if(err) self.log(err);
           else self._queueSegment(url);
         });
-        if (self._video.src === settings.SegPlaceholder)
-        {
-          self.log("pop segment");
-          var blob = self._popSegmentBlob();
-          if(blob)
-          {
-            self.log("got segment: "+blob);
-            self._video.loop = false;
-            self._video.src = blob;
-            self._video.play();
-          }
-        }   
       });
     }
   });
-  if(tick) tick();
+  if (self._video.src === settings.SegPlaceholder)
+  {
+    self.log("pop segment");
+    var blob = self._popSegmentBlob();
+    if(blob)
+    {
+      self.log("got segment: "+blob);
+      self._video.loop = false;
+      self._video.src = blob;
+      self._video.play();
+    }
+  }
   self.Cleanup();
 };
 
@@ -194,9 +193,9 @@ Streamer.prototype._onStarted = function()
     self._video.onended = next;
     var url = "https://"+location.host+"/wg-api/v1/stream/"+self._key;
     self._interval = setInterval(function() {
-      self._nextSegment(url, next);
+      self._nextSegment(url);
     }, 2500);
-    self._nextSegment(url, next);
+    self._nextSegment(url);
   }
   else
   {
