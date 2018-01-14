@@ -164,12 +164,10 @@ Streamer.prototype._onStarted = function()
     var numPeers = 0;
     for(var idx = 0 ; idx < self.torrent.torrents.length; idx ++)
     {
-      numPeers += self.torrent.torrents[idx].numPeers || 0;
+      var peers = self.torrent.torrents[idx].numPeers || 0;
+      if(numPeers < peers) numPeers = peers;
     }
-    if(self.torrent.torrents.length)
-      numPeers /= self.torrent.torrents.length;
-    numPeers = Math.floor(numPeers);
-    self.PeersLabel(numPeers || 1);
+    self.PeersLabel(numPeers);
   }, 1000);
   if (self._key)
   {    
