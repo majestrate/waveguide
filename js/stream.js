@@ -139,7 +139,7 @@ Streamer.prototype._segmenterCB = function(torrent, data)
 {
   var self = this;
   torrent.seed(data, function(t) {
-    self.log("submit magnet: "+ t.magnetURI);
+    self.log("submit torrent: "+ t.infoHash);
     var ajax = new XMLHttpRequest();
     ajax.onreadystatechange = function() {
       if (ajax.readyState == 4 && ajax.status != 200) {
