@@ -4,7 +4,6 @@ const util = require("./util.js");
 const upload = require("./upload.js");
 const player = require("./player.js");
 const stream = require("./stream.js");
-const cam = require("./cam.js");
 
 function WaveGuide()
 {
@@ -41,15 +40,11 @@ WaveGuide.prototype.Streamer = function(pubkey)
   else
   {
     console.log("asking for cam");
-    cam.getCam(function(err, src) {
-      if(err) throw err;
-      if(src)
-      {
-        console.log("Got stream");
-        self._stream = new stream.Streamer(src)
-        self._stream.Start();
-      }
-    });
+    navigator.mediaDevices.getUserMedia({video: true, audio:true}).then(function(st) {
+      console.log("Got stream");
+      self._stream = new stream.Streamer(st)
+      self._stream.Start();
+    }).catch(function(e) { console.log("failed to grab cam: "+e);} );
   }
 };
 
