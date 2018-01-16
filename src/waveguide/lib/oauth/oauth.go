@@ -22,7 +22,7 @@ func (c *Client) AuthURL(callback string) string {
 }
 
 func (c *Client) GetUser(code, callback string) (user *User, err error) {
-	var postdata url.Values
+	postdata := make(url.Values)
 	postdata.Set("client_id", c.conf.ClientID)
 	postdata.Set("client_secret", c.conf.ClientSecret)
 	postdata.Set("grant_type", "authorization_code")
