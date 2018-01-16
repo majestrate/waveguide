@@ -91,7 +91,14 @@ Streamer.prototype._nextSegment = function(url)
 {
   var self = this;
   parse_torrent.remote(url, function(err, tfile) {
-    if(err) self.log("no stream online");
+    if(err)
+    {
+      self.log("no stream online");
+      if(!(self._video.src === settings.SegOffline))
+      {
+        self._video.src = settings.SegOffline;
+      }
+    }
     else if (!self.torrent.get(tfile.infoHash))
     {
       self.log("add torrent "+tfile.infoHash);
@@ -105,7 +112,6 @@ Streamer.prototype._nextSegment = function(url)
   });
   if (self._video.src === settings.SegPlaceholder)
   {
-    self.log("pop segment");
     var blob = self._popSegmentBlob();
     if(blob)
     {
@@ -114,6 +120,8 @@ Streamer.prototype._nextSegment = function(url)
       self._video.src = blob;
       self._playVideo();
     }
+    else
+      self.log("no segment yet");
   }
   self.Cleanup();
 };
@@ -214,9 +222,12 @@ Streamer.prototype._onStarted = function()
         self._video.onended = next;
       }
       else
+      {
+        self.log("reached the end of segment but no next segment yet");
         setTimeout(function() {
           next();
         }, 1000);
+      }
     };
     self._video.onended = next;
     var url = "https://"+location.host+"/wg-api/v1/stream/"+self._key;

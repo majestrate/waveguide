@@ -9,8 +9,8 @@ GOPATH := $(REPO)
 GO ?= $(shell which go)
 
 WAVED := $(REPO)/waveguided
-STATIC := $(REPO)/static/
-TEMPLATES := $(REPO)/templates/
+STATIC := $(REPO)/static
+TEMPLATES := $(REPO)/templates
 
 JS = $(STATIC)/waveguide.min.js
 
