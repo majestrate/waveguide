@@ -8,10 +8,14 @@ import (
 )
 
 func (r *Routes) ServeStream(c *gin.Context) {
-	u := r.GetCurrentUser(c)
-	c.HTML(http.StatusOK, "stream.html", map[string]interface{}{
-		"User": u,
-	})
+	if r.CurrentUserLoggedIn(c) {
+		u := r.GetCurrentUser(c)
+		c.HTML(http.StatusOK, "stream.html", map[string]interface{}{
+			"User": u,
+		})
+	} else {
+		c.Redirect(http.StatusTemporaryRedirect, "/login/")
+	}
 }
 
 func (r *Routes) ApiStreamsOnline(c *gin.Context) {
