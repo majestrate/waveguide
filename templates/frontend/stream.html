@@ -1,9 +1,13 @@
 {{define "stream.html"}}
 {{ template "header.html" }}
+{{ if .User.UserID }}
+
 <video id="cam" autoplay>
 </video>
 <button onclick="window.guide.Streamer()">stream</button>
-<a href="/watch/{{User.UserName}}">Watch</a>
+<a href="/watch/{{.User.UserID}}">Watch</a>
+
+{{ end }}
 {{ template "stats.html" }}
 {{ template "log.html" }}
 {{ template "footer.html" }}

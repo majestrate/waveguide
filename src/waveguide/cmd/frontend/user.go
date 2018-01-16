@@ -18,8 +18,14 @@ func (r *Routes) GetCurrentUser(c *gin.Context) *model.UserInfo {
 	var uid, token string
 	s, err := sessionStore.Get(c.Request, sessionName)
 	if err == nil {
-		uid = fmt.Sprintf("%s", s.Values[sessionKeyUserID])
-		token = fmt.Sprintf("%s", s.Values[sessionKeyToken])
+		v := s.Values[sessionKeyUserID]
+		if v != nil {
+			uid = fmt.Sprintf("%s", v)
+		}
+		v = s.Values[sessionKeyToken]
+		if v != nil {
+			token = fmt.Sprintf("%s", v)
+		}
 	}
 	return &model.UserInfo{
 		UserID: uid,
