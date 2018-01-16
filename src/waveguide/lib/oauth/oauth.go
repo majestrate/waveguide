@@ -31,7 +31,7 @@ func (c *Client) GetUser(code, callback string) (user *User, err error) {
 	var buff bytes.Buffer
 	io.WriteString(&buff, postdata.Encode())
 	var resp *http.Response
-	resp, err = http.Post(c.conf.Provider+"oauth/acesss_token", "application/x-www-form-urlencoded", &buff)
+	resp, err = http.Post(c.conf.Provider+"oauth/access_token", "application/x-www-form-urlencoded", &buff)
 	if err == nil {
 		var u User
 		err = json.NewDecoder(resp.Body).Decode(&u)
