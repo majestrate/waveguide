@@ -97,6 +97,7 @@ Streamer.prototype._nextSegment = function(url)
       if(!(self._video.src === settings.SegOffline))
       {
         self._video.src = settings.SegOffline;
+        self._playVideo();
       }
     }
     else if (!self.torrent.get(tfile.infoHash))
