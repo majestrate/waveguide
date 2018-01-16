@@ -8,9 +8,9 @@ type Database interface {
 	Init() error
 	GetFrontpageVideos() (model.VideoList, error)
 	RegisterVideo(v *model.VideoInfo) error
-	SetVideoMetaInfo(id int64, url string) error
-	AddWebseed(id int64, url string) error
-	GetVideoInfo(id int64) (*model.VideoInfo, error)
+	SetVideoMetaInfo(id string, url string) error
+	AddWebseed(id string, url string) error
+	GetVideoInfo(id string) (*model.VideoInfo, error)
 	//GetUserByName(name string) (*model.UserInfo, error)
 	//GetUserByID(id int64) (*model.UserInfo, error)
 	GetVideosForUserByName(name string) (*model.VideoFeed, error)

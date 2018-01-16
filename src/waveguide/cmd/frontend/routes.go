@@ -4,11 +4,11 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"net/url"
-	"strconv"
 	"waveguide/lib/api"
 	"waveguide/lib/config"
 	"waveguide/lib/database"
 	"waveguide/lib/model"
+	"waveguide/lib/oauth"
 	"waveguide/lib/streaming"
 )
 
@@ -18,6 +18,7 @@ type Routes struct {
 	FrontendURL *url.URL
 	TempDir     string
 	Streaming   *streaming.Context
+	oauth       *oauth.Client
 }
 
 func (r *Routes) Close() error {
@@ -36,7 +37,11 @@ func (r *Routes) Reconfigure(c *config.Config) error {
 }
 
 func (r *Routes) configure(c *config.Config, reload bool) (err error) {
-
+	if c.OAuth.Enabled {
+		r.oauth = oauth.NewClient(c.OAuth)
+	} else {
+		r.oauth = nil
+	}
 	r.TempDir = c.Storage.TempDir
 
 	r.FrontendURL, err = url.Parse(c.Frontend.FrontendURL)
@@ -85,17 +90,13 @@ func (r *Routes) ServeIndex(c *gin.Context) {
 }
 
 func (r *Routes) ServeVideo(c *gin.Context) {
-	var info *model.VideoInfo
 	videoID := c.Param("VideoID")
-	id, err := strconv.ParseInt(videoID, 10, 64)
-	if err == nil {
-		info, err = r.DB.GetVideoInfo(id)
-		if err == nil {
-			c.HTML(http.StatusOK, "video.html", map[string]*model.VideoInfo{
-				"Video": info,
-			})
-			return
-		}
+	info, err := r.DB.GetVideoInfo(videoID)
+	if err == nil && info != nil {
+		c.HTML(http.StatusOK, "video.html", map[string]*model.VideoInfo{
+			"Video": info,
+		})
+		return
 	}
 	r.NotFound(c)
 }

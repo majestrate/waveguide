@@ -21,8 +21,8 @@ func (w *Worker) ApiEncodeVideo(r *api.Request) error {
 	if fname == "" {
 		return ErrNoFileName
 	}
-	vidid := r.GetInt(api.ParamVideoID, 0)
-	if vidid == 0 {
+	vidid := r.GetString(api.ParamVideoID, "")
+	if vidid == "" {
 		return ErrNoVideoID
 	}
 	infileURL, err := url.Parse(r.GetString(api.ParamFileURL, ""))

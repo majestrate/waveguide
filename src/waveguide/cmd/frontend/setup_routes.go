@@ -19,17 +19,21 @@ func (routes *Routes) SetupRoutes(router *gin.Engine, conf *config.Config) {
 
 	// setup routes
 	router.GET("/", routes.ServeIndex)
-	router.HEAD("/", func (c *gin.Context) {
+	router.HEAD("/", func(c *gin.Context) {
 		c.String(200, "")
 	})
 	router.GET(fmt.Sprintf("%s/:VideoID/", model.VideoURLBase), routes.ServeVideo)
 	router.GET("/u/:Username/", routes.ServeUser)
 	router.GET("/u/:Username/videos.atom", routes.ServeUserVideosFeed)
 
+	router.GET("/oauth/redirect_uri", routes.HandleOAuthRedirect)
+
 	apiV1 := router.Group("/wg-api/v1")
 	{
-		apiV1.POST("/login", routes.ApiLogin)
-		apiV1.POST("/register", routes.ApiRegister)
+		/*
+			apiV1.POST("/login", routes.ApiLogin)
+			apiV1.POST("/register", routes.ApiRegister)
+		*/
 		apiV1.GET("/stream/:UserID", routes.ApiStreamMagnets)
 		authed := apiV1.Group("/authed")
 		authed.Use(routes.ApiAuthMiddleware())

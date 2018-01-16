@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	_ "github.com/lib/pq"
+	"strconv"
 	"time"
 	"waveguide/lib/log"
 	"waveguide/lib/model"
@@ -31,12 +32,14 @@ func (db *pgDB) CreateTables() (err error) {
 		"video_users": "user_id SERIAL PRIMARY KEY, user_name VARCHAR(255) NOT NULL, user_email VARCHAR(255) NOT NULL, user_logincred VARCHAR(255) NOT NULL",
 		"videos":      "video_id SERIAL PRIMARY KEY, video_name VARCHAR(255) NOT NULL, video_uploader INTEGER REFERENCES video_users(user_id) ON DELETE CASCADE, video_upload_date INTEGER NOT NULL, video_description TEXT NOT NULL, video_metainfo_url TEXT NOT NULL",
 		"webseeds":    "webseed_url TEXT NOT NULL, video_id INTEGER REFERENCES videos(video_id) ON DELETE CASCADE",
+		"oauth_users": "video_user_id INTEGER REFERENCES video_users, oauth_user_id TEXT NOT NULL",
 	}
 
 	tables_order := []string{
 		"video_users",
 		"videos",
 		"webseeds",
+		"oauth_users",
 	}
 
 	for _, name := range tables_order {
@@ -59,7 +62,9 @@ func (db *pgDB) GetFrontpageVideos() (list model.VideoList, err error) {
 	} else if err == nil {
 		for rows.Next() {
 			var info model.VideoInfo
-			rows.Scan(&info.VideoID, &info.Title, &info.UploadedAt, &info.TorrentURL)
+			var id int64
+			rows.Scan(&id, &info.Title, &info.UploadedAt, &info.TorrentURL)
+			info.VideoID = fmt.Sprintf("%d", id)
 			list.Videos = append(list.Videos, info)
 			if list.LastUpdated.Unix() < info.UploadedAt {
 				list.LastUpdated = time.Unix(info.UploadedAt, 0)
@@ -74,37 +79,50 @@ func (db *pgDB) RegisterVideo(video *model.VideoInfo) error {
 	return db.conn.QueryRow("INSERT INTO videos (video_name, video_description, video_upload_date, video_metainfo_url) VALUES ($1, $2, $3, $4) RETURNING video_id", video.Title, video.Description, video.UploadedAt, "").Scan(&video.VideoID)
 }
 
-func (db *pgDB) SetVideoMetaInfo(id int64, url string) (err error) {
-	_, err = db.conn.Exec("UPDATE videos SET video_metainfo_url = $1 WHERE video_id = $2", url, id)
-	if err == sql.ErrNoRows {
-		err = nil
-	}
-	return
-}
-
-func (db *pgDB) AddWebseed(id int64, url string) (err error) {
-	_, err = db.conn.Exec("INSERT INTO webseeds(video_id, webseed_url) VALUES ($1, $2)", id, url)
-	return
-}
-
-func (db *pgDB) GetVideoInfo(id int64) (info *model.VideoInfo, err error) {
-	info = &model.VideoInfo{
-		VideoID: id,
-	}
-	err = db.conn.QueryRow("SELECT video_name, video_description, video_upload_date, video_metainfo_url FROM videos WHERE video_id = $1", id).Scan(&info.Title, &info.Description, &info.UploadedAt, &info.TorrentURL)
+func (db *pgDB) SetVideoMetaInfo(idstr string, url string) (err error) {
+	var id int64
+	id, err = strconv.ParseInt(idstr, 64, 10)
 	if err == nil {
-		var rows *sql.Rows
-		rows, err = db.conn.Query("SELECT webseed_url FROM webseeds WHERE video_id = $1", id)
-		if err == nil {
-			for rows.Next() {
-				var url string
-				rows.Scan(&url)
-				info.WebSeeds = append(info.WebSeeds, url)
-			}
-			rows.Close()
+		_, err = db.conn.Exec("UPDATE videos SET video_metainfo_url = $1 WHERE video_id = $2", url, id)
+		if err == sql.ErrNoRows {
+			err = nil
 		}
-	} else {
-		info = nil
+	}
+	return
+}
+
+func (db *pgDB) AddWebseed(idstr string, url string) (err error) {
+	var id int64
+	id, err = strconv.ParseInt(idstr, 64, 10)
+	if err == nil {
+		_, err = db.conn.Exec("INSERT INTO webseeds(video_id, webseed_url) VALUES ($1, $2)", id, url)
+	}
+	return
+}
+
+func (db *pgDB) GetVideoInfo(idstr string) (info *model.VideoInfo, err error) {
+
+	var id int64
+	id, err = strconv.ParseInt(idstr, 64, 10)
+	if err == nil {
+		info = &model.VideoInfo{
+			VideoID: idstr,
+		}
+		err = db.conn.QueryRow("SELECT video_name, video_description, video_upload_date, video_metainfo_url FROM videos WHERE video_id = $1", id).Scan(&info.Title, &info.Description, &info.UploadedAt, &info.TorrentURL)
+		if err == nil {
+			var rows *sql.Rows
+			rows, err = db.conn.Query("SELECT webseed_url FROM webseeds WHERE video_id = $1", id)
+			if err == nil {
+				for rows.Next() {
+					var url string
+					rows.Scan(&url)
+					info.WebSeeds = append(info.WebSeeds, url)
+				}
+				rows.Close()
+			}
+		} else {
+			info = nil
+		}
 	}
 	return
 }
@@ -135,7 +153,9 @@ func (db *pgDB) GetVideosForUserByName(name string) (list *model.VideoFeed, err 
 			for rows.Next() {
 				var info model.VideoInfo
 				info.UserID = user.UserID
-				rows.Scan(&info.VideoID, &info.Title, &info.Description, &info.UploadedAt, &info.TorrentURL)
+				var id int64
+				rows.Scan(&id, &info.Title, &info.Description, &info.UploadedAt, &info.TorrentURL)
+				info.VideoID = fmt.Sprintf("%d", id)
 				list.List.Videos = append(list.List.Videos, info)
 			}
 			rows.Close()

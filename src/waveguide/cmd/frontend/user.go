@@ -1,6 +1,7 @@
 package frontend
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/sessions"
 	"waveguide/lib/config"
@@ -13,17 +14,17 @@ const sessionName = "waveguided-session"
 const sessionKeyUserID = "user-id"
 
 func (r *Routes) GetCurrentUser(c *gin.Context) *model.UserInfo {
-	var uid int64
+	var uid string
 	s, err := sessionStore.Get(c.Request, sessionName)
 	if err == nil {
-		uid, _ = s.Values[sessionKeyUserID].(int64)
+		uid = fmt.Sprintf("%s", s.Values[sessionKeyUserID])
 	}
 	return &model.UserInfo{
 		UserID: uid,
 	}
 }
 
-func (r *Routes) SetCurrentUser(uid int64, c *gin.Context) {
+func (r *Routes) SetCurrentUser(uid string, c *gin.Context) {
 	s, err := sessionStore.Get(c.Request, sessionName)
 	if err == nil {
 		s.Values[sessionKeyUserID] = uid
@@ -32,8 +33,7 @@ func (r *Routes) SetCurrentUser(uid int64, c *gin.Context) {
 }
 
 func (r *Routes) CurrentUserLoggedIn(c *gin.Context) bool {
-	// return r.GetCurrentUser(c).UserID != 0
-	return true
+	return r.GetCurrentUser(c).UserID != ""
 }
 
 func (r *Routes) ServeUser(c *gin.Context) {

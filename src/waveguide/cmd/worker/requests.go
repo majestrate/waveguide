@@ -17,7 +17,7 @@ func (w *Worker) UploadRequest(u *url.URL, body io.ReadCloser) *http.Request {
 	}
 }
 
-func (w *Worker) MkTorrentRequest(infile *url.URL, vid int64, filename string) *api.Request {
+func (w *Worker) MkTorrentRequest(infile *url.URL, vid string, filename string) *api.Request {
 	return &api.Request{
 		Method: api.MakeTorrent,
 		Args: map[string]interface{}{

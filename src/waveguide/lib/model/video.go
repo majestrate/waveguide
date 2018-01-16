@@ -13,8 +13,8 @@ import (
 const VideoURLBase = "/v"
 
 type VideoInfo struct {
-	UserID      int64
-	VideoID     int64
+	UserID      string
+	VideoID     string
 	Title       string
 	Description string
 	UploadedAt  int64
@@ -58,7 +58,7 @@ func (v *VideoInfo) GetURL(frontend *url.URL) *url.URL {
 	if err != nil {
 		log.Errorf("waveguide/lib/model/Video.GetURL: %s", err)
 	}
-	u.Path = fmt.Sprintf("%s/%d/", VideoURLBase, v.VideoID)
+	u.Path = fmt.Sprintf("%s/%s/", VideoURLBase, v.VideoID)
 	return u
 }
 

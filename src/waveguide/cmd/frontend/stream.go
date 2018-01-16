@@ -17,7 +17,7 @@ func (r *Routes) ServeStream(c *gin.Context) {
 func (r *Routes) ApiStreamMagnets(c *gin.Context) {
 	magnet := ""
 	status := http.StatusNotFound
-	key := c.GetInt64("UserID")
+	key := c.GetString("UserID")
 
 	stream := r.Streaming.Find(key)
 	if stream != nil {

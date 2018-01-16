@@ -15,6 +15,7 @@ type Config struct {
 	MQ       MQConfig
 	Storage  StorageConfig
 	CDN      CDNConfig
+	OAuth    OAuthConfig
 }
 
 func (c *Config) Load(fname string) error {
@@ -25,6 +26,7 @@ func (c *Config) Load(fname string) error {
 		"rabbitmq": &c.MQ,
 		"storage":  &c.Storage,
 		"cdn":      &c.CDN,
+		"oauth":    &c.OAuth,
 	}
 	cfg, err := parser.Read(fname)
 	if err != nil {
