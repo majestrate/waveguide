@@ -15,5 +15,6 @@ module.exports = {
   SegMime: SegMime,
   SegExt: SegExt,
   SegPlaceholder: SegPlaceholder,
+  SegOffline: SegOffline,
   SegBitrate: SegBitrate
 };
