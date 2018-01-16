@@ -30,6 +30,7 @@ func (routes *Routes) SetupRoutes(router *gin.Engine, conf *config.Config) {
 
 	apiV1 := router.Group("/wg-api/v1")
 	{
+		apiV1.GET("/online", routes.ApiStreamsOnline)
 		/*
 			apiV1.POST("/login", routes.ApiLogin)
 			apiV1.POST("/register", routes.ApiRegister)
@@ -49,6 +50,7 @@ func (routes *Routes) SetupRoutes(router *gin.Engine, conf *config.Config) {
 	router.GET("/upload/", routes.ServeUpload)
 	router.GET("/login/", routes.ServeLogin)
 	router.GET("/stream/", routes.ServeStream)
+	router.GET("/watch/:UserID/", routes.ServeWatch)
 	// chat callback url
 	router.StaticFile("/chat/", filepath.Join(conf.Frontend.StaticDir, "chat.html"))
 

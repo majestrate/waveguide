@@ -14,6 +14,10 @@ func (r *Routes) ServeStream(c *gin.Context) {
 	})
 }
 
+func (r *Routes) ApiStreamsOnline(c *gin.Context) {
+	c.JSON(http.StatusOK, r.Streaming.Online())
+}
+
 func (r *Routes) ApiStreamMagnets(c *gin.Context) {
 	magnet := ""
 	status := http.StatusNotFound
