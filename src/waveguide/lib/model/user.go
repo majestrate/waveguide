@@ -6,6 +6,7 @@ import (
 
 type UserInfo struct {
 	UserID   string
+	Token    string
 	Name     string `form:"name" binding:"required"`
 	Login    string
 	Password string `form:"password" binding:"required"`
