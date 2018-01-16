@@ -223,7 +223,6 @@ Streamer.prototype._onStarted = function()
     self._interval = setInterval(function() {
       self._nextSegment(url);
     }, 2500);
-    self._nextSegment(url);
   }
   else
   {
