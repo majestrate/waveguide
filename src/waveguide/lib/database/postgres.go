@@ -81,7 +81,7 @@ func (db *pgDB) RegisterVideo(video *model.VideoInfo) error {
 
 func (db *pgDB) SetVideoMetaInfo(idstr string, url string) (err error) {
 	var id int64
-	id, err = strconv.ParseInt(idstr, 64, 10)
+	id, err = strconv.ParseInt(idstr, 10, 64)
 	if err == nil {
 		_, err = db.conn.Exec("UPDATE videos SET video_metainfo_url = $1 WHERE video_id = $2", url, id)
 		if err == sql.ErrNoRows {
@@ -93,7 +93,7 @@ func (db *pgDB) SetVideoMetaInfo(idstr string, url string) (err error) {
 
 func (db *pgDB) AddWebseed(idstr string, url string) (err error) {
 	var id int64
-	id, err = strconv.ParseInt(idstr, 64, 10)
+	id, err = strconv.ParseInt(idstr, 10, 64)
 	if err == nil {
 		_, err = db.conn.Exec("INSERT INTO webseeds(video_id, webseed_url) VALUES ($1, $2)", id, url)
 	}
@@ -103,7 +103,7 @@ func (db *pgDB) AddWebseed(idstr string, url string) (err error) {
 func (db *pgDB) GetVideoInfo(idstr string) (info *model.VideoInfo, err error) {
 
 	var id int64
-	id, err = strconv.ParseInt(idstr, 64, 10)
+	id, err = strconv.ParseInt(idstr, 10, 64)
 	if err == nil {
 		info = &model.VideoInfo{
 			VideoID: idstr,

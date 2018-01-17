@@ -22,7 +22,7 @@ func (routes *Routes) SetupRoutes(router *gin.Engine, conf *config.Config) {
 	router.HEAD("/", func(c *gin.Context) {
 		c.String(200, "")
 	})
-	router.GET(fmt.Sprintf("%s/:VideoID/", model.VideoURLBase), routes.ServeVideo)
+	router.GET(fmt.Sprintf("%s/:id/", model.VideoURLBase), routes.ServeVideo)
 	router.GET("/u/:Username/", routes.ServeUser)
 	router.GET("/u/:Username/videos.atom", routes.ServeUserVideosFeed)
 

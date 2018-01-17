@@ -90,7 +90,7 @@ func (r *Routes) ServeIndex(c *gin.Context) {
 }
 
 func (r *Routes) ServeVideo(c *gin.Context) {
-	videoID := c.Param("VideoID")
+	videoID := c.Param("id")
 	info, err := r.DB.GetVideoInfo(videoID)
 	if err == nil && info != nil {
 		c.HTML(http.StatusOK, "video.html", map[string]*model.VideoInfo{
