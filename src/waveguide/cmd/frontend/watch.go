@@ -6,7 +6,7 @@ import (
 )
 
 func (r *Routes) ServeWatch(c *gin.Context) {
-	id := c.GetString("UserID")
+	id, _ := c.GetQuery("u")
 	if id == "" {
 		r.NotFound(c)
 	} else {

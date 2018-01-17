@@ -35,7 +35,7 @@ func (routes *Routes) SetupRoutes(router *gin.Engine, conf *config.Config) {
 			apiV1.POST("/login", routes.ApiLogin)
 			apiV1.POST("/register", routes.ApiRegister)
 		*/
-		apiV1.GET("/stream/:UserID", routes.ApiStreamMagnets)
+		apiV1.GET("/stream", routes.ApiStreamMagnets)
 		authed := apiV1.Group("/authed")
 		authed.Use(routes.ApiAuthMiddleware())
 		{
@@ -50,7 +50,7 @@ func (routes *Routes) SetupRoutes(router *gin.Engine, conf *config.Config) {
 	router.GET("/upload/", routes.ServeUpload)
 	router.GET("/login/", routes.ServeLogin)
 	router.GET("/stream/", routes.ServeStream)
-	router.GET("/watch/:UserID/", routes.ServeWatch)
+	router.GET("/watch/", routes.ServeWatch)
 	// chat callback url
 	router.StaticFile("/chat/", filepath.Join(conf.Frontend.StaticDir, "chat.html"))
 

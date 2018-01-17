@@ -25,12 +25,14 @@ func (r *Routes) ApiStreamsOnline(c *gin.Context) {
 func (r *Routes) ApiStreamMagnets(c *gin.Context) {
 	magnet := ""
 	status := http.StatusNotFound
-	key := c.GetString("UserID")
+	key, ok := c.GetQuery("u")
 
-	stream := r.Streaming.Find(key)
-	if stream != nil {
-		status = http.StatusOK
-		magnet = stream.LastMagnet()
+	if ok {
+		stream := r.Streaming.Find(key)
+		if stream != nil {
+			status = http.StatusOK
+			magnet = stream.LastMagnet()
+		}
 	}
 	c.String(status, magnet)
 }
