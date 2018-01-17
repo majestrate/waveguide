@@ -1,6 +1,7 @@
 {{define "index.html"}}
 {{ template "header.html" }}
-<a href="/upload/"><h3>Upload Video</h3></a> 
+<a href="/upload/"><h3>Upload Video</h3></a>
+<a href="/stream/"><h3>Stream Video</h3></a>
 <h3> Recent Uploads </h3>
 <table>
   <thead>
@@ -20,8 +21,13 @@
     {{ end }}
   </tbody>
 </table>
-<script>
-  /** TODO: insert online streams */
-</script>
+<h3> Streamers Online </h3>
+<div class="streamers">
+  {{ range .Streams }}
+  <div class="stream">
+    <a href="/watch/?u={{ . }}"> {{.}} </a>
+  </div>
+  {{ end }}
+</div>
 {{ template "footer.html" }}
 {{end}}
