@@ -38,6 +38,7 @@ func (c *Client) GetUser(code, callback string) (user *User, err error) {
 		if err == nil {
 			user = &u
 		}
+		resp.Body.Close()
 	}
 	return
 }
