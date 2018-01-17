@@ -11,6 +11,7 @@ import (
 )
 
 var ErrInvalidBackendResponse = errors.New("invalid response from oauth backend")
+var ErrFailedToContactBackend = errors.New("failed to contact oauth backend server")
 
 type Client struct {
 	conf config.OAuthConfig
@@ -44,6 +45,8 @@ func (c *Client) GetUser(code, callback string) (user *User, err error) {
 			err = ErrInvalidBackendResponse
 		}
 		resp.Body.Close()
+	} else {
+		err = ErrFailedToContactBackend
 	}
 	return
 }
