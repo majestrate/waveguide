@@ -86,7 +86,7 @@ func (r *Routes) ServeIndex(c *gin.Context) {
 	}
 	c.HTML(http.StatusOK, "index.html", map[string]interface{}{
 		"Videos":  videos.Videos,
-		"Streams": r.streaming.Online(),
+		"Streams": r.Streaming.Online(),
 	})
 }
 
