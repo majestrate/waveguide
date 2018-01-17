@@ -20,6 +20,8 @@ function Streamer(source, key)
     util.get_id("cam").src = window.URL.createObjectURL(source);
   else
     this._segments = [];
+  this._writestream = null;
+  this._vidwrapper = null;
 }
 
 Streamer.prototype.Start = function()
@@ -104,13 +106,18 @@ Streamer.prototype._nextSegment = function(url)
     {
       self.log("add torrent "+tfile.infoHash);
       self.torrent.add(parse_torrent.toTorrentFile(tfile), function(t) {
-        t.files[0].getBlob(function(err, blob) {
+        /*t.files[0].getBlob(function(err, blob) {
           if(err) self.log(err);
           else self._queueSegment(blob.slice());
+        });*/
+        t.files[0].renderTo(self._video, {}, function(err, elem) {
+          if (err) self.log(err);
+          else self._playVideo();
         });
       });
     }
   });
+  /*
   if (self._video.src === settings.SegPlaceholder || self._video.src === settings.SegOffline)
   {
     var blob = self._popSegmentBlob();
@@ -124,6 +131,7 @@ Streamer.prototype._nextSegment = function(url)
     else
       self.log("no segment yet");
   }
+  */
   self.Cleanup();
 };
 
@@ -212,6 +220,7 @@ Streamer.prototype._onStarted = function()
     self._video.src = settings.SegPlaceholder;
     self._video.loop = true;
     self._playVideo();
+    /*
     var next = function() {
       var blob = self._popSegmentBlob();
       if(blob)
@@ -231,6 +240,7 @@ Streamer.prototype._onStarted = function()
       }
     };
     self._video.onended = next;
+    */
     var url = "https://"+location.host+"/wg-api/v1/stream?u="+self._key;
     self._interval = setInterval(function() {
       self._nextSegment(url);
