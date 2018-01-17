@@ -3,11 +3,14 @@ package oauth
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"io"
 	"net/http"
 	"net/url"
 	"waveguide/lib/config"
 )
+
+var ErrInvalidBackendResponse = errors.New("invalid response from oauth backend")
 
 type Client struct {
 	conf config.OAuthConfig
@@ -37,6 +40,8 @@ func (c *Client) GetUser(code, callback string) (user *User, err error) {
 		err = json.NewDecoder(resp.Body).Decode(&u)
 		if err == nil {
 			user = &u
+		} else {
+			err = ErrInvalidBackendResponse
 		}
 		resp.Body.Close()
 	}
