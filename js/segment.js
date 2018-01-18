@@ -35,9 +35,11 @@ Segmenter.prototype.Begin = function(cb)
   //console.log("starting...");
   self.cb = cb;
   self._collector.ondataavailable = function(ev) {
-    if (self._collector.state === 'inactive') return;
-    self._collector.stop();
-    self.MakeData(ev, cb);
+    if (self._collector.state === 'recording')
+    {
+      self.MakeData(ev, cb);
+      self._collector.stop();
+    }
   };
   self._collector.start(settings.SegLen);
 };
