@@ -53,7 +53,6 @@ func (routes *Routes) SetupRoutes(router *gin.Engine, conf *config.Config) {
 	router.GET("/watch/", routes.ServeWatch)
 	// chat callback url
 	router.StaticFile("/chat/", filepath.Join(conf.Frontend.StaticDir, "chat.html"))
-
-	router.GET("/register/", routes.ServeRegister).Use(RequiresCaptchaMiddleware())
+	router.GET("/register/", routes.ServeRegister)
 
 }

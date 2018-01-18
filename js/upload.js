@@ -155,6 +155,10 @@ UploadWidget.prototype.Submit = function()
         else if(ajax.status == 201) self.Success(j.url);
         else self.Error("failed to create video");
       }
+      else
+      {
+        self.Error("http "+ajax.status);
+      }
     }
   };
   ajax.upload.addEventListener("progress", function(ev) {
@@ -163,7 +167,7 @@ UploadWidget.prototype.Submit = function()
       self.Progress(ev.loaded / ev.total);
     }
   });
-  ajax.open("POST", ".");
+  ajax.open("POST", "/wg-api/v1/authed/upload");
   ajax.send(formdata);
 };
 

@@ -9,7 +9,8 @@
     var wg = window.guide;
     var player = wg.VideoPlayer("player");
     var webseeds = [];
-    {{ range .Video.WebSeeds }}webseeds.push("{{.}}");
+    {{ range .Video.WebSeeds }}
+    webseeds.push("{{.}}");
     {{ end }}
     player.SetInfo("{{ .Video.TorrentURL }}", webseeds, function() { player.Start(); });
   }, 100);

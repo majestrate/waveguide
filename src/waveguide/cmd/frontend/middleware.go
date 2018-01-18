@@ -13,9 +13,7 @@ func RequiresCaptchaMiddleware() gin.HandlerFunc {
 		if captcha.VerifyString(solution, id) {
 			c.Next()
 		} else {
-			c.JSON(http.StatusForbidden, map[string]interface{}{
-				"Error": "Bad Captcha",
-			})
+			c.AbortWithStatus(http.StatusForbidden)
 		}
 	}
 }
@@ -25,9 +23,7 @@ func (r *Routes) ApiAuthMiddleware() gin.HandlerFunc {
 		if r.CurrentUserLoggedIn(c) {
 			c.Next()
 		} else {
-			c.JSON(http.StatusForbidden, map[string]interface{}{
-				"Error": "Not Authenticated",
-			})
+			c.AbortWithStatus(http.StatusForbidden)
 		}
 	}
 }
