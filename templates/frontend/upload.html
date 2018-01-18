@@ -2,9 +2,10 @@
 {{ template "header.html" }}
 <div id="upload_widget"></div>
 <script type="text/javascript">
-  var guide = new WaveGuide();
-  var upload = guide.UploadWidget("upload_widget");
-  upload.Setup();
+  setTimeout(function() {
+    var upload = window.guide.UploadWidget("upload_widget");
+    upload.Setup();
+  }, 100);
 </script>
 {{ template "footer.html" }}
 {{end}}
