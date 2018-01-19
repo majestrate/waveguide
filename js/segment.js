@@ -24,8 +24,7 @@ Segmenter.prototype.MakeData = function(ev, cb)
 {
   var self = this;
   //console.log("got chunk of size "+ev.data.size);
-  ev.data.name = "segment" + settings.SegExt;
-  cb(ev.data);
+  cb(ev.data, "segment" + settings.SegExt);
 };
 
 Segmenter.prototype.Begin = function(cb)
@@ -37,9 +36,15 @@ Segmenter.prototype.Begin = function(cb)
   self._collector.ondataavailable = function(ev) {
     if (self._collector.state === 'recording')
     {
+      console.log('make data '+ev);
       self.MakeData(ev, cb);
       self._collector.stop();
     }
+    else if(self._collector.state === 'inactive')
+    {
+      self._collector.start(settings.SegLen);
+    }
+    console.log(self._collector.state);
   };
   self._collector.start(settings.SegLen);
 };

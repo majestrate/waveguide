@@ -1,10 +1,9 @@
 /** stream.js */
 
-const WebTorrent = require("webtorrent");
 const Segmenter = require("./segment.js").Segmenter;
 const util = require("./util.js");
-const parse_torrent = require('parse-torrent');
 const settings = require("./settings.js");
+const shim = require("./webtorrent-shim.js");
 
 function Streamer(source, key)
 {
@@ -15,11 +14,12 @@ function Streamer(source, key)
   this._segments = null;
   this._video = null;
   this._logelem = util.get_id("log");
-  this.torrent = new WebTorrent();
   if(source)
     util.get_id("cam").src = window.URL.createObjectURL(source);
   else
     this._segments = [];
+  this._net = new shim.Network();
+  this._net.Start();
 }
 
 Streamer.prototype.Start = function()
@@ -30,6 +30,7 @@ Streamer.prototype.Start = function()
 
 Streamer.prototype.log = function(msg)
 {
+  console.log(msg);
   var self = this;
   if(self._logelem)
   {
@@ -47,19 +48,8 @@ Streamer.prototype.log = function(msg)
 Streamer.prototype.Cleanup = function()
 {
   var self = this;
-  self.log("cleanup torrents");
-  var torrents = self.torrent.torrents;
-  while(torrents.length > self._rewind)
-  {
-    var ih = torrents[0].infoHash;
-    torrents.pop();
-    if(ih) {
-      self.torrent.remove(ih, function(err) {
-        if(err) self.log("failed to remove torrent: "+err);
-        else self.log("removed torrent: "+ih);
-      });
-    }
-  }
+  self.log("cleanup storage");
+  self._net.Cleanup(self._rewind);
 };
 
 Streamer.prototype.Stop = function()
@@ -87,10 +77,11 @@ Streamer.prototype._popSegmentBlob = function()
     return null;
 };
 
+
 Streamer.prototype._nextSegment = function(url)
 {
   var self = this;
-  parse_torrent.remote(url, function(err, tfile) {
+  self._net.FetchMetadata(url, function(err, metadata) {
     if(err)
     {
       self.log("no stream online");
@@ -100,14 +91,11 @@ Streamer.prototype._nextSegment = function(url)
         self._playVideo();
       }
     }
-    else if (!self.torrent.get(tfile.infoHash))
+    else
     {
-      self.log("add torrent "+tfile.infoHash);
-      self.torrent.add(parse_torrent.toTorrentFile(tfile), function(t) {
-        t.files[0].getBlob(function(err, blob) {
-          if(err) self.log(err);
-          else self._queueSegment(blob.slice());
-        });
+      self._net.AddMetadata(metadata, function(err, blob) {
+        if (err) self.log("failed to fetch file: "+err);
+        else self._queueSegment(blob);
       });
     }
   });
@@ -159,35 +147,29 @@ Streamer.prototype.PeersLabel = function(peers)
     e.innerHTML = "Active Peers: "+peers;
 };
 
-Streamer.prototype._segmenterCB = function(torrent, data)
+Streamer.prototype._segmenterCB = function(data, name)
 {
   var self = this;
-  torrent.seed(data, function(t) {
-    self.log("submit torrent: "+ t.infoHash);
-    var ajax = new XMLHttpRequest();
-    ajax.onreadystatechange = function() {
-      if (ajax.readyState == 4 && ajax.status != 200) {
-        self.Stop();
-      }
-    };
-    ajax.open("POST", "/wg-api/v1/authed/stream-update");
-    ajax.send(t.torrentFile);
-    self.Cleanup();
-    self._segmenter.Begin(function(data) {
-      self._segmenterCB(torrent, data);
-    });
+  self._net.SeedData(data, name, function(err, metadata) {
+    if(err) self.log(err);
+    else
+    {
+      var ajax = new XMLHttpRequest();
+      ajax.onreadystatechange = function() {
+        if (ajax.readyState == 4 && ajax.status != 200) {
+          self.Stop();
+        }
+      };
+      ajax.open("POST", "/wg-api/v1/authed/stream-update");
+      ajax.send(metadata);
+      self.Cleanup();
+    }
   });
 };
 
 Streamer.prototype._onStarted = function()
 {
   var self = this;
-
-  if(!WebTorrent.WEBRTC_SUPPORT)
-  {
-    self.log("no webrtc support this stream will not work D:");
-    return;
-  }
   if (util.isAndroid())
   {
     var playbutton = util.button();
@@ -199,14 +181,11 @@ Streamer.prototype._onStarted = function()
     document.body.appendChild(playbutton);
   }
   setInterval(function() {
-    self.BWLabel(self.torrent.uploadSpeed, self.torrent.downloadSpeed);
-    var numPeers = 0;
-    for(var idx = 0 ; idx < self.torrent.torrents.length; idx ++)
-    {
-      var peers = self.torrent.torrents[idx].numPeers || 0;
-      if(numPeers < peers) numPeers = peers;
-    }
-    self.PeersLabel(numPeers);
+    var upload = self._net.UploadRate();
+    var download = self._net.DownloadRate();
+    var peers = self._net.PeerCount();
+    self.BWLabel(upload, download);
+    self.PeersLabel(peers);
   }, 1000);
   if (self._key)
   {    
@@ -242,8 +221,8 @@ Streamer.prototype._onStarted = function()
   else
   {
     self._segmenter = new Segmenter(self._source);
-    self._segmenter.Begin(function(data) {
-      self._segmenterCB(self.torrent, data);
+    self._segmenter.Begin(function(data, name) {
+      self._segmenterCB(data, name);
     });
   }
 };
