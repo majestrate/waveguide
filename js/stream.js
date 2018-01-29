@@ -19,12 +19,12 @@ function Streamer(source, key)
   else
     this._segments = [];
   this._net = new shim.Network();
-  this._net.Start();
 }
 
 Streamer.prototype.Start = function()
 {
   var self = this;
+  self._net.Start();
   self._onStarted();
 };
 
