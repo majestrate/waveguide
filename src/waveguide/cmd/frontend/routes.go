@@ -104,8 +104,12 @@ func (r *Routes) ServeVideo(c *gin.Context) {
 }
 
 func (r *Routes) ServeUpload(c *gin.Context) {
-	u := r.GetCurrentUser(c)
-	c.HTML(http.StatusOK, "upload.html", map[string]interface{}{
-		"User": u,
-	})
+	if r.CurrentUserLoggedIn(c) {
+		u := r.GetCurrentUser(c)
+		c.HTML(http.StatusOK, "upload.html", map[string]interface{}{
+			"User": u,
+		})
+	} else {
+		c.Redirect(http.StatusTemporaryRedirect, "/login/")
+	}
 }
