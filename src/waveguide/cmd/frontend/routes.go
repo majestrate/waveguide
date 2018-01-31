@@ -42,6 +42,7 @@ func (r *Routes) configure(c *config.Config, reload bool) (err error) {
 	} else {
 		r.oauth = nil
 	}
+
 	r.TempDir = c.Storage.TempDir
 
 	r.FrontendURL, err = url.Parse(c.Frontend.FrontendURL)

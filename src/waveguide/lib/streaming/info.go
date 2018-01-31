@@ -1,19 +1,26 @@
 package streaming
 
-const MaxMagnets = 5
+import (
+	"time"
+)
+
+const StreamUpdateTimeout = time.Minute
 
 type StreamInfo struct {
-	Magnets []string
+	Magnet     string
+	LastUpdate time.Time
 }
 
 func (i *StreamInfo) LastMagnet() string {
-	return i.Magnets[len(i.Magnets)-1]
+	return i.Magnet
 }
 
 func (i *StreamInfo) Add(url string) {
-	if len(i.Magnets) > MaxMagnets {
-		i.Magnets = append(i.Magnets[1:], url)
-	} else {
-		i.Magnets = append(i.Magnets, url)
-	}
+	i.Magnet = url
+	i.LastUpdate = time.Now()
+}
+
+func (i *StreamInfo) IsExpired() bool {
+	now := time.Now()
+	return now.Sub(i.LastUpdate) > StreamUpdateTimeout
 }

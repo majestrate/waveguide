@@ -4,10 +4,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
 	"waveguide/lib/config"
+	"waveguide/lib/model"
 )
 
 var ErrInvalidBackendResponse = errors.New("invalid response from oauth backend")
@@ -25,6 +27,29 @@ func (c *Client) AuthURL(callback string) string {
 	return u.String()
 }
 
+func (c *Client) SubmitComment(comment model.Comment) (err error) {
+	u, _ := url.Parse(c.conf.Provider + fmt.Sprintf("channels/%s/messages", comment.ChannelID))
+	q := u.Query()
+	q.Set("access_token", comment.User.Token)
+	u.RawQuery = q.Encode()
+	buff := new(bytes.Buffer)
+	err = json.NewEncoder(buff).Encode(map[string]interface{}{
+		"text": comment.Text,
+	})
+	if err == nil {
+		var resp *http.Response
+		resp, err = http.Post(u.String(), "application/json; encoding=UTF-8", buff)
+		if err == nil {
+			if resp.StatusCode == 200 {
+				// TODO: check json response
+			} else {
+				err = ErrInvalidBackendResponse
+			}
+		}
+	}
+	return
+}
+
 func (c *Client) GetUser(code, callback string) (user *User, err error) {
 	postdata := make(url.Values)
 	postdata.Set("client_id", c.conf.ClientID)
@@ -32,10 +57,10 @@ func (c *Client) GetUser(code, callback string) (user *User, err error) {
 	postdata.Set("grant_type", "authorization_code")
 	postdata.Set("redirect_uri", callback)
 	postdata.Set("code", code)
-	var buff bytes.Buffer
-	io.WriteString(&buff, postdata.Encode())
+	buff := new(bytes.Buffer)
+	io.WriteString(buff, postdata.Encode())
 	var resp *http.Response
-	resp, err = http.Post(c.conf.Provider+"oauth/access_token", "application/x-www-form-urlencoded", &buff)
+	resp, err = http.Post(c.conf.Provider+"oauth/access_token", "application/x-www-form-urlencoded", buff)
 	if err == nil {
 		var u User
 		err = json.NewDecoder(resp.Body).Decode(&u)

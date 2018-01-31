@@ -36,6 +36,7 @@ func (routes *Routes) SetupRoutes(router *gin.Engine, conf *config.Config) {
 			apiV1.POST("/register", routes.ApiRegister)
 		*/
 		apiV1.GET("/stream", routes.ApiStreamMagnets)
+		apiV1.GET("/comments", routes.ApiStreamComments)
 		authed := apiV1.Group("/authed")
 		authed.Use(routes.ApiAuthMiddleware())
 		{

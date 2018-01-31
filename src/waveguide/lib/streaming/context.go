@@ -13,7 +13,18 @@ func NewContext() *Context {
 	}
 }
 
+func (ctx *Context) Expire() {
+	ctx.mtx.Lock()
+	defer ctx.mtx.Unlock()
+	for k := range ctx.streams {
+		if ctx.streams[k].IsExpired() {
+			delete(ctx.streams, k)
+		}
+	}
+}
+
 func (ctx *Context) Online() (keys []string) {
+	ctx.Expire()
 	ctx.mtx.Lock()
 	for k := range ctx.streams {
 		keys = append(keys, k)

@@ -221,9 +221,14 @@ Streamer.prototype._onStarted = function()
   else
   {
     self._segmenter = new Segmenter(self._source);
-    self._segmenter.Begin(function(data, name) {
-      self._segmenterCB(data, name);
-    });
+    try {
+      self._segmenter.Begin(function(data, name) {
+        self._segmenterCB(data, name);
+      });
+    } catch(ex) {
+      self.log("error starting video recorder: "+ex);
+      self._segmenter.Stop();
+    }
   }
 };
 
