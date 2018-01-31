@@ -13,6 +13,11 @@ func (r *Routes) ServeLogin(c *gin.Context) {
 	}
 }
 
+func (r *Routes) ApiLogout(c *gin.Context) {
+	r.SetCurrentUser("", "", c)
+	c.Redirect(http.StatusTemporaryRedirect, "/")
+}
+
 func (r *Routes) ApiLogin(c *gin.Context) {
 
 }

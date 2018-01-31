@@ -50,6 +50,8 @@ func (routes *Routes) SetupRoutes(router *gin.Engine, conf *config.Config) {
 
 	router.GET("/upload/", routes.ServeUpload)
 	router.GET("/login/", routes.ServeLogin)
+	router.GET("/logout/", routes.ApiLogout)
+
 	router.GET("/stream/", routes.ServeStream)
 	router.GET("/watch/", routes.ServeWatch)
 	// chat callback url
