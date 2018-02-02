@@ -146,7 +146,7 @@ Chat.prototype.Start = function()
   self.interval = setInterval(function() {
     self.GetLatest(function(j) {
       var data = j.data || [];
-      for(var idx = data.length; idx > 0; idx--)
+      for(var idx = data.length-1; idx > 0; idx--)
       {
         self.PutLineElem(buildChatPost(data[idx]));
       }
