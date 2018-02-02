@@ -3,6 +3,8 @@
 {{ template "navbar.html" }}
 <div id="player">
 </div>
+<div id="chat">
+</div>
 <script type="text/javascript">
   /** webtorrent webseeds */
   setTimeout(function() {
@@ -13,6 +15,9 @@
     webseeds.push("{{.}}");
     {{ end }}
     player.SetInfo("{{ .Video.TorrentURL }}", webseeds, function() { player.Start(); });
+    var chat = wg.ChatWidget("chat");
+    chat.SetToken("{{ .User.Token }}");
+    chat.Start();
   }, 100);
 </script>
 {{ template "footer.html" }}

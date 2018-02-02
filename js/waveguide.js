@@ -5,6 +5,7 @@ const upload = require("./upload.js");
 const player = require("./player.js");
 const stream = require("./stream.js");
 const cam = require("./cam.js");
+const chat = require("./chat.js");
 
 function WaveGuide()
 {
@@ -26,6 +27,14 @@ WaveGuide.prototype.VideoPlayer = function(id)
   if(!elem) return null;
   var self = this;
   return new player.TorrentPlayer(self, elem);
+};
+
+WaveGuide.prototype.ChatWidget = function(elemId, streamID)
+{
+  var self = this;
+  var elem = util.get_id(elemId);
+  if(!elem) return null;
+  return new chat.LiveChat(elem, streamID);
 };
 
 WaveGuide.prototype.Streamer = function(pubkey)

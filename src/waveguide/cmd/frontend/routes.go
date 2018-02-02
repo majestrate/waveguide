@@ -7,7 +7,6 @@ import (
 	"waveguide/lib/api"
 	"waveguide/lib/config"
 	"waveguide/lib/database"
-	"waveguide/lib/model"
 	"waveguide/lib/oauth"
 	"waveguide/lib/streaming"
 )
@@ -95,8 +94,9 @@ func (r *Routes) ServeVideo(c *gin.Context) {
 	videoID := c.Param("id")
 	info, err := r.DB.GetVideoInfo(videoID)
 	if err == nil && info != nil {
-		c.HTML(http.StatusOK, "video.html", map[string]*model.VideoInfo{
+		c.HTML(http.StatusOK, "video.html", map[string]interface{}{
 			"Video": info,
+			"User":  r.GetCurrentUser(c),
 		})
 		return
 	}
