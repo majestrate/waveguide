@@ -22,7 +22,7 @@ function buildChatPost(chat)
 
 function Chat(root, key)
 {
-  this.scrollback = 10;
+  this.scrollback = 20;
   this.elem = root;
   this.key = key || 1;
   this.last_id = 0;
@@ -33,9 +33,9 @@ function Chat(root, key)
   this.input = document.createElement("input");
   this.sendButton = document.createElement("button");
   this.sendButton.innerText = "send";
-  this.elem.appendChild(this.view);
   this.elem.appendChild(this.input);
   this.elem.appendChild(this.sendButton);
+  this.elem.appendChild(this.view);
 }
 
 Chat.prototype.Error = function(msg)
