@@ -1,0 +1,32 @@
+{{ define "chat_widget.html" }}
+<!-- chat_widget.html provides chat functionality to pages -->
+<div id="chat">
+  {{ if .User.Token }}
+  {{ else }}
+  <a id="login" href="javascript:tavrnLogin.doLogin()">log in to chat</a>
+  {{ end }}
+  <div id="chatOutput">
+  </div>
+</div>
+<!-- begin chat widget code --->
+<script type="text/javascript" src="//endchan.xyz/.static/ajax.js"></script>
+<script type="text/javascript" src="//widgets.tavrn.gg/js/chat.js?site=gitgudtv&id=1&w=300&h=250" id="chat_js"></script>
+<script type="text/javascript">
+  {{ if .ChatID }}
+  const chatID = "{{ .ChatID }}";
+  {{ else }}
+  /* fallback value */
+  const chatID = "1";
+  {{ end }}
+
+  /** change ChatWidget as needed */
+  const ChatWidget = tavrnChat;
+  
+  let tggChat = new ChatWidget(chatID);
+  {{ if .User.Token }}
+  tggChat.setAccessToken("{{ .User.Token }}");
+  {{ end }}
+  tggChat.getMessages();
+</script>
+<!-- end chat widget --->
+{{ end }}

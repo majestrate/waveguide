@@ -1,24 +1,7 @@
 {{define "video.html"}}
 {{ template "header.html" }}
 {{ template "navbar.html" }}
-<div id="player">
-</div>
-<div id="chat">
-</div>
-<script type="text/javascript">
-  /** webtorrent webseeds */
-  setTimeout(function() {
-    var wg = window.guide;
-    var player = wg.VideoPlayer("player");
-    var webseeds = [];
-    {{ range .Video.WebSeeds }}
-    webseeds.push("{{.}}");
-    {{ end }}
-    player.SetInfo("{{ .Video.TorrentURL }}", webseeds, function() { player.Start(); });
-    var chat = wg.ChatWidget("chat");
-    chat.SetToken("{{ .User.Token }}");
-    chat.Start();
-  }, 100);
-</script>
+{{ template "chat.html" }}
+{{ template "canned_player.html" }}
 {{ template "footer.html" }}
 {{end}}

@@ -14,7 +14,11 @@ function buildChatPost(chat)
   var name = "???";
   if(user && user.name)
   {
-    name = user.name;
+    name = user.name.trim();
+  }
+  if(!name.length)
+  {
+    name = user.username;
   }
   e.appendChild(document.createTextNode(name+": "+chat.text));
   return e;

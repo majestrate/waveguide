@@ -1,8 +1,8 @@
 {{define "watch.html"}}
 {{ template "header.html" }}
-{{ template "player.html" }}
+{{ template "live_player.html" }}
 <script>
-  setTimeout(function() { window.guide.Streamer("{{.StreamID}}"); } , 500);
+  setTimeout(function() { window.guide.Streamer("{{.StreamID}}"); } , 100);
 </script>
 {{ template "footer.html" }}
 {{end}}
