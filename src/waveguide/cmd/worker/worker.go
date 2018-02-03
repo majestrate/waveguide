@@ -2,12 +2,12 @@ package worker
 
 import (
 	"net/url"
-	"waveguide/lib/api"
 	"waveguide/lib/config"
 	"waveguide/lib/database"
 	"waveguide/lib/log"
 	"waveguide/lib/torrent"
 	"waveguide/lib/video"
+	"waveguide/lib/worker/api"
 )
 
 type Worker struct {

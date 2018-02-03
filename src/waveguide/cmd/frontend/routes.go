@@ -4,11 +4,11 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"net/url"
-	"waveguide/lib/api"
 	"waveguide/lib/config"
 	"waveguide/lib/database"
 	"waveguide/lib/oauth"
 	"waveguide/lib/streaming"
+	"waveguide/lib/worker/api"
 )
 
 type Routes struct {

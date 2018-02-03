@@ -9,24 +9,26 @@ type Configurable interface {
 }
 
 type Config struct {
-	Worker   WorkerConfig
-	Frontend FrontendConfig
-	DB       DBConfig
-	MQ       MQConfig
-	Storage  StorageConfig
-	CDN      CDNConfig
-	OAuth    OAuthConfig
+	Worker    WorkerConfig
+	Frontend  FrontendConfig
+	DB        DBConfig
+	MQ        MQConfig
+	Storage   StorageConfig
+	CDN       CDNConfig
+	OAuth     OAuthConfig
+	ApiServer ApiServerConfig
 }
 
 func (c *Config) Load(fname string) error {
 	sects := map[string]Configurable{
-		"worker":   &c.Worker,
-		"frontend": &c.Frontend,
-		"database": &c.DB,
-		"rabbitmq": &c.MQ,
-		"storage":  &c.Storage,
-		"cdn":      &c.CDN,
-		"oauth":    &c.OAuth,
+		"worker":    &c.Worker,
+		"frontend":  &c.Frontend,
+		"database":  &c.DB,
+		"rabbitmq":  &c.MQ,
+		"storage":   &c.Storage,
+		"cdn":       &c.CDN,
+		"oauth":     &c.OAuth,
+		"apiserver": &c.ApiServer,
 	}
 	cfg, err := parser.Read(fname)
 	if err != nil {

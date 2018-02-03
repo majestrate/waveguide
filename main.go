@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"waveguide/cmd/apiserv"
 	"waveguide/cmd/cdn"
 	"waveguide/cmd/frontend"
 	"waveguide/cmd/worker"
@@ -11,7 +12,7 @@ import (
 )
 
 func printUsage() {
-	fmt.Printf("usage: %s [frontend|worker|cdn]", os.Args[0])
+	fmt.Printf("usage: %s [apiserv|frontend|worker|cdn]", os.Args[0])
 	fmt.Println()
 }
 
@@ -23,6 +24,8 @@ func main() {
 		mode = strings.ToUpper(os.Args[1])
 	}
 	switch mode {
+	case "APISERV":
+		apiserv.Run()
 	case "FRONTEND":
 		frontend.Run()
 	case "WORKER":
@@ -30,6 +33,7 @@ func main() {
 	case "CDN":
 		cdn.Run()
 	default:
+		go apiserv.Run()
 		go frontend.Run()
 		go worker.Run()
 		cdn.Run()

@@ -5,8 +5,8 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"waveguide/lib/api"
 	"waveguide/lib/log"
+	"waveguide/lib/worker/api"
 )
 
 func (w *Worker) UploadRequest(u *url.URL, body io.ReadCloser) *http.Request {

@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"net/url"
 	"time"
-	"waveguide/lib/api"
 	"waveguide/lib/log"
 	"waveguide/lib/util"
+	"waveguide/lib/worker/api"
 )
 
 const VideoURLBase = "/v"

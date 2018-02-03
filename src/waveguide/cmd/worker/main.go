@@ -5,9 +5,9 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
-	"waveguide/lib/api"
 	"waveguide/lib/config"
 	"waveguide/lib/log"
+	"waveguide/lib/worker/api"
 )
 
 func Run() {

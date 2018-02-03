@@ -3,9 +3,9 @@ package worker
 import (
 	"net/url"
 	"path/filepath"
-	"waveguide/lib/api"
 	"waveguide/lib/log"
 	"waveguide/lib/util"
+	"waveguide/lib/worker/api"
 )
 
 func (w *Worker) ApiMakeTorrent(r *api.Request) error {

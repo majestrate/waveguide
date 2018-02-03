@@ -6,8 +6,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"waveguide/lib/api"
 	"waveguide/lib/log"
+	"waveguide/lib/worker/api"
 )
 
 var ErrNoFileName = errors.New("no filename provided")
