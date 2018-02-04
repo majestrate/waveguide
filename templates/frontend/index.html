@@ -1,5 +1,6 @@
 {{define "index.html"}}
-{{ template "header.html" }}
+{{ template "header.html" . }}
+{{ template "navbar.html" . }}
 <a href="/upload/"><h3>Upload Video</h3></a>
 <a href="/stream/"><h3>Stream Video</h3></a>
 <h3> Recent Uploads </h3>

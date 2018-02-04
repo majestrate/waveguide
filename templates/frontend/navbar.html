@@ -1,5 +1,16 @@
 {{define "navbar.html"}}
 <div class="navbar">
-  <a href="/">front page</a>
+  <span class="frontpage">
+    <a href="/">front page</a>
+  </span>
+  {{ if .User.ID }}
+  <span class="logout">
+    <a href="/logout/">log out</a>
+  </span>
+  {{ else }}
+  <span class="login">
+    <a href="/login/">log in</a>
+  </span>
+  {{ end }}
 </div>
 {{end}}
