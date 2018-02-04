@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 	"waveguide/lib/log"
+	"waveguide/lib/video"
 	"waveguide/lib/worker/api"
 )
 
@@ -33,9 +34,27 @@ func (w *Worker) ApiEncodeVideo(r *api.Request) error {
 		return ErrNoFilePath
 	}
 	infile := infileURL.Path
-	log.Infof("Encoding %s as %s to %s", fname, infile, outfile)
-	err = w.Encoder.EncodeFile(infile, outfile)
-	os.Remove(infile)
+	var encode bool
+
+	log.Infof("probing %s", infile)
+
+	encode, err = w.Prober.VideoNeedsEncoding(infile, video.Info{
+		VideoCodec: "h264",
+		AudioCodec: "aac",
+	})
+	if err != nil {
+		log.Errorf("failed to probe %s: %s", infile, err.Error())
+		return err
+	}
+
+	if encode {
+		log.Infof("Encoding %s as %s to %s", fname, infile, outfile)
+		err = w.Encoder.EncodeFile(infile, outfile)
+		os.Remove(infile)
+	} else if err == nil {
+		log.Infof("Video %s accepted as is", fname)
+		err = os.Rename(infile, outfile)
+	}
 	if err == nil {
 		var uploadURL *url.URL
 		uploadURL, err = url.Parse(w.UploadURL)

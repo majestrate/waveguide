@@ -17,8 +17,8 @@ func NewEncoder(conf *config.VideoEncoderConfig) (enc Encoder, err error) {
 	switch conf.Dialect {
 	case config.ExternalFFMPEG:
 		enc = &FFMPEGEncoder{
-			Path:   conf.FFMPEG.Path,
-			Params: strings.Split(conf.FFMPEG.Params, " "),
+			Path:   conf.FFMPEG.FFmpegPath,
+			Params: strings.Split(conf.FFMPEG.FFmpegParams, " "),
 		}
 	}
 	if enc == nil {

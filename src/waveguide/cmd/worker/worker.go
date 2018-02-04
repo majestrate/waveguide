@@ -13,6 +13,7 @@ import (
 type Worker struct {
 	UploadURL string
 	Encoder   video.Encoder
+	Prober    video.Prober
 	Torrent   *torrent.Factory
 	TempDir   string
 	DB        database.Database
@@ -54,6 +55,12 @@ func (w *Worker) configure(conf *config.Config, reload bool) (err error) {
 	w.TempDir = conf.Worker.TempDir
 	w.Encoder, err = video.NewEncoder(&conf.Worker.Encoder)
 	if err != nil {
+		log.Fatalf("failed to create encoder: %s", err)
+		return
+	}
+	w.Prober, err = video.NewProber(&conf.Worker.Encoder)
+	if err != nil {
+		log.Fatalf("failed to create prober: %s", err)
 		return
 	}
 

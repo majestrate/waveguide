@@ -20,12 +20,16 @@ func (c *VideoEncoderConfig) Load(s *parser.Section) error {
 }
 
 type FFMPEGConfig struct {
-	Path   string
-	Params string
+	FFmpegPath    string
+	FFmpegParams  string
+	FFprobePath   string
+	FFprobeParams string
 }
 
 func (c *FFMPEGConfig) Load(s *parser.Section) error {
-	c.Path = s.ValueOf("ffmpeg_path")
-	c.Params = s.ValueOf("ffmpeg_params")
+	c.FFmpegPath = s.ValueOf("ffmpeg_path")
+	c.FFmpegParams = s.ValueOf("ffmpeg_params")
+	c.FFprobePath = s.ValueOf("ffprobe_path")
+	c.FFprobeParams = s.ValueOf("ffprobe_params")
 	return nil
 }
