@@ -1,5 +1,6 @@
 {{define "stream.html"}}
-{{ template "header.html" }}
+{{ template "header.html" . }}
+{{ template "navbar.html" . }}
 {{ if .User.UserID }}
 <video id="cam" autoplay>
 </video>
