@@ -19,6 +19,8 @@ func NewServer() *Server {
 /** setup internal state and routes */
 func (s *Server) Setup() (err error) {
 
+	s.e.GET("/api/v1/stream/check", s.APICheckStreamKey)
+
 	return
 }
 
