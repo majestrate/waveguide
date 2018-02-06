@@ -70,7 +70,6 @@ func Run() {
 	router.SetFuncMap(funcs)
 	// load templates
 	router.LoadHTMLGlob(filepath.Join(conf.Frontend.TemplateDir, "*.html"))
-
 	// set up routes
 	routes.SetupRoutes(router, &conf)
 	// run router

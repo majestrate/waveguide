@@ -86,6 +86,8 @@ func (w *Worker) FindWorker(method string) (api.WorkerFunc, bool) {
 		return w.ApiEncodeVideo, true
 	case api.MakeTorrent:
 		return w.ApiMakeTorrent, true
+	case api.ExpireVideo:
+		return w.ApiExpireVideo, true
 	default:
 		return nil, false
 	}

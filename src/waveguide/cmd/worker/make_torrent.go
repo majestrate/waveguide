@@ -3,6 +3,7 @@ package worker
 import (
 	"net/url"
 	"path/filepath"
+	"waveguide/lib/expire"
 	"waveguide/lib/log"
 	"waveguide/lib/util"
 	"waveguide/lib/worker/api"
@@ -38,5 +39,16 @@ func (w *Worker) ApiMakeTorrent(r *api.Request) error {
 		}
 	}
 	util.RemoveURL(fileURL)
+	shouldExpire := util.RandBool(0.25)
+	if shouldExpire || true {
+		vids, err := w.DB.GetExpiredVideos(expire.DefaultCapacity)
+		if err == nil {
+			for _, vid := range vids {
+				w.API.Do(w.ExpireVideoRequest(vid.VideoID))
+			}
+		} else {
+			log.Errorf("failed to get expired videos: %s", err.Error())
+		}
+	}
 	return err
 }

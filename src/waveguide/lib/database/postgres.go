@@ -163,3 +163,60 @@ func (db *pgDB) GetVideosForUserByName(name string) (list *model.VideoFeed, err 
 	}
 	return
 }
+
+func (db *pgDB) DeleteVideo(id string) (err error) {
+	var id_i int64
+	id_i, err = strconv.ParseInt(id, 10, 64)
+	if err == nil {
+		_, err = db.conn.Exec("DELETE FROM videos WHERE video_id = $1", id_i)
+	}
+	return
+}
+
+func (db *pgDB) GetExpiredVideos(capacity uint64) (videos []model.VideoInfo, err error) {
+	var rows *sql.Rows
+	rows, err = db.conn.Query("SELECT videos.video_id, videos.video_metainfo_url FROM videos WHERE videos.video_id NOT IN ( SELECT video_id FROM videos ORDER BY video_upload_date DESC LIMIT $1 )", capacity)
+	if err == sql.ErrNoRows {
+		err = nil
+	} else if err == nil {
+		vids := make(map[int64]*model.VideoInfo)
+		for rows.Next() {
+			var u string
+			var id int64
+			rows.Scan(&id, &u)
+			vids[id] = &model.VideoInfo{
+				VideoID:    fmt.Sprintf("%d", id),
+				TorrentURL: u,
+			}
+		}
+		rows.Close()
+		var q string
+		counter := 1
+		var params []interface{}
+		for id := range vids {
+			if counter != 1 {
+				q += ", "
+			}
+			q += fmt.Sprintf("$%d", counter)
+			params = append(params, id)
+			counter++
+		}
+		rows, err = db.conn.Query(fmt.Sprintf("SELECT video_id, webseed_url FROM webseeds WHERE video_id IN (%s)", q), params...)
+		if err == sql.ErrNoRows {
+		} else if err == nil {
+			for rows.Next() {
+				var u string
+				var id int64
+				rows.Scan(&id, &u)
+				vids[id].WebSeeds = append(vids[id].WebSeeds, u)
+			}
+			rows.Close()
+		} else {
+			return
+		}
+		for k := range vids {
+			videos = append(videos, *vids[k])
+		}
+	}
+	return
+}
