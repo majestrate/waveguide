@@ -58,4 +58,9 @@ func (routes *Routes) SetupRoutes(router *gin.Engine, conf *config.Config) {
 	router.StaticFile("/chat/", filepath.Join(conf.Frontend.StaticDir, "chat.html"))
 	router.GET("/register/", routes.ServeRegister)
 
+	// pomf api
+	if routes.Pomf != nil {
+		router.Any("/upload.php", gin.WrapH(routes.Pomf))
+	}
+
 }

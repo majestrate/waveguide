@@ -7,6 +7,7 @@ import (
 	"waveguide/lib/config"
 	"waveguide/lib/database"
 	"waveguide/lib/oauth"
+	pomf "waveguide/lib/pomf/api"
 	"waveguide/lib/streaming"
 	"waveguide/lib/worker/api"
 )
@@ -18,6 +19,7 @@ type Routes struct {
 	TempDir     string
 	Streaming   *streaming.Context
 	oauth       *oauth.Client
+	Pomf        *pomf.Server
 }
 
 func (r *Routes) Close() error {
@@ -59,6 +61,8 @@ func (r *Routes) configure(c *config.Config, reload bool) (err error) {
 	if err != nil {
 		return
 	}
+
+	r.Pomf = pomf.NewServer(r)
 
 	if r.api != nil {
 		r.api.Close()

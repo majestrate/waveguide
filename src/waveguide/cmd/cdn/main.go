@@ -31,6 +31,15 @@ func (cdn *CDNServer) HandlePUT(c *gin.Context) {
 	}
 }
 
+func (cdn *CDNServer) HandleDELETE(c *gin.Context) {
+	err := os.Remove(filepath.Join(cdn.rootdir, filepath.Clean(c.Param("filename"))))
+	if err == nil {
+		c.String(http.StatusOK, "okay")
+	} else {
+		c.String(http.StatusInternalServerError, err.Error())
+	}
+}
+
 func Run() {
 	cdn := &CDNServer{
 		rootdir: "cdn_files",
@@ -49,6 +58,7 @@ func Run() {
 	router.Use(util.CORSMiddleware())
 
 	router.PUT("/:filename", cdn.HandlePUT)
+	router.DELETE("/:filename", cdn.HandleDELETE)
 	router.Static("/", cdn.rootdir)
 	sigchnl := make(chan os.Signal)
 	signal.Notify(sigchnl, os.Interrupt, syscall.SIGHUP)
