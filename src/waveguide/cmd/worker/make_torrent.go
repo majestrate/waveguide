@@ -40,7 +40,8 @@ func (w *Worker) ApiMakeTorrent(r *api.Request) error {
 	}
 	util.RemoveURL(fileURL)
 	shouldExpire := util.RandBool(0.25)
-	if shouldExpire || true {
+	alwaysExpire := true
+	if shouldExpire || alwaysExpire {
 		vids, err := w.DB.GetExpiredVideos(expire.DefaultCapacity)
 		if err == nil {
 			for _, vid := range vids {
