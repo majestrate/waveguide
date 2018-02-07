@@ -5,8 +5,22 @@
 <video id="cam" autoplay>
 </video>
 <div>
-  <button onclick="window.guide.Streamer()">stream</button>
+  stream key:
+  <pre id="streamkey"> </pre>
 </div>
+<script type="text/javascript">
+  var ajax = new XMLHttpRequest;
+
+  ajax.onreadystatechange = function() {
+    if (ajax.readyState == 4 && ajax.statusCode == 200) {
+      var info = JSON.parse(ajax.responseText);
+      var e = document.getElementById("streamkey");
+      e.appendChild(document.createTextNode(info.streamkey || "no stream key available"));
+    } 
+  };
+  ajax.open("GET", "/wg-api/v1/authed/stream-url");
+  ajax.send();
+</script>
 <div>
   <a target="_blank" href="/watch/?u={{.User.UserID}}">Watch</a>
 </div>
