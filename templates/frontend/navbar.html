@@ -1,16 +1,33 @@
 {{define "navbar.html"}}
-<div class="navbar">
-  <span class="frontpage">
-    <a href="/">front page</a>
-  </span>
-  {{ if .User.Token }}
-  <span class="logout">
-    <a href="/logout/">log out</a>
-  </span>
-  {{ else }}
-  <span class="login">
-    <a href="/login/">log in</a>
-  </span>
-  {{ end }}
+<div class="top">
+  <div class="menu bg green">
+    <div class="wrapper">
+      <ul>
+        <li>
+          <a href="/"><span class="nav-logo mixtape-color">
+            <img src="https://beam.sapphire.moe/assets/gitgudtv/GitGud.tv.png" height=32> GitGud.TV
+          </span></a>
+        </li>
+        <!-- div class="search">
+          <form action="/search" role="search">
+            <input type="text" id="search" class="search-box" name="q" placeholder="Search Posts and Tags">
+            <input type="submit" class="search-button" value="&#xf002;">
+          </form>
+        </div -->
+        {{ if .User.Token }}
+          <li class="username" onclick="accountList()"><a href="/logout/" style="padding-top: 0px"><span>Log out</span></a></li>
+        {{ else }}
+          <li class="username" onclick="accountList()"><a href="/login/" style="padding-top: 0px"><span>Log in</span></a></li>
+        {{ end }}
+      </ul>
+    </div>
+  </div>
+  <div class="notifications">
+    <div class="wrapper">
+      <!--div class="notification fadein animation-delay one green rounded-bot">
+        <div class="message"><strong>Mixtape Outage </strong> &mdash; Everything should be working now, if you have any issues, email us! </div>
+      </div-->
+    </div>
+  </div>
 </div>
 {{end}}

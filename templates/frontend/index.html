@@ -1,34 +1,65 @@
 {{define "index.html"}}
 {{ template "header.html" . }}
 {{ template "navbar.html" . }}
-<a href="/upload/"><h3>Upload Video</h3></a>
-<a href="/stream/"><h3>Stream Video</h3></a>
-<h3> Recent Uploads </h3>
-<table>
-  <thead>
-    <tr>
-      <th>Category</th>
-      <th>Name</th>
-      <th>Upload Date</th>
-    </tr>
-  </thead>
-  <tbody>
-    {{ range .Videos }}
-    <tr>
-      <td></td>
-      <td><a href="/v/{{ .VideoID }}/">{{ .Title }}</a></td>
-      <td>{{ FormatDate .UploadedAt }}</td>
-    </tr>
-    {{ end }}
-  </tbody>
-</table>
-<h3> Streamers Online </h3>
-<div class="streamers">
-  {{ range .Streams }}
-  <div class="stream">
-    <a href="/watch/?u={{ . }}"> {{.}} </a>
-  </div>
+
+<div class="container full dropitdown space-top">
+  {{ if .User.Token }}
+    <div class="container full text-center">
+      <div class="button blue rounded icon labeled"><a href="/upload/"><i class="fa fa-upload"></i>Upload Video</a></div>
+      <div class="button blue rounded icon labeled"><a href="/stream/"><i class="fa fa-camera"></i>Stream Video</a></div>
+      <div class="divider"></div>
+    </div>
   {{ end }}
+  <div class="header text-center">Recent Uploads</div>
+  <div class="file-list">
+    {{ range .Videos }}
+      <div class="item">
+        <!-- img src="https://my.mixtape.moe/rioxyn.png" -->
+        <div class="content" style="width: 100%">
+          <a href="/v/{{ .VideoID }}/">{{ .Title }}</a>
+          <div style="float: right">
+            <input type="text" class="url-copy copy-input" value="http://gitgud.tv/v/{{ .VideoID }}" readonly>
+            <div class="button gray copy icon"><i class="fa fa-copy"></i></div>
+            <div class="button green rounded icon labeled"><a href="/v/{{ .VideoID }}/"><i class="fa fa-play"></i>Play</a></div>
+          </div>
+          <div style="height: 10px"></div>
+          <!-- div class="button purple rounded icon labeled"><i class="fa fa-pencil"></i>Edit</div>
+          <div class="button red rounded icon labeled"><i class="fa fa-trash"></i>Delete</div -->
+          <p>
+            <strong>Uploaded:</strong> {{ FormatDate .UploadedAt }} -
+            <strong>Size:</strong> ?? -
+            <strong>Views:</strong> ?? -
+            <strong>Bandwidth:</strong> ?? MB</p>
+        </div>
+      </div>
+    {{ end }}
+  </div>
+  <!-- if count of streamers if more than zero then -->
+  <div class="header text-center">Streamers Online</div>
+  <div class="file-list">
+    {{ range .Streams }}
+      <div class="item">
+        <!-- img src="https://my.mixtape.moe/rioxyn.png" -->
+        <div class="content" style="width: 100%">
+          <a href="/watch/?u={{ . }}"> {{.}} </a>
+          <div style="float: right">
+            <input type="text" class="url-copy copy-input" value="http://gitgud.tv/watch/?u={{ . }}" readonly>
+            <div class="button gray copy icon"><i class="fa fa-copy"></i></div>
+            <div class="button green rounded icon labeled"><a href="/v/{{ .VideoID }}/"><i class="fa fa-watch"></i>Watch</a></div>
+          </div>
+          <!--div style="height: 10px"></div -->
+          <!-- div class="button purple rounded icon labeled"><i class="fa fa-pencil"></i>Edit</div>
+          <div class="button red rounded icon labeled"><i class="fa fa-trash"></i>Delete</div -->
+          <!-- p>
+            <strong>Uploaded:</strong> {{ FormatDate .UploadedAt }} -
+            <strong>Size:</strong> ?? -
+            <strong>Views:</strong> ?? -
+            <strong>Bandwidth:</strong> ?? MB</p -->
+        </div>
+      </div>
+    {{ end }}
+  </div>
 </div>
+
 {{ template "footer.html" }}
 {{end}}

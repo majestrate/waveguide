@@ -1,10 +1,36 @@
 {{define "header.html" }}
-<!doctype html>
-<html>
-    <head>
-        <title> {{ .Title }} </title>
-        <link rel="stylesheet" href="/static/waveguide.css">
-        <script type="text/javascript" src="/static/waveguide.min.js"></script>
-    </head>
-    <body>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700" rel="stylesheet">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+
+  <link rel="stylesheet" href="https://beam.sapphire.moe/jeweler/css/jeweler.css">
+  <link rel="stylesheet" href="https://beam.sapphire.moe/jeweler/css/gitgudtv.css">
+
+  <script src="https://beam.sapphire.moe/jeweler/js/gem.js"></script>
+  <link rel="stylesheet" href="https://beam.sapphire.moe/jeweler/fonts/font-awesome/css/font-awesome.min.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="Upload and share videos. GitGudTv allows you to upload any video type and share them with your friends, family, or followers!"/>
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://gitgud.tv" />
+  <meta property="og:title" content="GitGudTV" />
+  <meta property="og:description" content="Upload and share videos. GitGudTv allows you to upload any video type and share them with your friends, family, or followers!" />
+  <meta property="og:site_name" content="GitGudTV" />
+  <meta property="og:image" content="https://beam.sapphire.moe/assets/gitgudtv/GitGud.tv.png" />
+  <meta property="og:locale" content="en-US" />
+
+  <script>var siteName = "gitgudtv";</script>
+  <script src="https://beam.sapphire.moe/jeweler/js/notice.js"></script>
+
+  <!-- this goes after everything to override our design defaults -->
+  <link rel="stylesheet" href="/static/waveguide.css">
+  <script type="text/javascript" src="/static/waveguide.min.js"></script>
+
+  <!-- optimize me -->
+  <link rel="icon" href="https://beam.sapphire.moe/assets/gitgudtv/GitGud.tv.png" type="image/png">
+  <title>{{ .Title }}</title>
+</head>
+<body class="bg dark moon">
 {{end}}
