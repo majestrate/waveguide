@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"path/filepath"
+	"time"
 	"waveguide/lib/config"
 	"waveguide/lib/model"
 )
@@ -17,15 +18,16 @@ func (routes *Routes) SetupRoutes(router *gin.Engine, conf *config.Config) {
 		c.Redirect(http.StatusMovedPermanently, "/static/favicon.png")
 	})
 
+	noCacheHeadHandler := func(c *gin.Context) {
+		c.Header("Last-Modified", time.Now().Format(http.TimeFormat))
+		c.String(200, "")
+	}
+
 	// setup routes
 	router.GET("/", routes.ServeIndex)
-	router.HEAD("/", func(c *gin.Context) {
-		c.String(200, "")
-	})
+	router.HEAD("/", noCacheHeadHandler)
 	router.GET(fmt.Sprintf("%s/:id/", model.VideoURLBase), routes.ServeVideo)
-	router.HEAD(fmt.Sprintf("%s/:id/", model.VideoURLBase), func(c *gin.Context) {
-		c.String(200, "")
-	})
+	router.HEAD(fmt.Sprintf("%s/:id/", model.VideoURLBase), noCacheHeadHandler)
 
 	router.GET("/u/:Username/", routes.ServeUser)
 	router.GET("/u/:Username/videos.atom", routes.ServeUserVideosFeed)
