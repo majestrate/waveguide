@@ -1,11 +1,9 @@
 {{define "upload.html"}}
-{{ template "header.html" }}
+{{ template "header.html" . }}
 <div id="upload_widget"></div>
 <script type="text/javascript">
-  setTimeout(function() {
-    var upload = window.guide.UploadWidget("upload_widget");
-    upload.Setup();
-  }, 100);
+  var upload = window.guide.UploadWidget("upload_widget");
+  upload.Setup();
 </script>
-{{ template "footer.html" }}
+{{ template "footer.html" . }}
 {{end}}

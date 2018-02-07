@@ -1,5 +1,5 @@
 {{define "error.html"}}
-{{template "header.html" }}
+{{template "header.html" . }}
 <h1> {{ .Error }} </h1>
-{{template "footer.html" }}
+{{template "footer.html" . }}
 {{end}}

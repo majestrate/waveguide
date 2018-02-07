@@ -11,7 +11,7 @@
   <a target="_blank" href="/watch/?u={{.User.UserID}}">Watch</a>
 </div>
 {{ end }}
-{{ template "stats.html" }}
-{{ template "log.html" }}
-{{ template "footer.html" }}
+{{ template "stats.html" . }}
+{{ template "log.html" . }}
+{{ template "footer.html" . }}
 {{end}}
