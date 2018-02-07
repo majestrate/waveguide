@@ -7,16 +7,23 @@ import (
 const StreamUpdateTimeout = time.Minute
 
 type StreamInfo struct {
-	Magnet     string
+	URLS       [3]string
+	Token      string
 	LastUpdate time.Time
 }
 
-func (i *StreamInfo) LastMagnet() string {
-	return i.Magnet
+func (i *StreamInfo) LastTorrent() string {
+	return i.URLS[0]
 }
 
-func (i *StreamInfo) Add(url string) {
-	i.Magnet = url
+func (i *StreamInfo) OldestTorrent() string {
+	return i.URLS[2]
+}
+
+func (i *StreamInfo) AddTorrent(url string) {
+	i.URLS[2] = i.URLS[1]
+	i.URLS[1] = i.URLS[0]
+	i.URLS[0] = url
 	i.LastUpdate = time.Now()
 }
 

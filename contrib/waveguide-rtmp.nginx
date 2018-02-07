@@ -1,0 +1,21 @@
+
+server {
+	listen 1935;
+	chunk_size 4000;
+	
+
+	application waveguide {
+		live on;
+
+		on_publish http://127.0.0.1:2299/api/v1/stream/publish;
+		on_play http://127.0.0.1:2299/api/v1/stream/join;
+		on_play_done http://127.0.0.1:2299/api/v1/stream/part;
+		on_publish_done http://127.0.0.1:2299/api/v1/stream/done;
+    on_record_done http://127.0.0.1:2299/api/v1/stream/segment;
+    
+		record all;
+		record_interval 30s;
+    record_unique on;
+    record_path /var/www/wg;
+	}
+}

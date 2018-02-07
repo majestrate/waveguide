@@ -2,6 +2,7 @@ package api
 
 import (
 	"fmt"
+	"net/url"
 )
 
 type Request struct {
@@ -34,4 +35,24 @@ func (r *Request) GetString(key, fallback string) string {
 		return fmt.Sprintf("%s", v)
 	}
 	return fallback
+}
+
+func ExpireVideoRequest(vidID string) *Request {
+	return &Request{
+		Method: ExpireVideo,
+		Args: map[string]interface{}{
+			ParamVideoID: vidID,
+		},
+	}
+}
+
+func MkTorrentRequest(infile *url.URL, vid string, filename string) *Request {
+	return &Request{
+		Method: MakeTorrent,
+		Args: map[string]interface{}{
+			ParamVideoID:  vid,
+			ParamFilename: filename,
+			ParamFileURL:  infile.String(),
+		},
+	}
 }

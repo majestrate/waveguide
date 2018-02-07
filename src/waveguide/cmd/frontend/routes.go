@@ -17,7 +17,7 @@ type Routes struct {
 	api         *api.Client
 	FrontendURL *url.URL
 	TempDir     string
-	Streaming   *streaming.Context
+	Streaming   *streaming.Client
 	oauth       *oauth.Client
 	Pomf        *pomf.Server
 }
@@ -29,7 +29,6 @@ func (r *Routes) Close() error {
 }
 
 func (r *Routes) Configure(c *config.Config) error {
-	r.Streaming = streaming.NewContext()
 	return r.configure(c, false)
 }
 
@@ -38,6 +37,7 @@ func (r *Routes) Reconfigure(c *config.Config) error {
 }
 
 func (r *Routes) configure(c *config.Config, reload bool) (err error) {
+	r.Streaming = streaming.NewClient(c)
 	if c.OAuth.Enabled {
 		r.oauth = oauth.NewClient(c.OAuth)
 	} else {

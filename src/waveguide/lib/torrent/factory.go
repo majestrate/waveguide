@@ -22,6 +22,22 @@ type Factory struct {
 	PieceLength uint32
 }
 
+func (f *Factory) MakeSingleWithWebseed(filename, webseed string, body io.Reader, out io.Writer) (err error) {
+	t := metainfo.TorrentFile{
+		Announce: f.AnnounceURL,
+		Webseed:  webseed,
+	}
+	t.Info.PieceLength = f.PieceLength
+	t.Info.Path = filepath.Base(filename)
+	err = t.Info.BuildSingle(body)
+	if err == nil {
+		log.Debugf("created torrent for %s", filename)
+		t.Created = time.Now().Unix()
+		err = t.BEncode(out)
+	}
+	return
+}
+
 func (f *Factory) MakeSingle(filename string, body io.Reader, out io.Writer) error {
 	t := metainfo.TorrentFile{
 		Announce: f.AnnounceURL,

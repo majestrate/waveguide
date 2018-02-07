@@ -30,7 +30,7 @@ func (w *Worker) ApiMakeTorrent(r *api.Request) error {
 	err = w.Torrent.MakeSingle(filename, f, torrent)
 	f.Close()
 	if err == nil {
-		err = w.DoRequest(w.UploadRequest(uploadURL, torrent))
+		err = w.DoRequest(api.UploadRequest(uploadURL, torrent))
 		if err == nil {
 			vidid := r.GetString(api.ParamVideoID, "")
 			if vidid != "" {
@@ -45,7 +45,7 @@ func (w *Worker) ApiMakeTorrent(r *api.Request) error {
 		vids, err := w.DB.GetExpiredVideos(expire.DefaultCapacity)
 		if err == nil {
 			for _, vid := range vids {
-				w.API.Do(w.ExpireVideoRequest(vid.VideoID))
+				w.API.Do(api.ExpireVideoRequest(vid.VideoID))
 			}
 		} else {
 			log.Errorf("failed to get expired videos: %s", err.Error())

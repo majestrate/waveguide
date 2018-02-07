@@ -20,7 +20,6 @@ func (routes *Routes) SetupRoutes(router *gin.Engine, conf *config.Config) {
 
 	noCacheHeadHandler := func(c *gin.Context) {
 		c.Header("Last-Modified", time.Now().Format(http.TimeFormat))
-		c.String(200, "")
 	}
 
 	// setup routes
@@ -46,6 +45,7 @@ func (routes *Routes) SetupRoutes(router *gin.Engine, conf *config.Config) {
 		authed := apiV1.Group("/authed")
 		authed.Use(routes.ApiAuthMiddleware())
 		{
+			authed.GET("/stream-url", routes.ApiStreamURL)
 			authed.POST("/upload", routes.ApiUpload)
 			authed.POST("/comment", routes.ApiComment)
 			authed.POST("/stream-update", routes.ApiStreamUpdate)

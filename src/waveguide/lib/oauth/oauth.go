@@ -50,6 +50,10 @@ func (c *Client) SubmitComment(comment model.Comment) (err error) {
 	return
 }
 
+func (c *Client) AnnounceStream(userID, token string) (err error) {
+	return
+}
+
 func (c *Client) GetUser(code, callback string) (user *User, err error) {
 	postdata := make(url.Values)
 	postdata.Set("client_id", c.conf.ClientID)

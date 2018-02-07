@@ -137,6 +137,7 @@ type TorrentFile struct {
 	Comment      []byte     `bencode:"comment"`
 	CreatedBy    []byte     `bencode:"created by"`
 	Encoding     []byte     `bencode:"encoding"`
+	Webseed      string     `bencode:"url-list,omit-empty"`
 }
 
 func (tf *TorrentFile) LengthOfPiece(idx uint32) (l uint32) {

@@ -1,10 +1,9 @@
 package frontend
 
 import (
-	"bytes"
 	"github.com/gin-gonic/gin"
-	"io"
 	"net/http"
+	"waveguide/lib/api"
 )
 
 func (r *Routes) ServeStream(c *gin.Context) {
@@ -23,27 +22,26 @@ func (r *Routes) ApiStreamsOnline(c *gin.Context) {
 }
 
 func (r *Routes) ApiStreamMagnets(c *gin.Context) {
-	magnet := ""
 	status := http.StatusNotFound
 	key, ok := c.GetQuery("u")
-
 	if ok {
 		stream := r.Streaming.Find(key)
 		if stream != nil {
-			status = http.StatusOK
-			magnet = stream.LastMagnet()
+			c.Redirect(http.StatusTemporaryRedirect, stream.LastTorrent())
 		}
 	}
-	c.String(status, magnet)
+	c.String(status, "")
 }
 
 func (r *Routes) ApiStreamUpdate(c *gin.Context) {
-	u := r.GetCurrentUser(c)
-	stream := r.Streaming.Ensure(u.UserID)
 	status := http.StatusOK
-	buff := new(bytes.Buffer)
-	io.Copy(buff, c.Request.Body)
-	c.Request.Body.Close()
-	stream.Add(buff.String())
 	c.String(status, "")
+}
+
+func (r *Routes) ApiStreamURL(c *gin.Context) {
+	u := r.GetCurrentUser(c)
+	// TODO: use app token not user token
+	c.JSON(http.StatusOK, map[string]interface{}{
+		"streamkey": u.UserID + api.StreamKeyDelim + u.Token,
+	})
 }

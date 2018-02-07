@@ -64,13 +64,13 @@ func (w *Worker) ApiEncodeVideo(r *api.Request) error {
 			var f *os.File
 			f, err = os.Open(outfile)
 			if err == nil {
-				err = w.DoRequest(w.UploadRequest(uploadURL, f))
+				err = w.DoRequest(api.UploadRequest(uploadURL, f))
 				f.Close()
 				if err == nil {
 					err = w.DB.AddWebseed(vidid, w.ToPublicCDN(uploadURL).String())
 					if err == nil {
 						log.Infof("make torrent for %s", outfile)
-						err = w.API.Do(w.MkTorrentRequest(&url.URL{
+						err = w.API.Do(api.MkTorrentRequest(&url.URL{
 							Path:   outfile,
 							Scheme: "file",
 						}, vidid, fname))

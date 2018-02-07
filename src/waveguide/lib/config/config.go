@@ -17,6 +17,7 @@ type Config struct {
 	CDN       CDNConfig
 	OAuth     OAuthConfig
 	ApiServer ApiServerConfig
+	RTMP      RTMPConfig
 }
 
 func (c *Config) Load(fname string) error {
@@ -29,6 +30,7 @@ func (c *Config) Load(fname string) error {
 		"cdn":       &c.CDN,
 		"oauth":     &c.OAuth,
 		"apiserver": &c.ApiServer,
+		"rtmp":      &c.RTMP,
 	}
 	cfg, err := parser.Read(fname)
 	if err != nil {
