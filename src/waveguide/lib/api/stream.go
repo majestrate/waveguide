@@ -82,14 +82,14 @@ func (s *Server) APIStreamSegment(c *gin.Context) {
 	user, _ := extractUserToken(c.PostForm("name"))
 	infile := c.PostForm("path")
 	outfile := util.TempFileName(os.TempDir(), ".mp4")
+	defer os.Remove(outfile)
+	defer os.Remove(infile)
 	err := s.encoder.Transcode(infile, outfile)
 	if err != nil {
 		log.Errorf("failed to transcode file: %s", err.Error())
 		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
-	defer os.Remove(outfile)
-	defer os.Remove(infile)
 	videoURL, _ := url.Parse(s.MakeVideoUploadUrl(outfile))
 	torrentURL, _ := url.Parse(s.MakeTorrentUploadURL(outfile))
 	webseedURL := s.MakeWebseedURL(outfile)
