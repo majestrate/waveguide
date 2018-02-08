@@ -62,7 +62,8 @@ Streamer.prototype.Stop = function()
 Streamer.prototype._queueSegment = function(f)
 {
   var self = this;
-  self._segments.push(f);
+  if(f)
+    self._segments.push(f);
 };
 
 Streamer.prototype._popSegmentBlob = function()
