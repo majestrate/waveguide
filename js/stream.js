@@ -9,7 +9,7 @@ function Streamer(source, key)
 {
   this._key = key || null;
   this._source = source;
-  this._rewind = 3;
+  this._rewind = 2;
   this._interval = null;
   this._segments = null;
   this._video = null;
@@ -19,6 +19,7 @@ function Streamer(source, key)
   else
     this._segments = [];
   this._net = new shim.Network();
+  this._lastSegmentURL = null;
 }
 
 Streamer.prototype.Start = function()
@@ -82,6 +83,9 @@ Streamer.prototype._popSegmentBlob = function()
 Streamer.prototype._nextSegment = function(url)
 {
   var self = this;
+  if (self._lastSegmentURL == url) {
+    return;
+  }
   self._net.FetchMetadata(url, function(err, metadata) {
     if(err)
     {
@@ -96,7 +100,11 @@ Streamer.prototype._nextSegment = function(url)
     {
       self._net.AddMetadata(metadata, function(err, blob) {
         if (err) self.log("failed to fetch file: "+err);
-        else self._queueSegment(blob);
+        else
+        {
+          self._queueSegment(blob);
+          self._lastSegmentURL = url
+        }
       });
     }
   });
@@ -214,7 +222,7 @@ Streamer.prototype._onStarted = function()
       }
     };
     self._video.onended = next;
-    self._interval = setInterval(function() {
+    var getsegment = function() {
       var ajax = new XMLHttpRequest();
       ajax.open("GET" , "https://"+location.host+"/wg-api/v1/stream?u="+self._key);
       ajax.onreadystatechange = function() {
@@ -223,7 +231,11 @@ Streamer.prototype._onStarted = function()
         }
       }
       ajax.send();
-    }, 2500);
+    };
+    getsegment();
+    self._interval = setInterval(function() {
+      getsegment();
+    }, settings.RefreshInterval);
   }
   else
   {
