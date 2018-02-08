@@ -42,7 +42,7 @@ func (s *Server) APIStreamPublish(c *gin.Context) {
 		if err == nil {
 			if user == u.ID {
 				s.ctx.Ensure(user, u.Username)
-				log.Infof("stream %s is up", user)
+				s.oauth.AnnounceStream(token, "now live streaming at http://gitgud.tv/watch/?u="+user)
 			} else {
 				log.Errorf("user id missmatch, '%s' != '%s'", user, u.ID)
 				c.String(http.StatusForbidden, "")
@@ -74,6 +74,7 @@ func (s *Server) APIStreamDone(c *gin.Context) {
 			}
 		}
 		s.oauth.AnnounceStream(token, "stream is now offline, bai.")
+		s.ctx.Remove(user)
 	}
 }
 

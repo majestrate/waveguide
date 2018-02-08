@@ -65,3 +65,14 @@ func (ctx *Context) Find(k string) (i *StreamInfo) {
 	}
 	return
 }
+
+func (ctx *Context) Remove(k string) {
+	if len(k) > 0 {
+		ctx.mtx.Lock()
+		_, has := ctx.streams[k]
+		if has {
+			delete(ctx.streams, k)
+		}
+		ctx.mtx.Unlock()
+	}
+}
