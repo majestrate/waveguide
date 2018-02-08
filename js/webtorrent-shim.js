@@ -63,9 +63,14 @@ Shim.prototype.FetchMetadata = function(url, cb)
   });
 };
 
-Shim.prototype.StreamMetadata = function(metadata, elem)
+Shim.prototype.Stream = function(metadata, elem, first)
 {
   var self = this;
+  if(!first)
+  {
+    if(self.torrent.get(metadata.infoHash)) return;
+    if(self._lastInfohash == metadata.infoHash) return;
+  }
   self._lastInfohash = metadata.infoHash;
   self.torrent.add(metadata, function(t) {
     t.files[0].renderTo(elem);

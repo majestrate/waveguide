@@ -100,9 +100,9 @@ Streamer.prototype._nextSegment = function(url)
       }
       else
       {
+        self.log("segment "+self._segmentCounter);
         if(self._segmentCounter > 0)
         {
-          self.log("add torrent "+url);
           self._net.AddMetadata(metadata, function(err, blob) {
             if (err) self.log("failed to fetch file: "+err);
             else
@@ -114,9 +114,9 @@ Streamer.prototype._nextSegment = function(url)
         }
         else
         {
-          self._net.StreamMetadata(metadata, self._video);
+          self._net.Stream(metadata, self._video, true);
           self._video.loop = false;
-          self._segmentCounter ++;
+          self._segmentCounter +=  1;
           self._lastSegmentURL = url;
         }
       }
