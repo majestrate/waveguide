@@ -12,6 +12,7 @@ func (r *Routes) ServeWatch(c *gin.Context) {
 	} else {
 		chatID := r.ChatIDForStream(id)
 		c.HTML(http.StatusOK, "watch.html", map[string]interface{}{
+			"User":     r.GetCurrentUser(c),
 			"StreamID": id,
 			"ChatID":   chatID,
 		})
