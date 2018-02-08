@@ -25,7 +25,7 @@ func (r *Routes) HandleOAuthRedirect(c *gin.Context) {
 		user, err := r.oauth.GetUser(code, r.oauthCallback())
 		if err == nil {
 			r.SetCurrentUser(*user, c)
-			c.Redirect(http.StatusTemporaryRedirect, "/stream/")
+			c.Redirect(http.StatusTemporaryRedirect, "/")
 		} else {
 			r.Error(c, err)
 		}

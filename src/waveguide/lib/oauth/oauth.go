@@ -50,7 +50,26 @@ func (c *Client) SubmitComment(comment model.Comment) (err error) {
 	return
 }
 
-func (c *Client) AnnounceStream(userID, token string) (err error) {
+func (c *Client) AnnounceStream(token, message string) (err error) {
+	u, _ := url.Parse(c.conf.Provider + "channels/5/messages")
+	q := u.Query()
+	q.Set("access_token", token)
+	u.RawQuery = q.Encode()
+	buff := new(bytes.Buffer)
+	err = json.NewEncoder(buff).Encode(map[string]interface{}{
+		"text": message,
+	})
+	if err == nil {
+		var resp *http.Response
+		resp, err = http.Post(u.String(), "application/json; encoding=UTF-8", buff)
+		if err == nil {
+			if resp.StatusCode == 200 {
+				// TODO: check json response
+			} else {
+				err = ErrInvalidBackendResponse
+			}
+		}
+	}
 	return
 }
 
@@ -66,10 +85,20 @@ func (c *Client) GetUser(code, callback string) (user *User, err error) {
 	var resp *http.Response
 	resp, err = http.Post(c.conf.Provider+"oauth/access_token", "application/x-www-form-urlencoded", buff)
 	if err == nil {
-		var u User
-		err = json.NewDecoder(resp.Body).Decode(&u)
+		r := make(map[string]interface{})
+		err = json.NewDecoder(resp.Body).Decode(&r)
 		if err == nil {
-			user = &u
+			var token, username, userid string
+			token = fmt.Sprintf("%s", r["access_token"])
+			username = fmt.Sprintf("%s", r["username"])
+			tok := r["token"].(map[string]interface{})
+			u := tok["user"].(map[string]interface{})
+			userid = fmt.Sprintf("%s", u["id"])
+			user = &User{
+				Token:    token,
+				Username: username,
+				ID:       userid,
+			}
 		} else {
 			err = ErrInvalidBackendResponse
 		}

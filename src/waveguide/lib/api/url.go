@@ -25,5 +25,5 @@ func (s *Server) MakeWebseedURL(fname string) string {
 
 func (s *Server) MakePublicURL(fname string) string {
 	// TODO: multiple webseed servers
-	return s.MakePublicURL(fname) + ".torrent"
+	return s.MakeWebseedURL(fname) + ".torrent"
 }

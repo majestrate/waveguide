@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/sessions"
 	"waveguide/lib/config"
+	"waveguide/lib/log"
 	"waveguide/lib/model"
 	"waveguide/lib/oauth"
 )
@@ -43,10 +44,13 @@ func (r *Routes) GetCurrentUser(c *gin.Context) *model.UserInfo {
 func (r *Routes) SetCurrentUser(u oauth.User, c *gin.Context) {
 	s, err := sessionStore.Get(c.Request, sessionName)
 	if err == nil {
+		log.Infof("set user object: %q", u)
 		s.Values[sessionKeyUserID] = u.ID
 		s.Values[sessionKeyToken] = u.Token
 		s.Values[sessionKeyUserName] = u.Username
 		s.Save(c.Request, c.Writer)
+	} else {
+		log.Errorf("Failed to get session: %s", err.Error())
 	}
 }
 

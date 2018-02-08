@@ -22,6 +22,18 @@ func extractUserToken(streamkey string) (user, token string) {
 	return
 }
 
+func (s *Server) deleteTorrent(oldest string) {
+	utorrent, _ := url.Parse(oldest)
+	ufile, _ := url.Parse(oldest[:len(oldest)-8])
+	cdnURL, _ := url.Parse(s.conf.Worker.UploadURL)
+	utorrent.Scheme = "http"
+	ufile.Scheme = "http"
+	utorrent.Host = cdnURL.Host
+	ufile.Host = cdnURL.Host
+	api.DoHTTP(api.DeleteRequest(utorrent))
+	api.DoHTTP(api.DeleteRequest(ufile))
+}
+
 func (s *Server) APIStreamPublish(c *gin.Context) {
 	user, token := extractUserToken(c.PostForm("name"))
 	if user != "" && token != "" {
@@ -43,6 +55,15 @@ func (s *Server) APIStreamPart(c *gin.Context) {
 }
 
 func (s *Server) APIStreamDone(c *gin.Context) {
+	user, _ := extractUserToken(c.PostForm("name"))
+	info := s.ctx.Find(user)
+	if info != nil {
+		for _, u := range info.URLS[:] {
+			if u != "" {
+				s.deleteTorrent(u)
+			}
+		}
+	}
 }
 
 func (s *Server) APIStreamSegment(c *gin.Context) {
@@ -56,7 +77,8 @@ func (s *Server) APIStreamSegment(c *gin.Context) {
 		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
-
+	defer os.Remove(outfile)
+	defer os.Remove(infile)
 	videoURL, _ := url.Parse(s.MakeVideoUploadUrl(outfile))
 	torrentURL, _ := url.Parse(s.MakeTorrentUploadURL(outfile))
 	webseedURL := s.MakeWebseedURL(outfile)
@@ -83,13 +105,7 @@ func (s *Server) APIStreamSegment(c *gin.Context) {
 		} else {
 			oldest := info.OldestTorrent()
 			if oldest != "" {
-				utorrent, _ := url.Parse(oldest)
-				ufile, _ := url.Parse(oldest[:len(oldest)-8])
-				cdnURL, _ := url.Parse(s.conf.Worker.UploadURL)
-				utorrent.Host = cdnURL.Host
-				ufile.Host = cdnURL.Host
-				api.DoHTTP(api.DeleteRequest(utorrent))
-				api.DoHTTP(api.DeleteRequest(ufile))
+				s.deleteTorrent(oldest)
 			}
 			info.AddTorrent(publicURL)
 		}
