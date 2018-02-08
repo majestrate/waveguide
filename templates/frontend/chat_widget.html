@@ -15,5 +15,23 @@
 {{ else }}
   <script type="text/javascript" src="//widgets.tavrn.gg/js/chat.js?site=gitgudtv&id=1&w=300&h=250" id="chat_js"></script>
 {{ end }}
+  <!-- move chat below player, can't change the order of the above two lines for some reason -->
+<script type="text/javascript">
+  {{ if .ChatID }}
+  const chatID = "{{ .ChatID }}";
+  {{ else }}
+  /* fallback value */
+  const chatID = "5";
+  {{ end }}
+
+  /** change ChatWidget as needed */
+  const ChatWidget = tavrnChat;
+
+  let tggChat = new ChatWidget(chatID);
+  {{ if .User.Token }}
+  tggChat.setAccessToken("{{ .User.Token }}");
+  {{ end }}
+  tggChat.getMessages();
+</script>
 <!-- end chat widget --->
 {{ end }}
