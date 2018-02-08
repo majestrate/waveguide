@@ -20,6 +20,7 @@ function Streamer(source, key)
     this._segments = [];
   this._net = new shim.Network();
   this._lastSegmentURL = null;
+  this._segmentCounter = 0;
 }
 
 Streamer.prototype.Start = function()
@@ -64,7 +65,10 @@ Streamer.prototype._queueSegment = function(f)
 {
   var self = this;
   if(f)
+  {
     self._segments.push(f);
+    self._segmentCounter ++;
+  }
 };
 
 Streamer.prototype._popSegmentBlob = function()
@@ -83,46 +87,55 @@ Streamer.prototype._popSegmentBlob = function()
 Streamer.prototype._nextSegment = function(url)
 {
   var self = this;
-  if (self._lastSegmentURL == url) {
-    return;
-  }
-  self._net.FetchMetadata(url, function(err, metadata) {
-    if(err)
-    {
-      self.log("no stream online: "+err);
-      if(!(self._video.src === settings.SegOffline))
+  if (self._lastSegmentURL != url) {
+    self._net.FetchMetadata(url, function(err, metadata) {
+      if(err)
       {
-        self._video.src = settings.SegOffline;
-        self._playVideo();
+        self.log("no stream online: "+err);
+        if(!(self._video.src === settings.SegOffline))
+        {
+          self._video.src = settings.SegOffline;
+          self._playVideo();
+        }
       }
-    }
-    else
-    {
-      self._net.AddMetadata(metadata, function(err, blob) {
-        if (err) self.log("failed to fetch file: "+err);
+      else
+      {
+        if(self._segmentCounter > 0)
+        {
+          self.log("add torrent "+url);
+          self._net.AddMetadata(metadata, function(err, blob) {
+            if (err) self.log("failed to fetch file: "+err);
+            else
+            {
+              self._queueSegment(blob);
+              self._lastSegmentURL = url
+            }
+          });
+        }
         else
         {
-          self._queueSegment(blob);
-          self._lastSegmentURL = url
+          self._net.StreamMetadata(metadata, self._video);
+          self._video.loop = false;
+          self._segmentCounter ++;
+          self._lastSegmentURL = url;
         }
-      });
-    }
-  });
-  
-  if (self._video.src === settings.SegPlaceholder || self._video.src === settings.SegOffline)
-  {
-    var blob = self._popSegmentBlob();
-    if(blob)
+      }
+    });
+    
+    if (self._video.src === settings.SegPlaceholder || self._video.src === settings.SegOffline)
     {
-      self.log("got segment: "+blob);
-      self._video.loop = false;
-      self._video.src = blob;
-      self._playVideo();
+      var blob = self._popSegmentBlob();
+      if(blob)
+      {
+        self.log("got segment: "+blob);
+        self._video.loop = false;
+        self._video.src = blob;
+        self._playVideo();
+      }
+      else
+        self.log("no segment yet");
     }
-    else
-      self.log("no segment yet");
-  }
-  
+  }  
   self.Cleanup();
 };
 
@@ -176,6 +189,20 @@ Streamer.prototype._segmenterCB = function(data, name)
   });
 };
 
+Streamer.prototype._getNextSegment = function()
+{
+  var self = this;
+  var ajax = new XMLHttpRequest();
+  ajax.open("GET" , "https://"+location.host+"/wg-api/v1/stream?u="+self._key);
+  ajax.onreadystatechange = function() {
+    if (ajax.readyState == 4 && ajax.status == 200) {
+      var url = ajax.responseText;
+      self._nextSegment(url);
+    }
+  }
+  ajax.send();
+};
+
 Streamer.prototype._onStarted = function()
 {
   var self = this;
@@ -202,7 +229,6 @@ Streamer.prototype._onStarted = function()
     self._video.src = settings.SegPlaceholder;
     self._video.loop = true;
     self._playVideo();
-    
     var next = function() {
       var blob = self._popSegmentBlob();
       if(blob)
@@ -216,25 +242,16 @@ Streamer.prototype._onStarted = function()
       else
       {
         self.log("reached the end of segment but no next segment yet");
+        self._getNextSegment();
         setTimeout(function() {
           next();
         }, 1000);
       }
     };
     self._video.onended = next;
-    var getsegment = function() {
-      var ajax = new XMLHttpRequest();
-      ajax.open("GET" , "https://"+location.host+"/wg-api/v1/stream?u="+self._key);
-      ajax.onreadystatechange = function() {
-        if (ajax.readyState == 4 && ajax.status == 200) {
-          self._nextSegment(ajax.responseText);
-        }
-      }
-      ajax.send();
-    };
-    getsegment();
+    self._getNextSegment();
     self._interval = setInterval(function() {
-      getsegment();
+      self._getNextSegment();
     }, settings.RefreshInterval);
   }
   else
