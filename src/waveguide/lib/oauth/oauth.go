@@ -73,7 +73,30 @@ func (c *Client) AnnounceStream(token, message string) (err error) {
 	return
 }
 
-func (c *Client) GetUser(code, callback string) (user *User, err error) {
+func (c *Client) GetUser(token string) (user *User, err error) {
+	var req *http.Request
+	req, err = http.NewRequest("GET", c.conf.Provider+"stream/0/token", nil)
+	if err == nil {
+		req.Header.Set("Authorization", "Bearer "+token)
+		var resp *http.Response
+		resp, err = http.DefaultClient.Do(req)
+		if err == nil {
+			defer resp.Body.Close()
+			var tokenReq TokenInfoRequest
+			err = json.NewDecoder(resp.Body).Decode(&tokenReq)
+			if err == nil {
+				user = &User{
+					ID:       tokenReq.Data.User.ID,
+					Username: tokenReq.Data.User.Username,
+					Token:    token,
+				}
+			}
+		}
+	}
+	return
+}
+
+func (c *Client) GrantUser(code, callback string) (user *User, err error) {
 	postdata := make(url.Values)
 	postdata.Set("client_id", c.conf.ClientID)
 	postdata.Set("client_secret", c.conf.ClientSecret)
@@ -85,19 +108,14 @@ func (c *Client) GetUser(code, callback string) (user *User, err error) {
 	var resp *http.Response
 	resp, err = http.Post(c.conf.Provider+"oauth/access_token", "application/x-www-form-urlencoded", buff)
 	if err == nil {
-		r := make(map[string]interface{})
-		err = json.NewDecoder(resp.Body).Decode(&r)
+		defer resp.Body.Close()
+		var tok TokenRequest
+		err = json.NewDecoder(resp.Body).Decode(&tok)
 		if err == nil {
-			var token, username, userid string
-			token = fmt.Sprintf("%s", r["access_token"])
-			username = fmt.Sprintf("%s", r["username"])
-			tok := r["token"].(map[string]interface{})
-			u := tok["user"].(map[string]interface{})
-			userid = fmt.Sprintf("%s", u["id"])
 			user = &User{
-				Token:    token,
-				Username: username,
-				ID:       userid,
+				Token:    tok.AccessToken,
+				Username: tok.Token.User.Username,
+				ID:       tok.Token.User.ID,
 			}
 		} else {
 			err = ErrInvalidBackendResponse

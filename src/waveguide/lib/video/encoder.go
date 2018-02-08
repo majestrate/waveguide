@@ -11,6 +11,7 @@ var ErrNoEncoder = errors.New("no such encoder")
 type Encoder interface {
 	Init() error
 	EncodeFile(infile, outfile string) error
+	Transcode(infile, outfile string) error
 }
 
 func NewEncoder(conf *config.VideoEncoderConfig) (enc Encoder, err error) {

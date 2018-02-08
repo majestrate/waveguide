@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"waveguide/lib/log"
 	"waveguide/lib/util"
@@ -37,10 +38,17 @@ func (s *Server) deleteTorrent(oldest string) {
 func (s *Server) APIStreamPublish(c *gin.Context) {
 	user, token := extractUserToken(c.PostForm("name"))
 	if user != "" && token != "" {
-		err := s.oauth.AnnounceStream(token, "streaming live at https://gitgud.tv/watch/?u="+user)
+		u, err := s.oauth.GetUser(token)
 		if err == nil {
-			s.ctx.Ensure(user)
+			if user == u.ID {
+				s.ctx.Ensure(user, u.Username)
+				log.Infof("stream %s is up", user)
+			} else {
+				log.Errorf("user id missmatch, '%s' != '%s'", user, u.ID)
+				c.String(http.StatusForbidden, "")
+			}
 		} else {
+			log.Errorf("failed to auth stream with oauth: %s", err.Error())
 			c.String(http.StatusForbidden, err.Error())
 		}
 	} else {
@@ -49,13 +57,15 @@ func (s *Server) APIStreamPublish(c *gin.Context) {
 }
 
 func (s *Server) APIStreamJoin(c *gin.Context) {
+	// TODO: implement
 }
 
 func (s *Server) APIStreamPart(c *gin.Context) {
+	// TODO: implement
 }
 
 func (s *Server) APIStreamDone(c *gin.Context) {
-	user, _ := extractUserToken(c.PostForm("name"))
+	user, token := extractUserToken(c.PostForm("name"))
 	info := s.ctx.Find(user)
 	if info != nil {
 		for _, u := range info.URLS[:] {
@@ -63,17 +73,17 @@ func (s *Server) APIStreamDone(c *gin.Context) {
 				s.deleteTorrent(u)
 			}
 		}
+		s.oauth.AnnounceStream(token, "stream is now offline, bai.")
 	}
 }
 
 func (s *Server) APIStreamSegment(c *gin.Context) {
 	user, _ := extractUserToken(c.PostForm("name"))
 	infile := c.PostForm("path")
-	ext := filepath.Ext(infile)
-	outfile := util.TempFileName(os.TempDir(), ext)
-	err := os.Rename(infile, outfile)
+	outfile := util.TempFileName(os.TempDir(), ".mp4")
+	err := s.encoder.Transcode(infile, outfile)
 	if err != nil {
-		log.Errorf("failed to move file: %s", err.Error())
+		log.Errorf("failed to transcode file: %s", err.Error())
 		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -103,17 +113,37 @@ func (s *Server) APIStreamSegment(c *gin.Context) {
 		if info == nil {
 			log.Errorf("failed to update non existing stream %s", user)
 		} else {
+			// delete oldest torrent first
 			oldest := info.OldestTorrent()
 			if oldest != "" {
 				s.deleteTorrent(oldest)
 			}
+			// then add new torrent
 			info.AddTorrent(publicURL)
 		}
 	}
 }
 
 func (s *Server) APIStreamInfo(c *gin.Context) {
-	u := c.Query("u")
+	u := c.Param("key")
 	info := s.ctx.Find(u)
-	c.JSON(http.StatusOK, info)
+	if info == nil {
+		// stream not found
+		c.JSON(http.StatusNotFound, map[string]interface{}{})
+	} else {
+		c.JSON(http.StatusOK, info)
+	}
+}
+
+func (s *Server) APIListStreams(c *gin.Context) {
+	limit := 10
+	limit_str := c.Query("limit")
+	if limit_str != "" {
+		li, err := strconv.Atoi(limit_str)
+		if err == nil {
+			limit = li
+		}
+	}
+	streams := s.ctx.Online(limit)
+	c.JSON(http.StatusOK, streams)
 }

@@ -84,7 +84,7 @@ Streamer.prototype._nextSegment = function(url)
   self._net.FetchMetadata(url, function(err, metadata) {
     if(err)
     {
-      self.log("no stream online");
+      self.log("no stream online: "+err);
       if(!(self._video.src === settings.SegOffline))
       {
         self._video.src = settings.SegOffline;
@@ -213,9 +213,15 @@ Streamer.prototype._onStarted = function()
       }
     };
     self._video.onended = next;
-    var url = "https://"+location.host+"/wg-api/v1/stream?u="+self._key;
     self._interval = setInterval(function() {
-      self._nextSegment(url);
+      var ajax = new XMLHttpRequest();
+      ajax.open("GET" , "https://"+location.host+"/wg-api/v1/stream?u="+self._key);
+      ajax.onreadystatechange = function() {
+        if (ajax.readyState == 4 && ajax.status == 200) {
+          self._nextSegment(ajax.responseText);
+        }
+      }
+      ajax.send();
     }, 2500);
   }
   else

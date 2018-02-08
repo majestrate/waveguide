@@ -22,7 +22,7 @@ func (r *Routes) HandleOAuthRedirect(c *gin.Context) {
 		r.NotFound(c)
 	} else {
 		code := c.Query("code")
-		user, err := r.oauth.GetUser(code, r.oauthCallback())
+		user, err := r.oauth.GrantUser(code, r.oauthCallback())
 		if err == nil {
 			r.SetCurrentUser(*user, c)
 			c.Redirect(http.StatusTemporaryRedirect, "/")

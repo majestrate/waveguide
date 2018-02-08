@@ -1,6 +1,9 @@
 package streaming
 
-import "sync"
+import (
+	"sync"
+	"time"
+)
 
 type Context struct {
 	mtx     sync.Mutex
@@ -23,23 +26,30 @@ func (ctx *Context) Expire() {
 	}
 }
 
-func (ctx *Context) Online() (keys []string) {
+func (ctx *Context) Online(limit int) (streams []*StreamInfo) {
 	ctx.Expire()
 	ctx.mtx.Lock()
 	for k := range ctx.streams {
-		keys = append(keys, k)
+		streams = append(streams, ctx.streams[k])
+		limit--
+		if limit == 0 {
+			break
+		}
 	}
 	ctx.mtx.Unlock()
 	return
 }
 
-func (ctx *Context) Ensure(k string) (i *StreamInfo) {
+func (ctx *Context) Ensure(k, username string) (i *StreamInfo) {
 	if len(k) > 0 {
 		ctx.mtx.Lock()
 		var ok bool
 		i, ok = ctx.streams[k]
 		if !ok {
 			i = new(StreamInfo)
+			i.ID = k
+			i.Username = username
+			i.LastUpdate = time.Now()
 			ctx.streams[k] = i
 		}
 		ctx.mtx.Unlock()

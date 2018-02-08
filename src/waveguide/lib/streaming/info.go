@@ -7,9 +7,11 @@ import (
 const StreamUpdateTimeout = time.Minute
 
 type StreamInfo struct {
-	URLS       [3]string
-	Token      string
-	LastUpdate time.Time
+	ID         string    `json:"id"`
+	Username   string    `json:"username"`
+	URLS       [3]string `json:"urls"`
+	Token      string    `json:"-"`
+	LastUpdate time.Time `json:"-"`
 }
 
 func (i *StreamInfo) LastTorrent() string {

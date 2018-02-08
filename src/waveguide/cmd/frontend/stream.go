@@ -27,7 +27,7 @@ func (r *Routes) ApiStreamMagnets(c *gin.Context) {
 	if ok {
 		stream := r.Streaming.Find(key)
 		if stream != nil {
-			c.Redirect(http.StatusTemporaryRedirect, stream.LastTorrent())
+			c.String(http.StatusOK, stream.LastTorrent())
 		}
 	}
 	c.String(status, "")

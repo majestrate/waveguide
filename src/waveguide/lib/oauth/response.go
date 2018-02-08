@@ -1,5 +1,5 @@
 package oauth
 
-type Response struct {
-	Data map[string]interface{} `json:"data"`
+type MetaResponse struct {
+	Code int `json:"code"`
 }

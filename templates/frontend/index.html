@@ -41,11 +41,11 @@
       <div class="item">
         <!-- img src="https://my.mixtape.moe/rioxyn.png" -->
         <div class="content" style="width: 100%">
-          <a href="/watch/?u={{ . }}"> {{.}} </a>
+          <a href="/watch/?u={{ .ID }}"> {{.Username}} </a>
           <div style="float: right">
-            <input type="text" class="url-copy copy-input" value="http://gitgud.tv/watch/?u={{ . }}" readonly>
+            <input type="text" class="url-copy copy-input" value="http://gitgud.tv/watch/?u={{ .ID }}" readonly>
             <div class="button gray copy icon"><i class="fa fa-copy"></i></div>
-            <div class="button green rounded icon labeled"><a href="/v/{{ .VideoID }}/"><i class="fa fa-watch"></i>Watch</a></div>
+            <!-- <div class="button green rounded icon labeled"><a href="/v/{{ .VideoID }}/"><i class="fa fa-watch"></i>Watch</a></div> -->
           </div>
           <!--div style="height: 10px"></div -->
           <!-- div class="button purple rounded icon labeled"><i class="fa fa-pencil"></i>Edit</div>

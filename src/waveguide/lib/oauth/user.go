@@ -1,7 +1,16 @@
 package oauth
 
 type User struct {
-	Token    string `json:"access_token"`
+	ID       string `json:"id"`
 	Username string `json:"username"`
-	ID       string `json:"user_id"`
+	Token    string `json:"-"`
+}
+
+type Token struct {
+	User User `json:"user"`
+}
+
+type TokenRequest struct {
+	AccessToken string `json:"access_token"`
+	Token       Token  `json:"token"`
 }

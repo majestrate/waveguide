@@ -5,9 +5,11 @@ import (
 	"net"
 	"net/http"
 	"waveguide/lib/config"
+	"waveguide/lib/log"
 	"waveguide/lib/oauth"
 	"waveguide/lib/streaming"
 	"waveguide/lib/torrent"
+	"waveguide/lib/video"
 )
 
 type Server struct {
@@ -16,6 +18,7 @@ type Server struct {
 	oauth   *oauth.Client
 	torrent *torrent.Factory
 	ctx     *streaming.Context
+	encoder video.Encoder
 }
 
 func (s *Server) Configure(conf config.Config) (err error) {
@@ -32,6 +35,11 @@ func (s *Server) Configure(conf config.Config) (err error) {
 func (s *Server) reconfigure(conf config.Config, fresh bool) (err error) {
 	s.conf = conf
 	s.oauth = oauth.NewClient(s.conf.OAuth)
+	s.encoder, err = video.NewEncoder(&s.conf.Worker.Encoder)
+	if err != nil {
+		log.Fatalf("failed to create encoder: %s", err)
+		return
+	}
 	s.torrent, err = torrent.NewFactory(&s.conf.Worker.Torrent)
 	return
 }
@@ -43,7 +51,8 @@ func (s *Server) setupRoutes() {
 	s.e.POST("/api/v1/stream/part", s.APIStreamPart)
 	s.e.POST("/api/v1/stream/done", s.APIStreamDone)
 	s.e.POST("/api/v1/stream/segment", s.APIStreamSegment)
-	s.e.GET("/api/v1/stream/", s.APIStreamInfo)
+	s.e.GET("/api/v1/stream/info/:key", s.APIStreamInfo)
+	s.e.GET("/api/v1/streams/", s.APIListStreams)
 }
 
 func (s *Server) Serve(l net.Listener) error {
