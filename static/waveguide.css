@@ -10,3 +10,9 @@ footer {
 .upload {
     margin: 20px;
 }
+
+#player {
+    width: 75%;
+    margin-left: 10%;
+}
+
