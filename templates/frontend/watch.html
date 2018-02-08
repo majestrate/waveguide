@@ -5,5 +5,6 @@
 <script>
   setTimeout(function() { window.guide.Streamer("{{.StreamID}}"); } , 100);
 </script>
+{{ template "chat_widget.html" . }}
 {{ template "footer.html" . }}
 {{end}}
