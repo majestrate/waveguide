@@ -18,6 +18,8 @@ Requirements:
 
 * ffmpeg
 
+* nginx-rtmp
+
 Building:
 
     $ make
