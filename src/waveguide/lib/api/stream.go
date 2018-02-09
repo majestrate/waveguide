@@ -26,13 +26,17 @@ func extractUserToken(streamkey string) (user, token string) {
 func (s *Server) deleteTorrent(oldest string) {
 	utorrent, _ := url.Parse(oldest)
 	ufile, _ := url.Parse(oldest[:len(oldest)-8])
+	thumb, _ := url.Parse(oldest[:len(oldest)-7] + "jpeg")
 	cdnURL, _ := url.Parse(s.conf.Worker.UploadURL)
 	utorrent.Scheme = "http"
 	ufile.Scheme = "http"
+	thumb.Scheme = "http"
 	utorrent.Host = cdnURL.Host
 	ufile.Host = cdnURL.Host
+	thumb.Host = cdnURL.Host
 	api.DoHTTP(api.DeleteRequest(utorrent))
 	api.DoHTTP(api.DeleteRequest(ufile))
+	api.DoHTTP(api.DeleteRequest(thumb))
 }
 
 func (s *Server) APIStreamPublish(c *gin.Context) {
@@ -85,8 +89,9 @@ func (s *Server) APIStreamSegment(c *gin.Context) {
 		// got first segment
 		s.oauth.AnnounceStream(token, "now live streaming at http://gitgud.tv/watch/?u="+user)
 	}
-
-	info.Segments++
+	if info != nil {
+		info.Segments++
+	}
 
 	infile := c.PostForm("path")
 	outfile := util.TempFileName(os.TempDir(), ".mp4")
@@ -98,6 +103,16 @@ func (s *Server) APIStreamSegment(c *gin.Context) {
 		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
+	thumbURL, _ := url.Parse(s.MakeThumbnailUploadURL(outfile))
+	thumbfile := filepath.Join(os.TempDir(), filepath.Base(thumbURL.Path))
+	defer os.Remove(thumbfile)
+	err = s.encoder.Thumbnail(outfile, thumbfile)
+	if err != nil {
+		log.Errorf("failed to generate stream thumbnail: %s", err.Error())
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+
 	videoURL, _ := url.Parse(s.MakeVideoUploadUrl(outfile))
 	torrentURL, _ := url.Parse(s.MakeTorrentUploadURL(outfile))
 	webseedURL := s.MakeWebseedURL(outfile)
@@ -118,6 +133,15 @@ func (s *Server) APIStreamSegment(c *gin.Context) {
 		}
 	}
 	if err == nil {
+		// upload thumbnail
+		var thumb *os.File
+		thumb, err = os.Open(thumbfile)
+		if err == nil {
+			err = api.DoHTTP(api.UploadRequest(thumbURL, thumb))
+			thumb.Close()
+		}
+	}
+	if err == nil {
 		info := s.ctx.Find(user)
 		if info == nil {
 			log.Errorf("failed to update non existing stream %s", user)
@@ -130,6 +154,9 @@ func (s *Server) APIStreamSegment(c *gin.Context) {
 			// then add new torrent
 			info.AddTorrent(publicURL)
 		}
+	} else {
+		log.Errorf("api error: %s", err.Error())
+		c.String(http.StatusInternalServerError, err.Error())
 	}
 }
 

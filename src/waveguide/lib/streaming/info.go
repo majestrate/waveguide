@@ -15,6 +15,14 @@ type StreamInfo struct {
 	Segments   uint64    `json:"-"`
 }
 
+func (i *StreamInfo) ThumbnailURL() string {
+	last := i.LastTorrent()
+	if len(last) > 0 {
+		return last[:len(last)-7] + "jpeg"
+	}
+	return ""
+}
+
 func (i *StreamInfo) LastTorrent() string {
 	return i.URLS[0]
 }

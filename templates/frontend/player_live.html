@@ -1,6 +1,10 @@
 {{define "player_live.html"}}
 <div class="videoplayer">
+  {{ if .Stream }}
+  <video id="player" autoplay=autoplay controls=controls poster="{{.Stream.ThumbnailURL}}"></video>
+  {{ else }}
   <video id="player" autoplay=autoplay controls=controls></video>
+  {{ end }}
   {{ template "stats.html" . }}
   {{ template "log.html" . }}
 </div>

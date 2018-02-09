@@ -11,10 +11,12 @@ func (r *Routes) ServeWatch(c *gin.Context) {
 		r.NotFound(c)
 	} else {
 		chatID := r.ChatIDForStream(id)
-		c.HTML(http.StatusOK, "watch.html", map[string]interface{}{
+		info := r.Streaming.Find(id)
+		c.HTML(http.StatusOK, "video_live.html", map[string]interface{}{
 			"User":     r.GetCurrentUser(c),
-			"StreamID": id,
 			"ChatID":   chatID,
+			"StreamID": id,
+			"Stream":   info,
 		})
 	}
 }
