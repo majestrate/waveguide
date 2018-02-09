@@ -82,6 +82,7 @@ func (s *Server) APIStreamSegment(c *gin.Context) {
 
 	info := s.ctx.Find(user)
 	if info != nil && info.Segments == 0 {
+		// got first segment
 		s.oauth.AnnounceStream(token, "now live streaming at http://gitgud.tv/watch/?u="+user)
 	}
 

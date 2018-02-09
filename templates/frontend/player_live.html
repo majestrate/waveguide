@@ -1,0 +1,7 @@
+{{define "player_live.html"}}
+<div class="videoplayer">
+  <video id="player" autoplay=autoplay controls=controls></video>
+  {{ template "stats.html" . }}
+  {{ template "log.html" . }}
+</div>
+{{end}}

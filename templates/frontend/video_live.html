@@ -1,9 +1,9 @@
-{{define "watch.html"}}
+{{define "video_live.html"}}
 {{ template "header.html" . }}
 {{ template "navbar.html" . }}
-{{ template "live_player.html" . }}
-<script>
-  setTimeout(function() { window.guide.Streamer("{{.StreamID}}"); } , 100);
+{{ template "player_live.html" . }}
+<script type="text/javascript">
+  window.guide.Streamer("{{.StreamID}}");
 </script>
 {{ template "chat_widget.html" . }}
 {{ template "footer.html" . }}

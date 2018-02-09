@@ -2,13 +2,18 @@
 {{ template "header.html" . }}
 {{ template "navbar.html" . }}
 {{ if .User.UserID }}
-<video id="cam" autoplay>
-</video>
+<div>
+  <h1><a target="_blank" href="/watch/?u={{.User.UserID}}">Stream URL</a></h1>
+</div>
 <div>
   stream url:
   <pre>rtmp://ingest.gitgud.tv/waveguide</pre>
   stream key:
   <pre id="streamkey"> </pre>
+</div>
+<div>
+  <h2> example settings for obs </h2>
+  <img src="/static/obs_settings.jpeg" />
 </div>
 <script type="text/javascript">
   var ajax = new XMLHttpRequest();
@@ -22,9 +27,6 @@
   };
   ajax.send(null);
 </script>
-<div>
-  <a target="_blank" href="/watch/?u={{.User.UserID}}">Watch</a>
-</div>
 {{ end }}
 {{ template "stats.html" . }}
 {{ template "log.html" . }}

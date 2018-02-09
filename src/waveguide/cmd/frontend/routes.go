@@ -100,7 +100,7 @@ func (r *Routes) ServeVideo(c *gin.Context) {
 	info, err := r.DB.GetVideoInfo(videoID)
 	chatID := r.ChatIDForVideo(videoID)
 	if err == nil && info != nil {
-		c.HTML(http.StatusOK, "video.html", map[string]interface{}{
+		c.HTML(http.StatusOK, "video_canned.html", map[string]interface{}{
 			"Video":  info,
 			"User":   r.GetCurrentUser(c),
 			"ChatID": chatID,
