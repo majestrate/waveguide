@@ -33,5 +33,6 @@ func DoHTTP(r *http.Request) error {
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("http status code %d", resp.StatusCode)
 	}
+	resp.Body.Close()
 	return err
 }

@@ -21,6 +21,7 @@ function Streamer(source, key)
   this._net = new shim.Network();
   this._lastSegmentURL = null;
   this._segmentCounter = 0;
+  this._lastPopped = 0;
 }
 
 Streamer.prototype.Start = function()
@@ -61,13 +62,16 @@ Streamer.prototype.Stop = function()
   if(self._segmenter) self._segmenter.Stop();
 };
 
-Streamer.prototype._queueSegment = function(f)
+Streamer.prototype._queueSegment = function(f, idx)
 {
   var self = this;
   if(f)
   {
-    self._segments.push(f);
+    self._segments.push([f, idx]);
     self._segmentCounter ++;
+    self._segments.sort(function(a, b) {
+      return a[1] - b[1];
+    });
   }
 };
 
@@ -75,9 +79,9 @@ Streamer.prototype._popSegmentBlob = function()
 {
   var self = this;
   var seg = self._segments.pop(0);
-  if(seg)
+  if(seg && seg[0])
   {
-    return URL.createObjectURL(seg);
+    return URL.createObjectURL(seg[0]);
   }
   else
     return null;
@@ -103,11 +107,16 @@ Streamer.prototype._nextSegment = function(url)
         self.log("segment "+self._segmentCounter);
         if(self._segmentCounter > 0)
         {
+          var curSeg = self._segmentCounter;
           self._net.AddMetadata(metadata, function(err, blob) {
             if (err) self.log("failed to fetch file: "+err);
             else
             {
-              self._queueSegment(blob);
+              if(self._segmentCounter > curSeg)
+              {
+                self.log("out of order segment");
+              }
+              self._queueSegment(blob, curSeg);
               self._lastSegmentURL = url
             }
           });

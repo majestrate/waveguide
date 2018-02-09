@@ -12,6 +12,7 @@ type StreamInfo struct {
 	URLS       [5]string `json:"urls"`
 	Token      string    `json:"-"`
 	LastUpdate time.Time `json:"-"`
+	Segments   uint64    `json:"-"`
 }
 
 func (i *StreamInfo) LastTorrent() string {

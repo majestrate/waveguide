@@ -42,7 +42,6 @@ func (s *Server) APIStreamPublish(c *gin.Context) {
 		if err == nil {
 			if user == u.ID {
 				s.ctx.Ensure(user, u.Username)
-				s.oauth.AnnounceStream(token, "now live streaming at http://gitgud.tv/watch/?u="+user)
 			} else {
 				log.Errorf("user id missmatch, '%s' != '%s'", user, u.ID)
 				c.String(http.StatusForbidden, "")
@@ -79,7 +78,15 @@ func (s *Server) APIStreamDone(c *gin.Context) {
 }
 
 func (s *Server) APIStreamSegment(c *gin.Context) {
-	user, _ := extractUserToken(c.PostForm("name"))
+	user, token := extractUserToken(c.PostForm("name"))
+
+	info := s.ctx.Find(user)
+	if info != nil && info.Segments == 0 {
+		s.oauth.AnnounceStream(token, "now live streaming at http://gitgud.tv/watch/?u="+user)
+	}
+
+	info.Segments++
+
 	infile := c.PostForm("path")
 	outfile := util.TempFileName(os.TempDir(), ".mp4")
 	defer os.Remove(outfile)
