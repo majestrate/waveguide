@@ -5,6 +5,7 @@ import (
 )
 
 const StreamUpdateTimeout = time.Minute
+const PlaceholderThumbnail = "https://beam.sapphire.moe/assets/gitgudtv/GitGud.tv.png"
 
 type StreamInfo struct {
 	ID         string    `json:"id"`
@@ -20,7 +21,7 @@ func (i *StreamInfo) ThumbnailURL() string {
 	if len(last) > 0 {
 		return last[:len(last)-7] + "jpeg"
 	}
-	return ""
+	return PlaceholderThumbnail
 }
 
 func (i *StreamInfo) LastTorrent() string {
