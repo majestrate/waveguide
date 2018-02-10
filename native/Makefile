@@ -1,0 +1,53 @@
+
+REPO := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
+
+CC = emcc
+CXX = emcc
+
+LIBEXT = html
+JSEXT = js
+WASMEXT = wasm
+
+WASMTORRENT = $(REPO)/libwasmtorrent
+
+WASMTORRENT_LIB = $(WASMTORRENT).$(LIBEXT)
+WASMTORRENT_LIB_OBJ = $(WASMTORRENT).$(WASMEXT)
+WASMTORRENT_LIB_JS = $(WASMTORRENT).$(JSEXT)
+WASMTORRENT_SRC_C = $(wildcard $(REPO)/wasmtorrent/*.c)
+WASMTORRENT_SRC_CXX = $(wildcard $(REPO)/wasmtorrent/*.cpp)
+
+WASMTORRENT_OBJ_C = $(WASMTORRENT_SRC_C:.c=.c.bc)
+WASMTORRENT_OBJ_CXX = $(WASMTORRENT_SRC_CXX:.cpp=.cpp.bc)
+
+WASMTORRENT_SRC = $(WASMTORRENT_SRC_C) $(WASMTORRENT_SRC_CXX) 
+WASMTORRENT_OBJ = $(WASMTORRENT_OBJ_C) $(WASMTORRENT_OBJ_CXX) 
+
+GITGUD = $(REPO)/gitgud
+
+GITGUD_SRC = $(wildcard $(GITGUD)/*.cpp)
+GITGUD_OBJ = $(GITGUD_SRC:.cpp=.cpp.bc)
+
+MAIN_SRC = $(REPO)/main.cpp
+
+REQ_CFLAGS = -std=c11 -Wall
+REQ_CXXFLAGS = -std=c++1z -Wall
+
+all: clean build
+
+
+%.c.bc: %.c
+	$(CC) -o $<.bc -DWASM -c $< $(REQ_CFLAGS)
+
+%.cpp.bc: %.cpp
+	$(CXX) -o $<.bc -DWASM -c $< $(REQ_CXXFLAGS)
+
+$(WASMTORRENT_OBJ_C): $(WASMTORRENT_SRC_C)
+
+
+$(WASMTORRENT_LIB): $(WASMTORRENT_OBJ) $(GITGUD_OBJ)
+	$(CXX) $(REQ_CXXFLAGS) -s WASM=1 -DWASM $(MAIN_SRC) $(GITGUD_OBJ) $(WASMTORRENT_OBJ) $(WASMTORRENT_JS) -o $(WASMTORRENT_LIB) 
+
+build: $(WASMTORRENT_LIB)
+
+clean:
+	rm -f $(WASMTORRENT_LIB) $(WASMTORRENT_OBJ) $(WASMTORRENT_LIB_JS) $(WASMTORRENT_LIB_OBJ)

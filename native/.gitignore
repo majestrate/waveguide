@@ -1,0 +1,6 @@
+*.bc
+*.html
+*.js
+*.o
+*.a
+*.wasm
