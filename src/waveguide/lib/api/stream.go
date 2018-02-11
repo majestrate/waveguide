@@ -83,17 +83,21 @@ func (s *Server) APIStreamDone(c *gin.Context) {
 
 func (s *Server) APIStreamSegment(c *gin.Context) {
 	user, token := extractUserToken(c.PostForm("name"))
-
+	infile := c.PostForm("path")
 	info := s.ctx.Find(user)
 	if info != nil && info.Segments == 0 {
 		// got first segment
 		s.oauth.AnnounceStream(token, "now live streaming at http://gitgud.tv/watch/?u="+user)
 	}
-	if info != nil {
+	if info == nil {
+		log.Errorf("non existing stream %s", user)
+		os.Remove(infile)
+		c.String(http.StatusInternalServerError, "no such stream")
+		return
+	} else {
 		info.Segments++
 	}
 
-	infile := c.PostForm("path")
 	outfile := util.TempFileName(os.TempDir(), ".mp4")
 	defer os.Remove(outfile)
 	defer os.Remove(infile)

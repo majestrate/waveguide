@@ -9,7 +9,7 @@ import (
 func (r *Routes) ServeStream(c *gin.Context) {
 	if r.CurrentUserLoggedIn(c) {
 		u := r.GetCurrentUser(c)
-		c.HTML(http.StatusOK, "video_live.html", map[string]interface{}{
+		c.HTML(http.StatusOK, "stream.html", map[string]interface{}{
 			"User": u,
 		})
 	} else {
