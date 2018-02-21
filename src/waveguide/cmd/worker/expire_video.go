@@ -24,6 +24,7 @@ func (w *Worker) ApiExpireVideo(r *api.Request) (err error) {
 				if u != nil {
 					if u.Host != cdn.Host {
 						u.Host = cdn.Host
+						u.Scheme = "http"
 						w.DoRequest(api.DeleteRequest(u))
 					}
 				}
@@ -32,6 +33,7 @@ func (w *Worker) ApiExpireVideo(r *api.Request) (err error) {
 			u, err = url.Parse(info.TorrentURL)
 			if u != nil {
 				u.Host = cdn.Host
+				u.Scheme = "http"
 				w.DoRequest(api.DeleteRequest(u))
 			}
 		}
