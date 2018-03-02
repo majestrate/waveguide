@@ -4,6 +4,8 @@ const Segmenter = require("./segment.js").Segmenter;
 const util = require("./util.js");
 const settings = require("./settings.js");
 const shim = require("./webtorrent-shim.js");
+const videostream = require('./videostream.js');
+const render = require('render-media');
 
 function Streamer(source, key)
 {
@@ -22,6 +24,7 @@ function Streamer(source, key)
   this._lastSegmentURL = null;
   this._segmentCounter = 0;
   this._lastPopped = 0;
+  this._videostream = new videostream.Stream();
 }
 
 Streamer.prototype.Start = function()
@@ -67,14 +70,19 @@ Streamer.prototype._queueSegment = function(f, idx)
   var self = this;
   if(f)
   {
+    self._videostream.Put(f, idx);
+    self._segmentCounter ++;
+    /*
     self._segments.push([f, idx]);
     self._segmentCounter ++;
     self._segments.sort(function(a, b) {
       return a[1] - b[1];
     });
+    */
   }
 };
 
+/*
 Streamer.prototype._popSegmentBlob = function()
 {
   var self = this;
@@ -86,7 +94,7 @@ Streamer.prototype._popSegmentBlob = function()
   else
     return null;
 };
-
+*/
 
 Streamer.prototype._nextSegment = function(url)
 {
@@ -123,14 +131,17 @@ Streamer.prototype._nextSegment = function(url)
         }
         else
         {
-          self._net.Stream(metadata, self._video, true);
           self._video.loop = false;
-          self._segmentCounter +=  1;
+          render.render(self._videostream, self.video, function(err, elem) {
+            if (err) self.log(err);
+          });
+          /* self._net.Stream(metadata, self._video, true); */
+          self._segmentCounter += 1;
           self._lastSegmentURL = url;
         }
       }
     });
-    
+    /*
     if (self._video.src === settings.SegPlaceholder || self._video.src === settings.SegOffline)
     {
       var blob = self._popSegmentBlob();
@@ -144,6 +155,7 @@ Streamer.prototype._nextSegment = function(url)
       else
         self.log("no segment yet");
     }
+    */
   }  
   self.Cleanup();
 };
