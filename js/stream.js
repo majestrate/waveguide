@@ -202,7 +202,7 @@ Streamer.prototype._getNextSegment = function()
 {
   var self = this;
   var ajax = new XMLHttpRequest();
-  ajax.open("GET" , "https://"+location.host+"/wg-api/v1/stream?u="+self._key);
+  ajax.open("GET", "/wg-api/v1/stream?u="+self._key);
   ajax.onreadystatechange = function() {
     if (ajax.readyState == 4 && ajax.status == 200) {
       var url = ajax.responseText;
@@ -263,6 +263,7 @@ Streamer.prototype._onStarted = function()
       self._getNextSegment();
     }, settings.RefreshInterval);
   }
+  /*
   else
   {
     self._segmenter = new Segmenter(self._source);
@@ -275,6 +276,7 @@ Streamer.prototype._onStarted = function()
       self._segmenter.Stop();
     }
   }
+  */
 };
 
 module.exports = {
