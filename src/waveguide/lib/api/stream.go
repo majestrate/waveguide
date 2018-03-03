@@ -40,6 +40,10 @@ func (s *Server) deleteTorrent(oldest string) {
 }
 
 func (s *Server) APIStreamPublish(c *gin.Context) {
+	if s.Anon() {
+		s.ctx.Ensure("1", "anon")
+		return
+	}
 	user, token := extractUserToken(c.PostForm("name"))
 	if user != "" && token != "" {
 		u, err := s.oauth.GetUser(token)
@@ -85,7 +89,7 @@ func (s *Server) APIStreamSegment(c *gin.Context) {
 	user, token := extractUserToken(c.PostForm("name"))
 	infile := c.PostForm("path")
 	info := s.ctx.Find(user)
-	if info != nil && info.Segments == 0 {
+	if info != nil && info.Segments == 0 && s.oauth != nil {
 		// got first segment
 		s.oauth.AnnounceStream(token, "now live streaming at http://gitgud.tv/watch/?u="+user)
 	}

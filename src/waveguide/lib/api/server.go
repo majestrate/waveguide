@@ -21,6 +21,11 @@ type Server struct {
 	encoder video.Encoder
 }
 
+// Anon returns true if we allow anonymous stream access
+func (s *Server) Anon() bool {
+	return s.conf.ApiServer.Anon
+}
+
 func (s *Server) Configure(conf config.Config) (err error) {
 	if s.e == nil {
 		s.setupRoutes()
