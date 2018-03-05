@@ -42,12 +42,15 @@ Shim.prototype.Cleanup = function(rewind)
   var self = this;
   var torrents = self.torrent.torrents;
   var iters = 10;
-  while(torrents.length > rewind && iters > 0)
+  while(torrents.length > rewind)
   {
     var ih = torrents[0].infoHash;
     if(ih == self._lastInfohash) {
       iters --;
-      continue;
+      if(iters)
+        continue;
+      else
+        return;
     }
     torrents.pop();
     self.torrent.remove(ih, function(err) { });
