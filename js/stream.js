@@ -105,8 +105,8 @@ Streamer.prototype._nextSegment = function(url)
       else
       {
         self.log("segment "+self._segmentCounter);
-        if(self._segmentCounter > 0)
-        {
+        /*if(self._segmentCounter > 0)
+        { */
           var curSeg = self._segmentCounter;
           self._net.AddMetadata(metadata, function(err, blob) {
             if (err) self.log("failed to fetch file: "+err);
@@ -120,7 +120,7 @@ Streamer.prototype._nextSegment = function(url)
               self._lastSegmentURL = url
             }
           });
-        }
+        /*}
         else
         {
           self._net.Stream(metadata, self._video, true);
@@ -128,6 +128,7 @@ Streamer.prototype._nextSegment = function(url)
           self._segmentCounter +=  1;
           self._lastSegmentURL = url;
         }
+	*/
       }
     });
     
