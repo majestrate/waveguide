@@ -42,7 +42,13 @@ func (r *Routes) ApiStreamUpdate(c *gin.Context) {
 func (r *Routes) ApiStreamURL(c *gin.Context) {
 	u := r.GetCurrentUser(c)
 	// TODO: use app token not user token
-	c.JSON(http.StatusOK, map[string]interface{}{
-		"streamkey": u.UserID + api.StreamKeyDelim + u.Token,
-	})
+	if r.CurrentUserLoggedIn(c) {
+		c.JSON(http.StatusOK, map[string]interface{}{
+			"streamkey": u.UserID + api.StreamKeyDelim + u.Token,
+		})
+	} else {
+		c.JSON(http.StatusOK, map[string]interface{}{
+			"streamkey": nil,
+		})
+	}
 }
