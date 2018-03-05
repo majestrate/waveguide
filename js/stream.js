@@ -53,11 +53,18 @@ Streamer.prototype.Cleanup = function()
   var self = this;
   self.log("cleanup storage");
   var exclude = self.SegmentInfohashes()
-  if (exlcude.length >= self._rewind)
+  if (exclude.length > self._rewind)
   {
-    exclude = exlcude.slice(self._rewind, exclude.length-self._rewind);
+    var diff = exclude.length - self._rewind;
+    exclude = exclude.slice(exclude.length-self._rewind);
+    while(diff > 0)
+    {
+      var seg = self._segments.shift();
+      diff--;
+      self.log("discard segment "+seg[1]);
+    }
   }
-  self._net.Cleanup(exlcude);
+  self._net.Cleanup(exclude);
 };
 
 Streamer.prototype.Stop = function()
@@ -153,20 +160,19 @@ Streamer.prototype._nextSegment = function(url)
         });
       }
     });
-    
-    if (self._video.src === settings.SegPlaceholder || self._video.src === settings.SegOffline)
-    {
-      var blob = self._popSegmentBlob();
+  }
+  if (self._video.src === settings.SegPlaceholder || self._video.src === settings.SegOffline)
+  {
+    var blob = self._popSegmentBlob();
       if(blob)
-      {
-        self.log("got segment: "+blob);
-        self._video.loop = false;
-        self._video.src = blob;
-        self._playVideo();
-      }
-      else
-        self.log("no segment yet");
+    {
+      self.log("got segment: "+blob);
+      self._video.loop = false;
+      self._video.src = blob;
+      self._playVideo();
     }
+    else
+      self.log("no segment yet");
   }  
   self.Cleanup();
 };
