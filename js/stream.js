@@ -81,6 +81,7 @@ Streamer.prototype._popSegmentBlob = function()
   var seg = self._segments.pop(0);
   if(seg && seg[0])
   {
+    self.log("pop segment "+seg[1]);
     return URL.createObjectURL(seg[0]);
   }
   else
