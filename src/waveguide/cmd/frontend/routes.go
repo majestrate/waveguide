@@ -39,9 +39,22 @@ func (r *Routes) Reconfigure(c *config.Config) error {
 func (r *Routes) configure(c *config.Config, reload bool) (err error) {
 	r.Streaming = streaming.NewClient(c)
 	if c.OAuth.Enabled {
-		r.oauth = oauth.NewClient(c.OAuth)
+		o := oauth.NewClient(c.OAuth)
+		if r.oauth == nil {
+			r.oauth = o
+		} else {
+			// safe close
+			old := r.oauth
+			r.oauth = o
+			old.Close()
+		}
 	} else {
-		r.oauth = nil
+		if r.oauth != nil {
+			// safe close
+			old := r.oauth
+			r.oauth = nil
+			old.Close()
+		}
 	}
 
 	r.TempDir = c.Storage.TempDir
@@ -88,10 +101,11 @@ func (r *Routes) ServeIndex(c *gin.Context) {
 		r.Error(c, err)
 		return
 	}
+	u := r.GetCurrentUser(c)
 	c.HTML(http.StatusOK, "index.html", map[string]interface{}{
 		"Videos":  videos.Videos,
 		"Streams": r.Streaming.Online(),
-		"User":    r.GetCurrentUser(c),
+		"User":    u,
 	})
 }
 
@@ -100,9 +114,10 @@ func (r *Routes) ServeVideo(c *gin.Context) {
 	info, err := r.DB.GetVideoInfo(videoID)
 	chatID := r.ChatIDForVideo(videoID)
 	if err == nil && info != nil {
+		u := r.GetCurrentUser(c)
 		c.HTML(http.StatusOK, "video_canned.html", map[string]interface{}{
 			"Video":  info,
-			"User":   r.GetCurrentUser(c),
+			"User":   u,
 			"ChatID": chatID,
 		})
 		return

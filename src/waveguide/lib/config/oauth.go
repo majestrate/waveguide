@@ -1,6 +1,7 @@
 package config
 
 import (
+	"strconv"
 	"waveguide/lib/config/parser"
 )
 
@@ -8,13 +9,15 @@ type OAuthConfig struct {
 	Provider     string
 	ClientID     string
 	ClientSecret string
+	Workers      int
 	Enabled      bool
 }
 
-func (c *OAuthConfig) Load(s *parser.Section) error {
+func (c *OAuthConfig) Load(s *parser.Section) (err error) {
 	c.Provider = s.ValueOf("provider")
 	c.ClientID = s.ValueOf("clientid")
 	c.ClientSecret = s.ValueOf("clientsecret")
 	c.Enabled = s.ValueOf("enabled") == "1"
-	return nil
+	c.Workers, err = strconv.Atoi(s.Get("workers", "8"))
+	return
 }

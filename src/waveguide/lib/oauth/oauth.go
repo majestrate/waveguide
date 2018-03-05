@@ -14,9 +14,53 @@ import (
 
 var ErrInvalidBackendResponse = errors.New("invalid response from oauth backend")
 var ErrFailedToContactBackend = errors.New("failed to contact oauth backend server")
+var ErrOAuthClosing = errors.New("oauth backend is closed")
+
+type response struct {
+	resp *http.Response
+	err  error
+}
+
+type request struct {
+	reply   chan response
+	request *http.Request
+}
 
 type Client struct {
-	conf config.OAuthConfig
+	conf    config.OAuthConfig
+	reqChan chan *request
+	http    http.Client
+	closing bool
+}
+
+// implements io.Closer
+func (c *Client) Close() error {
+	c.closing = true
+	c.reqChan <- nil
+	return nil
+}
+
+func (c *Client) runWorker() {
+	for {
+		req := <-c.reqChan
+		if req == nil {
+			return
+		}
+		resp, err := c.http.Do(req.request)
+		req.reply <- response{resp: resp, err: err}
+	}
+}
+
+func (c *Client) doRequest(req *http.Request) (resp *http.Response, err error) {
+	if c.closing {
+		err = ErrOAuthClosing
+		return
+	}
+	reply := make(chan response)
+	c.reqChan <- &request{request: req, reply: reply}
+	r := <-reply
+	resp, err = r.resp, r.err
+	return
 }
 
 func (c *Client) AuthURL(callback string) string {
@@ -38,12 +82,16 @@ func (c *Client) SubmitComment(comment model.Comment) (err error) {
 	})
 	if err == nil {
 		var resp *http.Response
-		resp, err = http.Post(u.String(), "application/json; encoding=UTF-8", buff)
+		var req *http.Request
+		req, err = http.NewRequest("POST", u.String(), buff)
 		if err == nil {
-			if resp.StatusCode == 200 {
-				// TODO: check json response
-			} else {
-				err = ErrInvalidBackendResponse
+			req.Header.Set("Content-Type", "application/json; encoding=UTF-8")
+			resp, err = c.doRequest(req)
+			if err == nil {
+				defer resp.Body.Close()
+				if resp.StatusCode != 200 {
+					err = ErrInvalidBackendResponse
+				}
 			}
 		}
 	}
@@ -61,12 +109,16 @@ func (c *Client) AnnounceStream(token, message string) (err error) {
 	})
 	if err == nil {
 		var resp *http.Response
-		resp, err = http.Post(u.String(), "application/json; encoding=UTF-8", buff)
+		var req *http.Request
+		req, err = http.NewRequest("POST", u.String(), buff)
 		if err == nil {
-			if resp.StatusCode == 200 {
-				// TODO: check json response
-			} else {
-				err = ErrInvalidBackendResponse
+			req.Header.Set("Content-Type", "application/json; encoding=UTF-8")
+			resp, err = c.doRequest(req)
+			if err == nil {
+				defer resp.Body.Close()
+				if resp.StatusCode != 200 {
+					err = ErrInvalidBackendResponse
+				}
 			}
 		}
 	}
@@ -79,7 +131,7 @@ func (c *Client) GetUser(token string) (user *User, err error) {
 	if err == nil {
 		req.Header.Set("Authorization", "Bearer "+token)
 		var resp *http.Response
-		resp, err = http.DefaultClient.Do(req)
+		resp, err = c.doRequest(req)
 		if err == nil {
 			defer resp.Body.Close()
 			var tokenReq TokenInfoRequest
@@ -89,6 +141,8 @@ func (c *Client) GetUser(token string) (user *User, err error) {
 					ID:       tokenReq.Data.User.ID,
 					Username: tokenReq.Data.User.Username,
 					Token:    token,
+					Avatar:   tokenReq.Data.User.Avatar,
+					Cover:    tokenReq.Data.User.Cover,
 				}
 			}
 		}
@@ -106,29 +160,44 @@ func (c *Client) GrantUser(code, callback string) (user *User, err error) {
 	buff := new(bytes.Buffer)
 	io.WriteString(buff, postdata.Encode())
 	var resp *http.Response
-	resp, err = http.Post(c.conf.Provider+"oauth/access_token", "application/x-www-form-urlencoded", buff)
+	var req *http.Request
+	req, err = http.NewRequest("POST", c.conf.Provider+"oauth/access_token", buff)
 	if err == nil {
-		defer resp.Body.Close()
-		var tok TokenRequest
-		err = json.NewDecoder(resp.Body).Decode(&tok)
+		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+		resp, err = c.doRequest(req)
 		if err == nil {
-			user = &User{
-				Token:    tok.AccessToken,
-				Username: tok.Token.User.Username,
-				ID:       tok.Token.User.ID,
+			defer resp.Body.Close()
+			var tok TokenRequest
+			err = json.NewDecoder(resp.Body).Decode(&tok)
+			if err == nil {
+				user = &User{
+					Token:    tok.AccessToken,
+					Username: tok.Token.User.Username,
+					ID:       tok.Token.User.ID,
+				}
+			} else {
+				err = ErrInvalidBackendResponse
 			}
+			resp.Body.Close()
 		} else {
-			err = ErrInvalidBackendResponse
+			err = ErrFailedToContactBackend
 		}
-		resp.Body.Close()
-	} else {
-		err = ErrFailedToContactBackend
 	}
 	return
 }
 
 func NewClient(c config.OAuthConfig) *Client {
-	return &Client{
-		conf: c,
+	cl := &Client{
+		conf:    c,
+		reqChan: make(chan *request),
 	}
+	workers := c.Workers
+	if workers <= 0 {
+		workers = 1
+	}
+	for workers > 0 {
+		go cl.runWorker()
+		workers--
+	}
+	return cl
 }

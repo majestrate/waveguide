@@ -39,7 +39,15 @@ func (s *Server) Configure(conf config.Config) (err error) {
 
 func (s *Server) reconfigure(conf config.Config, fresh bool) (err error) {
 	s.conf = conf
-	s.oauth = oauth.NewClient(s.conf.OAuth)
+	o := oauth.NewClient(s.conf.OAuth)
+	if s.oauth == nil {
+		s.oauth = o
+	} else {
+		// safe close
+		old := s.oauth
+		s.oauth = o
+		old.Close()
+	}
 	s.encoder, err = video.NewEncoder(&s.conf.Worker.Encoder)
 	if err != nil {
 		log.Fatalf("failed to create encoder: %s", err)
