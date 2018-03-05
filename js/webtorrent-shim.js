@@ -86,7 +86,7 @@ Shim.prototype.AddMetadata = function(metadata, cb)
   self.torrent.add(metadata, function(t) {
     t.files[0].getBlob(function(err, blob) {
       if(err) cb(err, null);
-      else cb(null, blob.slice());
+      else cb(null, blob);
     });
   });
 };
