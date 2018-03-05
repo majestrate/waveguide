@@ -52,7 +52,12 @@ Streamer.prototype.Cleanup = function()
 {
   var self = this;
   self.log("cleanup storage");
-  self._net.Cleanup(self._rewind);
+  var exclude = self.SegmentInfohashes()
+  if (exlcude.length >= self._rewind)
+  {
+    exclude = exlcude.slice(self._rewind, exclude.length-self._rewind);
+  }
+  self._net.Cleanup(exlcude);
 };
 
 Streamer.prototype.Stop = function()
@@ -72,14 +77,25 @@ Streamer.prototype._hasSegment = function(idx)
   return false;
 }
 
-Streamer.prototype._queueSegment = function(f, idx)
+Streamer.prototype.SegmentInfohashes = function()
+{
+  var self = this;
+  var list = [];
+  for (var i = 0; i < self._segments.length; i ++)
+  {
+    list.push(self._segments[i][2]);
+  }
+  return list;
+}
+
+Streamer.prototype._queueSegment = function(f, idx, ih)
 {
   var self = this;
   if(f)
   {
     if(!self._hasSegment(idx))
     {
-      self._segments.push([f, idx]);
+      self._segments.push([f, idx, ih]);
       self._segmentCounter ++;
       self._segments = self._segments.sort(function(a, b) {
         return a[1] - b[1];
@@ -91,6 +107,7 @@ Streamer.prototype._queueSegment = function(f, idx)
 Streamer.prototype._popSegmentBlob = function()
 {
   var self = this;
+  console.log("segments:" + self._segments);
   var seg = self._segments.shift();
   if(seg && seg[0])
   {
@@ -130,7 +147,7 @@ Streamer.prototype._nextSegment = function(url)
             {
               self.log("out of order segment");
             }
-            self._queueSegment(blob, curSeg);
+            self._queueSegment(blob, curSeg, metadata.infoHash);
             self._lastSegmentURL = url
           }
         });

@@ -37,7 +37,7 @@ Shim.prototype.PeerCount = function()
   return numPeers;
 }
 
-Shim.prototype.Cleanup = function(rewind)
+Shim.prototype.Cleanup = function(exclude)
 {
   var self = this;
   var torrents = self.torrent.torrents;
@@ -53,7 +53,15 @@ Shim.prototype.Cleanup = function(rewind)
         return;
     }
     torrents.pop();
-    self.torrent.remove(ih, function(err) { });
+    var found = false;
+    for(var idx = 0; idx < exclude.length && !found; idx++)
+    {
+      if(exclude[idx] == ih) found = true;
+    }
+    if(found)
+      iters--;
+    else
+      self.torrent.remove(ih, function(err) { });
   }
 };
 
