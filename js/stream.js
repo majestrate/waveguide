@@ -62,23 +62,36 @@ Streamer.prototype.Stop = function()
   if(self._segmenter) self._segmenter.Stop();
 };
 
+Streamer.prototype._hasSegment = function(idx)
+{
+  var self = this;
+  for(var i = 0; i < self._segments.length; i ++)
+  {
+    if (self._segments[i][1] == idx) return true;
+  }
+  return false;
+}
+
 Streamer.prototype._queueSegment = function(f, idx)
 {
   var self = this;
   if(f)
   {
-    self._segments.push([f, idx]);
-    self._segmentCounter ++;
-    self._segments = self._segments.sort(function(a, b) {
-      return a[1] - b[1];
-    });
+    if(!self._hasSegment(idx))
+    {
+      self._segments.push([f, idx]);
+      self._segmentCounter ++;
+      self._segments = self._segments.sort(function(a, b) {
+        return a[1] - b[1];
+      });
+    }
   }
 };
 
 Streamer.prototype._popSegmentBlob = function()
 {
   var self = this;
-  var seg = self._segments.pop(0);
+  var seg = self._segments.shift();
   if(seg && seg[0])
   {
     self.log("pop segment "+seg[1]);
@@ -257,20 +270,6 @@ Streamer.prototype._onStarted = function()
       self._getNextSegment();
     }, settings.RefreshInterval);
   }
-  /*
-  else
-  {
-    self._segmenter = new Segmenter(self._source);
-    try {
-      self._segmenter.Begin(function(data, name) {
-        self._segmenterCB(data, name);
-      });
-    } catch(ex) {
-      self.log("error starting video recorder: "+ex);
-      self._segmenter.Stop();
-    }
-  }
-  */
 };
 
 module.exports = {
