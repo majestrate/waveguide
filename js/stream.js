@@ -69,8 +69,8 @@ Streamer.prototype._queueSegment = function(f, idx)
   {
     self._segments.push([f, idx]);
     self._segmentCounter ++;
-    self._segments.sort(function(a, b) {
-      return b[1] - a[1];
+    self._segments = self._segments.sort(function(a, b) {
+      return a[1] - b[1];
     });
   }
 };
