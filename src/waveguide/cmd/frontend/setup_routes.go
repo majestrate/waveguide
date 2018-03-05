@@ -34,6 +34,7 @@ func (routes *Routes) SetupRoutes(router *gin.Engine, conf *config.Config) {
 	router.GET("/oauth/redirect_uri", routes.HandleOAuthRedirect)
 
 	apiV1 := router.Group("/wg-api/v1")
+	apiV1.Use(routes.CORSMiddleware())
 	{
 		apiV1.GET("/online", routes.ApiStreamsOnline)
 		/*
