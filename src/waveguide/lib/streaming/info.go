@@ -13,7 +13,7 @@ type StreamInfo struct {
 	URLS       [5]string `json:"urls"`
 	Token      string    `json:"-"`
 	LastUpdate time.Time `json:"-"`
-	Segments   uint64    `json:"-"`
+	Segments   uint64    `json:"segments"`
 }
 
 func (i *StreamInfo) ThumbnailURL() string {

@@ -73,6 +73,20 @@ func (r *Routes) GetCurrentUser(c *gin.Context) *model.UserInfo {
 	return u
 }
 
+func (r *Routes) ResetUser(c *gin.Context) {
+	s, err := sessionStore.Get(c.Request, sessionName)
+	if err == nil {
+		s.Values[sessionKeyUserID] = ""
+		s.Values[sessionKeyToken] = ""
+		s.Values[sessionKeyUserName] = ""
+		s.Values[sessionKeyAvatarURL] = ""
+		s.Values[sessionKeyLastUpdate] = 0
+		s.Save(c.Request, c.Writer)
+	} else {
+		log.Warnf("failed to reset user: %s", err.Error())
+	}
+}
+
 func (r *Routes) SetCurrentUser(u oauth.User, c *gin.Context) {
 	s, err := sessionStore.Get(c.Request, sessionName)
 	if err == nil {
