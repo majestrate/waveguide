@@ -99,36 +99,27 @@ Streamer.prototype._nextSegment = function(url)
         if(!(self._video.src === settings.SegOffline))
         {
           self._video.src = settings.SegOffline;
+          self._video.loop = true;
           self._playVideo();
         }
       }
       else
       {
         self.log("segment "+self._segmentCounter);
-        /*if(self._segmentCounter > 0)
-        { */
-          var curSeg = self._segmentCounter;
-          self._net.AddMetadata(metadata, function(err, blob) {
-            if (err) self.log("failed to fetch file: "+err);
-            else
+
+        var curSeg = self._segmentCounter;
+        self._net.AddMetadata(metadata, function(err, blob) {
+          if (err) self.log("failed to fetch file: "+err);
+          else
+          {
+            if(self._segmentCounter > curSeg)
             {
-              if(self._segmentCounter > curSeg)
-              {
-                self.log("out of order segment");
-              }
-              self._queueSegment(blob, curSeg);
-              self._lastSegmentURL = url
+              self.log("out of order segment");
             }
-          });
-        /*}
-        else
-        {
-          self._net.Stream(metadata, self._video, true);
-          self._video.loop = false;
-          self._segmentCounter +=  1;
-          self._lastSegmentURL = url;
-        }
-	*/
+            self._queueSegment(blob, curSeg);
+            self._lastSegmentURL = url
+          }
+        });
       }
     });
     
@@ -245,9 +236,10 @@ Streamer.prototype._onStarted = function()
       {
         self.log("popped next segment");
         self._video.loop = false;
+        var oldSrc = self._video.src;
         self._video.src = blob;
+        URL.revokeObjectURL(oldSrc);
         self._playVideo();
-        /* self._video.onended = next; */
       }
       else
       {
