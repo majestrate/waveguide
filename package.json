@@ -14,10 +14,8 @@
     "deamdify": "^0.3.0",
     "deglobalify": "^0.2.0",
     "es6ify": "^1.6.0",
-    "readable-stream": "^2.3.4",
-    "render-media": "^2.11.0",
+    "ipfs": "^0.27.7",
     "uglify-es": "^3.1.1",
-    "util": "^0.10.3",
     "webtorrent": "^0.98.19"
   },
   "scripts": {
