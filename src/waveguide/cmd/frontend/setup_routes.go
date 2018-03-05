@@ -59,6 +59,7 @@ func (routes *Routes) SetupRoutes(router *gin.Engine, conf *config.Config) {
 	router.GET("/logout/", routes.ApiLogout)
 
 	router.GET("/about/", routes.ServeAbout)
+	router.GET("/faq/", routes.ServeFAQ)
 
 	router.GET("/stream/", routes.ServeStream)
 	router.GET("/watch/", routes.ServeWatch)
