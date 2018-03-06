@@ -20,7 +20,6 @@ function Streamer(source, key)
     this._segments = [];
   this._net = new shim.Network();
   this._lastSegmentURL = null;
-  this._segmentCounter = 0;
   this._lastPopped = 0;
 }
 
@@ -103,7 +102,6 @@ Streamer.prototype._queueSegment = function(f, idx, ih)
     if(!self._hasSegment(idx))
     {
       self._segments.push([f, idx, ih]);
-      self._segmentCounter ++;
       self._segments = self._segments.sort(function(a, b) {
         return a[1] - b[1];
       });
@@ -126,7 +124,7 @@ Streamer.prototype._popSegmentBlob = function()
 };
 
 
-Streamer.prototype._nextSegment = function(url)
+Streamer.prototype._nextSegment = function(url, segno)
 {
   var self = this;
   if (self._lastSegmentURL != url) {
@@ -143,18 +141,12 @@ Streamer.prototype._nextSegment = function(url)
       }
       else
       {
-        self.log("segment "+self._segmentCounter);
-
-        var curSeg = self._segmentCounter;
+        self.log("segment "+segno);
         self._net.AddMetadata(metadata, function(err, blob) {
           if (err) self.log("failed to fetch file: "+err);
           else
           {
-            if(self._segmentCounter > curSeg)
-            {
-              self.log("out of order segment");
-            }
-            self._queueSegment(blob, curSeg, metadata.infoHash);
+            self._queueSegment(blob, segno, metadata.infoHash);
             self._lastSegmentURL = url
           }
         });
@@ -234,14 +226,8 @@ Streamer.prototype._getNextSegment = function()
   ajax.open("GET", "/wg-api/v1/stream?u="+self._key);
   ajax.onreadystatechange = function() {
     if (ajax.readyState == 4 && ajax.status == 200) {
-      try {
-        var j = JSON.parse(ajax.responseText);
-      } catch(ex) {
-        j = {
-          url: ajax.responseText
-        };
-      }
-      self._nextSegment(j.url);
+      var j = JSON.parse(ajax.responseText);
+      self._nextSegment(j.urls[0], j.segments);
     }
   }
   ajax.send();

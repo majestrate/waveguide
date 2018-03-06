@@ -27,7 +27,7 @@ func (r *Routes) ApiStreamMagnets(c *gin.Context) {
 	if ok {
 		stream := r.Streaming.Find(key)
 		if stream != nil {
-			c.String(http.StatusOK, stream.LastTorrent())
+			c.JSON(http.StatusOK, stream)
 			return
 		}
 	}

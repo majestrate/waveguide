@@ -16,18 +16,7 @@ func NewContext() *Context {
 	}
 }
 
-func (ctx *Context) Expire() {
-	ctx.mtx.Lock()
-	defer ctx.mtx.Unlock()
-	for k := range ctx.streams {
-		if ctx.streams[k].IsExpired() {
-			delete(ctx.streams, k)
-		}
-	}
-}
-
 func (ctx *Context) Online(limit int) (streams []*StreamInfo) {
-	ctx.Expire()
 	ctx.mtx.Lock()
 	for k := range ctx.streams {
 		streams = append(streams, ctx.streams[k])
@@ -52,6 +41,15 @@ func (ctx *Context) Ensure(k, username string) (i *StreamInfo) {
 			i.LastUpdate = time.Now()
 			ctx.streams[k] = i
 		}
+		ctx.mtx.Unlock()
+	}
+	return
+}
+
+func (ctx *Context) Has(k string) (has bool) {
+	if len(k) > 0 {
+		ctx.mtx.Lock()
+		_, has = ctx.streams[k]
 		ctx.mtx.Unlock()
 	}
 	return

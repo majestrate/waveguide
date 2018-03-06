@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"net/url"
@@ -75,13 +76,13 @@ func (s *Server) APIStreamDone(c *gin.Context) {
 	user, token := extractUserToken(c.PostForm("name"))
 	info := s.ctx.Find(user)
 	if info != nil {
+		s.ctx.Remove(user)
 		for _, u := range info.URLS[:] {
 			if u != "" {
 				s.deleteTorrent(u)
 			}
 		}
 		s.oauth.AnnounceStream(token, "stream is now offline, bai.")
-		s.ctx.Remove(user)
 	}
 }
 
@@ -96,13 +97,13 @@ func (s *Server) APIStreamSegment(c *gin.Context) {
 	if info == nil {
 		log.Errorf("non existing stream %s", user)
 		os.Remove(infile)
-		c.String(http.StatusInternalServerError, "no such stream")
+		c.String(http.StatusNotFound, "no such stream")
 		return
 	} else {
 		info.Segments++
 	}
 
-	outfile := util.TempFileName(os.TempDir(), ".mp4")
+	outfile := util.TempFileName(os.TempDir(), fmt.Sprintf("-%s-stream.mp4", user))
 	defer os.Remove(outfile)
 	defer os.Remove(infile)
 	err := s.encoder.Transcode(infile, outfile)
@@ -125,6 +126,13 @@ func (s *Server) APIStreamSegment(c *gin.Context) {
 	torrentURL, _ := url.Parse(s.MakeTorrentUploadURL(outfile))
 	webseedURL := s.MakeWebseedURL(outfile)
 	publicURL := s.MakePublicURL(outfile)
+
+	if !s.ctx.Has(info.ID) {
+		// stream is gone
+		log.Errorf("stream %s is gone, will not publish files", info.ID)
+		c.String(http.StatusNotFound, "stream is gone")
+		return
+	}
 
 	var videoFile *os.File
 	videoFile, err = os.Open(outfile)
