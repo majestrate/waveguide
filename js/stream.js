@@ -234,8 +234,14 @@ Streamer.prototype._getNextSegment = function()
   ajax.open("GET", "/wg-api/v1/stream?u="+self._key);
   ajax.onreadystatechange = function() {
     if (ajax.readyState == 4 && ajax.status == 200) {
-      var url = ajax.responseText;
-      self._nextSegment(url);
+      try {
+        var j = JSON.parse(ajax.responseText);
+      } catch(ex) {
+        j = {
+          url: ajax.responseText
+        };
+      }
+      self._nextSegment(j.url);
     }
   }
   ajax.send();
