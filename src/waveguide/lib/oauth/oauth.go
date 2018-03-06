@@ -9,58 +9,27 @@ import (
 	"net/http"
 	"net/url"
 	"waveguide/lib/config"
+	"waveguide/lib/httppool"
 	"waveguide/lib/model"
 )
 
 var ErrInvalidBackendResponse = errors.New("invalid response from oauth backend")
 var ErrFailedToContactBackend = errors.New("failed to contact oauth backend server")
-var ErrOAuthClosing = errors.New("oauth backend is closed")
-
-type response struct {
-	resp *http.Response
-	err  error
-}
-
-type request struct {
-	reply   chan response
-	request *http.Request
-}
+var ErrOAuthClosing = errors.New("oauth backend is already closed")
 
 type Client struct {
 	conf    config.OAuthConfig
-	reqChan chan *request
-	http    http.Client
+	http    *httppool.Client
 	closing bool
 }
 
 // implements io.Closer
 func (c *Client) Close() error {
-	c.closing = true
-	c.reqChan <- nil
-	return nil
-}
-
-func (c *Client) runWorker() {
-	for {
-		req := <-c.reqChan
-		if req == nil {
-			return
-		}
-		resp, err := c.http.Do(req.request)
-		req.reply <- response{resp: resp, err: err}
-	}
-}
-
-func (c *Client) doRequest(req *http.Request) (resp *http.Response, err error) {
 	if c.closing {
-		err = ErrOAuthClosing
-		return
+		return ErrOAuthClosing
 	}
-	reply := make(chan response)
-	c.reqChan <- &request{request: req, reply: reply}
-	r := <-reply
-	resp, err = r.resp, r.err
-	return
+	c.closing = true
+	return c.http.Close()
 }
 
 func (c *Client) AuthURL(callback string) string {
@@ -86,7 +55,7 @@ func (c *Client) SubmitComment(comment model.Comment) (err error) {
 		req, err = http.NewRequest("POST", u.String(), buff)
 		if err == nil {
 			req.Header.Set("Content-Type", "application/json; encoding=UTF-8")
-			resp, err = c.doRequest(req)
+			resp, err = c.http.Do(req)
 			if err == nil {
 				defer resp.Body.Close()
 				if resp.StatusCode != 200 {
@@ -113,7 +82,7 @@ func (c *Client) AnnounceStream(token, message string) (err error) {
 		req, err = http.NewRequest("POST", u.String(), buff)
 		if err == nil {
 			req.Header.Set("Content-Type", "application/json; encoding=UTF-8")
-			resp, err = c.doRequest(req)
+			resp, err = c.http.Do(req)
 			if err == nil {
 				defer resp.Body.Close()
 				if resp.StatusCode != 200 {
@@ -131,7 +100,7 @@ func (c *Client) GetUser(token string) (user *User, err error) {
 	if err == nil {
 		req.Header.Set("Authorization", "Bearer "+token)
 		var resp *http.Response
-		resp, err = c.doRequest(req)
+		resp, err = c.http.Do(req)
 		if err == nil {
 			defer resp.Body.Close()
 			var tokenReq TokenInfoRequest
@@ -164,7 +133,7 @@ func (c *Client) GrantUser(code, callback string) (user *User, err error) {
 	req, err = http.NewRequest("POST", c.conf.Provider+"oauth/access_token", buff)
 	if err == nil {
 		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-		resp, err = c.doRequest(req)
+		resp, err = c.http.Do(req)
 		if err == nil {
 			defer resp.Body.Close()
 			var tok TokenRequest
@@ -187,17 +156,8 @@ func (c *Client) GrantUser(code, callback string) (user *User, err error) {
 }
 
 func NewClient(c config.OAuthConfig) *Client {
-	cl := &Client{
-		conf:    c,
-		reqChan: make(chan *request),
+	return &Client{
+		conf: c,
+		http: httppool.New(c.Workers),
 	}
-	workers := c.Workers
-	if workers <= 0 {
-		workers = 1
-	}
-	for workers > 0 {
-		go cl.runWorker()
-		workers--
-	}
-	return cl
 }

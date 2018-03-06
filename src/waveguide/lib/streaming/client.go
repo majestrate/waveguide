@@ -4,11 +4,13 @@ import (
 	"encoding/json"
 	"net/http"
 	"waveguide/lib/config"
+	"waveguide/lib/httppool"
 	"waveguide/lib/log"
 )
 
 type Client struct {
 	conf *config.Config
+	http *httppool.Client
 }
 
 func (cl *Client) Online() (streams []StreamInfo) {
@@ -44,5 +46,6 @@ func (cl *Client) Find(key string) (stream *StreamInfo) {
 func NewClient(c *config.Config) *Client {
 	return &Client{
 		conf: c,
+		http: httppool.New(4),
 	}
 }
