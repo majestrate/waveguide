@@ -63,7 +63,7 @@ func (c *Client) Do(req *http.Request) (resp *http.Response, err error) {
 
 func New(workers int) *Client {
 	cl := &Client{
-		reqChan: make(chan *request),
+		reqChan: make(chan *request, 128),
 	}
 	if workers <= 0 {
 		workers = 1
