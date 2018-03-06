@@ -37,12 +37,13 @@ Shim.prototype.PeerCount = function()
   return numPeers;
 }
 
-Shim.prototype.Cleanup = function(exclude)
+Shim.prototype.Cleanup = function(exclude, rewind)
 {
   var self = this;
   var torrents = self.torrent.torrents;
+  console.log("we have "+torrents.length+" torrents");
   var iters = 10;
-  while(torrents.length > 2)
+  while(torrents.length > rewind)
   {
     var ih = torrents[0].infoHash;
     if(ih == self._lastInfohash) {
@@ -61,7 +62,10 @@ Shim.prototype.Cleanup = function(exclude)
     if(found)
       iters--;
     else
-      self.torrent.remove(ih, function(err) { });
+      self.torrent.remove(ih, function(err) {
+        if(err) console.log("error for "+ih+": "+err);
+        else console.log("removed "+ih);
+      });
   }
 };
 

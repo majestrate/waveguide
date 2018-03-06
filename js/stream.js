@@ -63,7 +63,7 @@ Streamer.prototype.Cleanup = function()
       self.log("discard segment "+seg[1]);
     }
   }
-  self._net.Cleanup(exclude);
+  self._net.Cleanup(exclude, self._rewind);
 };
 
 Streamer.prototype.Stop = function()
@@ -127,7 +127,7 @@ Streamer.prototype._popSegmentBlob = function()
 Streamer.prototype._nextSegment = function(url, segno)
 {
   var self = this;
-  if (self._lastSegmentURL != url) {
+  if (self._lastSegmentURL != url && url != "") {
     self._net.FetchMetadata(url, function(err, metadata) {
       if(err)
       {
