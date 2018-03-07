@@ -10,6 +10,8 @@ import (
 	"waveguide/lib/torrent/metainfo"
 )
 
+const DefaultTracker = "wss://api.gitgud.tv"
+
 func NewFactory(c *config.TorrentConfig) (*Factory, error) {
 	return &Factory{
 		AnnounceURL: c.TrackerURL,
@@ -24,8 +26,9 @@ type Factory struct {
 
 func (f *Factory) MakeSingleWithWebseed(filename, webseed string, body io.Reader, out io.Writer) (err error) {
 	t := metainfo.TorrentFile{
-		Announce: f.AnnounceURL,
-		Webseed:  webseed,
+		Announce:     f.AnnounceURL,
+		AnnounceList: [][]string{[]string{DefaultTracker}},
+		Webseed:      webseed,
 	}
 	t.Info.PieceLength = f.PieceLength
 	t.Info.Path = filepath.Base(filename)
