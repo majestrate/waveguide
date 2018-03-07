@@ -2,6 +2,7 @@
 
 const parse_torrent = require("parse-torrent");
 const WebTorrent = require("webtorrent");
+const ut_pex = require("ut_pex");
 
 function Shim()
 {
@@ -102,9 +103,22 @@ Shim.prototype.AddMetadata = function(metadata, cb)
   if(self._lastInfohash == metadata.infoHash) return;
   self._lastInfohash = metadata.infoHash;
   self.torrent.add(metadata, function(t) {
-    t.files[0].getBlob(function(err, blob) {
-      if(err) cb(err, null);
-      else cb(null, blob);
+    t.on("wire", function(wire, addr) {
+      wire.use(ut_pex());
+      wire.ut_pex.start();
+      wire.ut_pex.on('peer', function (peer) {
+        t.addPeer(peer);
+      });
+      wire.ut_pex.on("dropped", function(peer) {
+        t.removePeer(peer);
+      });
+    });
+    // download in full
+    t.on("done", function() {
+      t.files[0].getBlob(function(err, blob) {
+        if(err) cb(err, null);
+        else cb(null, blob);
+      });
     });
   });
 };
