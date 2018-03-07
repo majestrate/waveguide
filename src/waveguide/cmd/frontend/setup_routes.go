@@ -61,6 +61,7 @@ func (routes *Routes) SetupRoutes(router *gin.Engine, conf *config.Config) {
 
 	router.GET("/about", routes.ServeAbout)
 	router.GET("/faq", routes.ServeFAQ)
+	router.GET("/funding", routes.ServeFunding)
 
 	router.GET("/stream/", routes.ServeStream)
 	router.GET("/watch/", routes.ServeWatch)

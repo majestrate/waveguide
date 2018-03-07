@@ -12,3 +12,7 @@ func (r *Routes) ServeAbout(c *gin.Context) {
 func (r *Routes) ServeFAQ(c *gin.Context) {
 	c.HTML(http.StatusOK, "faq.html", nil)
 }
+
+func (r *Routes) ServeFunding(c *gin.Context) {
+	c.HTML(http.StatusOK, "funding.html", nil)
+}
