@@ -113,6 +113,10 @@ Shim.prototype.AddMetadata = function(metadata, cb)
         t.removePeer(peer);
       });
     });
+    // manual tracker update
+    t.on("ready", function() {
+      t.discovery.tracker.update();
+    });
     // download in full
     t.on("done", function() {
       t.files[0].getBlob(function(err, blob) {
