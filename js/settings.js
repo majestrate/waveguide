@@ -1,7 +1,7 @@
 /** settings.js */
 
 
-const SegmentLength = 30 * 1000;
+const SegmentLength = 15 * 1000;
 const RefreshInterval = SegmentLength / 8;
 //const SegMime = 'video/mp4; codecs="avc1.42E01E, mp4a.40.2"';
 const SegMime = 'video/webm';

@@ -266,8 +266,13 @@ Streamer.prototype._onStarted = function()
         self.log("popped next segment");
         self._video.loop = false;
         var oldSrc = self._video.src;
+        self._video.stop();
         self._video.src = blob;
-        URL.revokeObjectURL(oldSrc);
+        self._video.load();
+        // give it a bit of time so we don't crash?
+        setTimeout(function() {
+          URL.revokeObjectURL(oldSrc);
+        }, 500);
         self._playVideo();
       }
       else
