@@ -68,7 +68,8 @@ func (c *Client) SubmitComment(comment model.Comment) (err error) {
 }
 
 func (c *Client) EnsureChat(token string) (chatid string, err error) {
-
+	// TODO: implement this
+	chatid = "5"
 	return
 }
 
