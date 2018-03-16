@@ -201,7 +201,9 @@ func (db *pgDB) GetExpiredVideos(capacity uint64) (videos []model.VideoInfo, err
 			params = append(params, id)
 			counter++
 		}
-		rows, err = db.conn.Query(fmt.Sprintf("SELECT video_id, webseed_url FROM webseeds WHERE video_id IN (%s)", q), params...)
+		query := fmt.Sprintf("SELECT video_id, webseed_url FROM webseeds WHERE video_id IN ( %s )", q)
+		log.Infof("expire query %s", query)
+		rows, err = db.conn.Query(query, params...)
 		if err == sql.ErrNoRows {
 		} else if err == nil {
 			for rows.Next() {

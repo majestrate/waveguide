@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 	"waveguide/lib/log"
+	"waveguide/lib/oauth"
 	"waveguide/lib/util"
 	"waveguide/lib/worker/api"
 )
@@ -42,7 +43,7 @@ func (s *Server) deleteTorrent(oldest string) {
 
 func (s *Server) APIStreamPublish(c *gin.Context) {
 	if s.Anon() {
-		s.ctx.Ensure("1", "anon")
+		s.ctx.Ensure("1", "anon", "5")
 		return
 	}
 	user, token := extractUserToken(c.PostForm("name"))
@@ -50,7 +51,13 @@ func (s *Server) APIStreamPublish(c *gin.Context) {
 		u, err := s.oauth.GetUser(token)
 		if err == nil {
 			if user == u.ID {
-				s.ctx.Ensure(user, u.Username)
+				chatid, err := s.oauth.EnsureChat(token)
+				if err == nil {
+					s.ctx.Ensure(user, u.Username, chatid)
+				} else {
+					log.Errorf("failed to create chat for stream: %s", err.Error())
+					c.String(http.StatusInternalServerError, err.Error())
+				}
 			} else {
 				log.Errorf("user id missmatch, '%s' != '%s'", user, u.ID)
 				c.String(http.StatusForbidden, "")
@@ -82,7 +89,10 @@ func (s *Server) APIStreamDone(c *gin.Context) {
 				s.deleteTorrent(u)
 			}
 		}
-		s.oauth.AnnounceStream(token, "stream is now offline, bai.")
+		s.oauth.SubmitPost(token, info.ChatID, oauth.Post{
+			Text: fmt.Sprintf("%s has ended streaming, press F to pay respects", info.Username),
+		})
+		s.oauth.StreamOffline(token, info.ID)
 	}
 }
 
@@ -92,7 +102,10 @@ func (s *Server) APIStreamSegment(c *gin.Context) {
 	info := s.ctx.Find(user)
 	if info != nil && info.Segments == 0 && s.oauth != nil {
 		// got first segment
-		s.oauth.AnnounceStream(token, "now live streaming at http://gitgud.tv/watch/?u="+user)
+		s.oauth.SubmitPost(token, info.ChatID, oauth.Post{
+			Text: "aw yeh, now heckin' streaming at http://gitgud.tv/watch/?u=" + user,
+		})
+		s.oauth.StreamOnline(token, user)
 	}
 	if info == nil {
 		log.Errorf("non existing stream %s", user)

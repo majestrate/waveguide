@@ -67,15 +67,65 @@ func (c *Client) SubmitComment(comment model.Comment) (err error) {
 	return
 }
 
-func (c *Client) AnnounceStream(token, message string) (err error) {
-	u, _ := url.Parse(c.conf.Provider + "channels/5/messages")
+func (c *Client) EnsureChat(token string) (chatid string, err error) {
+
+	return
+}
+
+func (c *Client) UpdateAnnotation(token string, a Annotation) (err error) {
+	u, _ := url.Parse(c.conf.Provider + "stream/0/users/me")
 	q := u.Query()
 	q.Set("access_token", token)
 	u.RawQuery = q.Encode()
 	buff := new(bytes.Buffer)
 	err = json.NewEncoder(buff).Encode(map[string]interface{}{
-		"text": message,
+		"annotations": []Annotation{a},
 	})
+	if err == nil {
+		var resp *http.Response
+		var req *http.Request
+		req, err = http.NewRequest("PATCH", u.String(), buff)
+		if err == nil {
+			req.Header.Set("Content-Type", "application/json; encoding=UTF-8")
+			resp, err = c.http.Do(req)
+			if err == nil {
+				defer resp.Body.Close()
+				if resp.StatusCode != 200 {
+					err = ErrInvalidBackendResponse
+				}
+			}
+		}
+	}
+	return
+}
+
+func (c *Client) streamStatus(token, uid string, status bool) (err error) {
+	err = c.UpdateAnnotation(token, Annotation{
+		Type: StreamAnnotation,
+		Value: Stream{
+			Online: status,
+		},
+	})
+	return
+}
+
+func (c *Client) StreamOnline(token, uid string) (err error) {
+	err = c.streamStatus(token, uid, true)
+	return
+}
+
+func (c *Client) StreamOffline(token, uid string) (err error) {
+	err = c.streamStatus(token, uid, false)
+	return
+}
+
+func (c *Client) SubmitPost(token, channel string, post Post) (err error) {
+	u, _ := url.Parse(c.conf.Provider + fmt.Sprintf("channels/%s/messages?include_post_annotations=1", channel))
+	q := u.Query()
+	q.Set("access_token", token)
+	u.RawQuery = q.Encode()
+	buff := new(bytes.Buffer)
+	err = json.NewEncoder(buff).Encode(post)
 	if err == nil {
 		var resp *http.Response
 		var req *http.Request

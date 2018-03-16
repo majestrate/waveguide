@@ -29,7 +29,7 @@ func (ctx *Context) Online(limit int) (streams []*StreamInfo) {
 	return
 }
 
-func (ctx *Context) Ensure(k, username string) (i *StreamInfo) {
+func (ctx *Context) Ensure(k, username, chatid string) (i *StreamInfo) {
 	if len(k) > 0 {
 		ctx.mtx.Lock()
 		var ok bool
@@ -38,6 +38,7 @@ func (ctx *Context) Ensure(k, username string) (i *StreamInfo) {
 			i = new(StreamInfo)
 			i.ID = k
 			i.Username = username
+			i.ChatID = chatid
 			i.LastUpdate = time.Now()
 			ctx.streams[k] = i
 		}

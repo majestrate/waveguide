@@ -14,6 +14,7 @@ type StreamInfo struct {
 	Token      string    `json:"-"`
 	LastUpdate time.Time `json:"-"`
 	Segments   uint64    `json:"segments"`
+	ChatID     string    `json:"chat_id"`
 }
 
 func (i *StreamInfo) ThumbnailURL() string {
