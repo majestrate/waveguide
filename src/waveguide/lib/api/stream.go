@@ -105,7 +105,10 @@ func (s *Server) APIStreamSegment(c *gin.Context) {
 		s.oauth.SubmitPost(token, info.ChatID, oauth.Post{
 			Text: "aw yeh, now heckin' streaming at http://gitgud.tv/watch/?u=" + user,
 		})
-		s.oauth.StreamOnline(token, user)
+		err := s.oauth.StreamOnline(token, user)
+		if err != nil {
+			log.Errorf("Failed to update stream state: %s", err.Error())
+		}
 	}
 	if info == nil {
 		log.Errorf("non existing stream %s", user)
