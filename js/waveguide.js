@@ -37,14 +37,17 @@ WaveGuide.prototype.ChatWidget = function(elemId, streamID)
   return new chat.LiveChat(elem, streamID);
 };
 
-WaveGuide.prototype.Streamer = function(pubkey)
+WaveGuide.prototype.Streamer = function(pubkey, experimental)
 {
   var self = this;
   if(self._stream) return;
   if(pubkey)
   {
     console.log("streaming "+pubkey);
-    self._stream = new stream.Streamer(null, pubkey);
+    if (experimental)
+      self._stream = new stream.Streamer(null, pubkey, true);
+    else
+      self._stream = new stream.Streamer(null, pubkey);
     self._stream.Start();
   }
   else

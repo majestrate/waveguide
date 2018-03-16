@@ -96,7 +96,7 @@ Shim.prototype.Stream = function(metadata, elem, first)
   });
 }
 
-Shim.prototype.AddMetadata = function(metadata, cb)
+Shim.prototype.AddMetadata = function(metadata, useBlob, cb)
 {
   var self = this;
   if (self.torrent.get(metadata.infoHash)) return;
@@ -119,10 +119,19 @@ Shim.prototype.AddMetadata = function(metadata, cb)
     });
     // download in full
     t.on("done", function() {
-      t.files[0].getBlob(function(err, blob) {
-        if(err) cb(err, null);
-        else cb(null, blob);
-      });
+      if(useBlob)
+      {
+        t.files[0].getBlob(function(err, blob) {
+          if(err) cb(err, null);
+          else cb(null, blob);
+        });
+      }
+      else
+      {
+        t.files[0].getBuffer(function(err, buff) {
+          cb(err, buff);
+        });
+      }
     });
   });
 };

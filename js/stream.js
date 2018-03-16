@@ -4,8 +4,9 @@ const Segmenter = require("./segment.js").Segmenter;
 const util = require("./util.js");
 const settings = require("./settings.js");
 const shim = require("./webtorrent-shim.js");
+const video = require("./videostream.js");
 
-function Streamer(source, key)
+function Streamer(source, key, mediastreams)
 {
   this._key = key || null;
   this._source = source;
@@ -13,11 +14,12 @@ function Streamer(source, key)
   this._interval = null;
   this._segments = null;
   this._video = null;
-  this._logelem = util.get_id("log");
-  if(source)
-    util.get_id("cam").src = window.URL.createObjectURL(source);
+  if(mediastreams)
+    this.video = new video.Player(util.get_id("player"));
   else
-    this._segments = [];
+    this.video = null;
+  this._logelem = util.get_id("log");
+  this._segments = [];
   this._net = new shim.Network();
   this._lastSegmentURL = null;
   this._lastPopped = 0;
@@ -117,7 +119,7 @@ Streamer.prototype._popSegmentBlob = function()
   if(seg && seg[0])
   {
     self.log("pop segment "+seg[1]);
-    return URL.createObjectURL(seg[0]);
+    return window.URL.createObjectURL(seg[0]);
   }
   else
     return null;
@@ -132,40 +134,65 @@ Streamer.prototype._nextSegment = function(url, segno)
       if(err)
       {
         self.log("no stream online: "+err);
-        if(!(self._video.src === settings.SegOffline))
+        if (self.video)
         {
-          self._video.src = settings.SegOffline;
-          self._video.loop = true;
-          self._playVideo();
+          self.video.SetOffline();
+        }
+        else
+        {
+          if(!(self._video.src === settings.SegOffline))
+          {
+            self._video.src = settings.SegOffline;
+            self._video.loop = true;
+            self._playVideo();
+          }
         }
       }
       else
       {
         self.log("segment "+segno);
-        self._net.AddMetadata(metadata, function(err, blob) {
+        self._net.AddMetadata(metadata, self.video == null, function(err, blob) {
           if (err) self.log("failed to fetch file: "+err);
           else
           {
-            self._queueSegment(blob, segno, metadata.infoHash);
+            if(self.video)
+            {
+              self.video.AddSegment(blob);
+              if(!self.video.Started())
+              {
+                self.video.Start();
+                self.video.Play();
+              }
+            }
+            else
+            {
+              self._queueSegment(blob, segno, metadata.infoHash);
+            }
             self._lastSegmentURL = url
           }
         });
       }
     });
   }
-  if (self._video.src === settings.SegPlaceholder || self._video.src === settings.SegOffline)
+  if (self.video)
   {
-    var blob = self._popSegmentBlob();
-      if(blob)
+  }
+  else
+  {
+    if (self._video.src === settings.SegPlaceholder || self._video.src === settings.SegOffline)
     {
-      self.log("got segment: "+blob);
-      self._video.loop = false;
-      self._video.src = blob;
-      self._playVideo();
+      var blob = self._popSegmentBlob();
+      if(blob)
+      {
+        self.log("got segment: "+blob);
+        self._video.loop = false;
+        self._video.src = blob;
+        self._playVideo();
+      }
+      else
+        self.log("no segment yet");
     }
-    else
-      self.log("no segment yet");
-  }  
+  }
   self.Cleanup();
 };
 
@@ -241,7 +268,10 @@ Streamer.prototype._onStarted = function()
     var playbutton = util.button();
     playbutton.value = "play video";
     playbutton.onclick = function(ev) {
-      self._video.play();
+      if(self.video)
+        self.video.Play();
+      else
+        self._video.play();
       self.log("play pressed");
     };
     document.body.appendChild(playbutton);
@@ -255,36 +285,43 @@ Streamer.prototype._onStarted = function()
   }, 1000);
   if (self._key)
   {    
-    self._video = util.get_id("player");
-    self._video.src = settings.SegPlaceholder;
-    self._video.loop = true;
-    self._playVideo();
-    var next = function() {
-      var blob = self._popSegmentBlob();
-      if(blob)
-      {
-        self.log("popped next segment");
-        self._video.loop = false;
-        var oldSrc = self._video.src;
-        self._video.stop();
-        self._video.src = blob;
-        self._video.load();
-        // give it a bit of time so we don't crash?
-        setTimeout(function() {
-          URL.revokeObjectURL(oldSrc);
-        }, 500);
-        self._playVideo();
-      }
-      else
-      {
-        self.log("reached the end of segment but no next segment yet");
-        self._getNextSegment();
-        setTimeout(function() {
-          next();
-        }, 1000);
-      }
-    };
-    self._video.onended = next;
+
+    if(self.video)
+    {
+      /** placeholder */
+    }
+    else
+    {
+      self._video = util.get_id("player");
+      self._video.src = settings.SegPlaceholder;
+      self._video.loop = true;
+      self._playVideo();
+      var next = function() {
+        var blob = self._popSegmentBlob();
+        if(blob)
+        {
+          self.log("popped next segment");        
+          self._video.loop = false;
+          var oldSrc = self._video.src;
+          self._video.src = blob;
+          self._video.load();
+          // give it a bit of time so we don't crash?
+          setTimeout(function() {
+            URL.revokeObjectURL(oldSrc);
+          }, 500);
+          self._playVideo();
+        }
+        else
+        {
+          self.log("reached the end of segment but no next segment yet");
+          self._getNextSegment();
+          setTimeout(function() {
+            next();
+          }, 1000);
+        }
+      };
+      self._video.onended = next;
+    }
     self._getNextSegment();
     self._interval = setInterval(function() {
       self._getNextSegment();
