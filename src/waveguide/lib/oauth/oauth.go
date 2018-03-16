@@ -67,9 +67,72 @@ func (c *Client) SubmitComment(comment model.Comment) (err error) {
 	return
 }
 
-func (c *Client) EnsureChat(token string) (chatid string, err error) {
-	// TODO: implement this
-	chatid = "5"
+func (c *Client) EnsureStreamChat(token string) (chatid string, err error) {
+	var chnl *Channel
+	chnl, err = c.CreateChannel(token, StreamAnnotation)
+	if err == nil {
+		if chnl == nil {
+			err = ErrInvalidBackendResponse
+		} else {
+			chatid = chnl.ID
+		}
+	}
+	return
+}
+
+func (c *Client) DeleteChannel(token string, chnlID string) (err error) {
+	u, _ := url.Parse(c.conf.Provider + fmt.Sprintf("stream/0/channels/%s", chnlID))
+	q := u.Query()
+	q.Set("access_token", token)
+	u.RawQuery = q.Encode()
+	if err == nil {
+		var resp *http.Response
+		var req *http.Request
+		req, err = http.NewRequest("DELETE", u.String(), nil)
+		if err == nil {
+			req.Header.Set("Content-Type", "application/json; encoding=UTF-8")
+			resp, err = c.http.Do(req)
+			if err == nil {
+				// TODO: logging
+				resp.Body.Close()
+			}
+		}
+	}
+	return
+}
+
+func (c *Client) CreateChannel(token string, chanType string) (chnl *Channel, err error) {
+	u, _ := url.Parse(c.conf.Provider + "stream/0/channels")
+	q := u.Query()
+	q.Set("access_token", token)
+	u.RawQuery = q.Encode()
+	buff := new(bytes.Buffer)
+	err = json.NewEncoder(buff).Encode(map[string]interface{}{
+		"type": chanType,
+	})
+	if err == nil {
+		var resp *http.Response
+		var req *http.Request
+		req, err = http.NewRequest("POST", u.String(), buff)
+		if err == nil {
+			req.Header.Set("Content-Type", "application/json; encoding=UTF-8")
+			resp, err = c.http.Do(req)
+			if err == nil {
+				defer resp.Body.Close()
+				if resp.StatusCode == 200 {
+					var chnlResp ChannelResponse
+					err = json.NewDecoder(resp.Body).Decode(&chnlResp)
+					if err == nil {
+						if chnlResp.Meta.Code == 200 {
+							chnl = &chnlResp.Data
+						}
+					}
+				} else {
+					err = ErrInvalidBackendResponse
+				}
+			}
+		}
+	}
 	return
 }
 
@@ -83,7 +146,7 @@ func (c *Client) GetAnnotations(token string) (a []Annotation, err error) {
 }
 
 func (c *Client) putAnnotations(token string, a []Annotation) (err error) {
-	u, _ := url.Parse(c.conf.Provider + "stream/0/users/me")
+	u, _ := url.Parse(c.conf.Provider + "stream/0/users/me?include_annotations=1")
 	q := u.Query()
 	q.Set("access_token", token)
 	u.RawQuery = q.Encode()
@@ -136,7 +199,7 @@ func (c *Client) StreamOffline(token, uid string) (err error) {
 }
 
 func (c *Client) SubmitPost(token, channel string, post Post) (err error) {
-	u, _ := url.Parse(c.conf.Provider + fmt.Sprintf("channels/%s/messages?include_post_annotations=1", channel))
+	u, _ := url.Parse(c.conf.Provider + fmt.Sprintf("channels/%s/messages?include_annotations=1", channel))
 	q := u.Query()
 	q.Set("access_token", token)
 	u.RawQuery = q.Encode()
@@ -162,7 +225,7 @@ func (c *Client) SubmitPost(token, channel string, post Post) (err error) {
 
 func (c *Client) GetUser(token string) (user *User, err error) {
 	var req *http.Request
-	req, err = http.NewRequest("GET", c.conf.Provider+"stream/0/token", nil)
+	req, err = http.NewRequest("GET", c.conf.Provider+"stream/0/token?include_annotations=1", nil)
 	if err == nil {
 		req.Header.Set("Authorization", "Bearer "+token)
 		var resp *http.Response

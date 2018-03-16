@@ -51,7 +51,7 @@ func (s *Server) APIStreamPublish(c *gin.Context) {
 		u, err := s.oauth.GetUser(token)
 		if err == nil {
 			if user == u.ID {
-				chatid, err := s.oauth.EnsureChat(token)
+				chatid, err := s.oauth.EnsureStreamChat(token)
 				if err == nil {
 					s.ctx.Ensure(user, u.Username, chatid)
 				} else {
@@ -93,6 +93,7 @@ func (s *Server) APIStreamDone(c *gin.Context) {
 			Text: fmt.Sprintf("%s has ended streaming, press F to pay respects", info.Username),
 		})
 		s.oauth.StreamOffline(token, info.ID)
+		s.oauth.DeleteChannel(token, info.ChatID)
 	}
 }
 
