@@ -5,11 +5,12 @@ import (
 )
 
 type FrontendConfig struct {
-	StaticDir   string
-	TemplateDir string
-	WorkerURL   string
-	FrontendURL string
-	Addr        string
+	StaticDir    string
+	TemplateDir  string
+	WorkerURL    string
+	FrontendURL  string
+	Addr         string
+	CookieDomain string
 }
 
 func (c *FrontendConfig) Load(s *parser.Section) error {
@@ -18,5 +19,6 @@ func (c *FrontendConfig) Load(s *parser.Section) error {
 	c.WorkerURL = s.ValueOf("worker")
 	c.FrontendURL = s.ValueOf("url")
 	c.Addr = s.ValueOf("addr")
+	c.CookieDomain = s.ValueOf("cookie-domain")
 	return nil
 }

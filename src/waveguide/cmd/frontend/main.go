@@ -37,6 +37,9 @@ func Run() {
 		log.Fatal(err.Error())
 	}
 
+	// set cookie domain
+	sessionStore.Options.Domain = conf.Frontend.CookieDomain
+
 	// make router
 	router := gin.Default()
 
