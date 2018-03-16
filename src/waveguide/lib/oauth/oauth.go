@@ -73,14 +73,23 @@ func (c *Client) EnsureChat(token string) (chatid string, err error) {
 	return
 }
 
-func (c *Client) UpdateAnnotation(token string, a Annotation) (err error) {
+func (c *Client) GetAnnotations(token string) (a []Annotation, err error) {
+	var u *User
+	u, err = c.GetUser(token)
+	if err == nil && u != nil {
+		a = u.Annotations
+	}
+	return
+}
+
+func (c *Client) putAnnotations(token string, a []Annotation) (err error) {
 	u, _ := url.Parse(c.conf.Provider + "stream/0/users/me")
 	q := u.Query()
 	q.Set("access_token", token)
 	u.RawQuery = q.Encode()
 	buff := new(bytes.Buffer)
 	err = json.NewEncoder(buff).Encode(map[string]interface{}{
-		"annotations": []Annotation{a},
+		"annotations": a,
 	})
 	if err == nil {
 		var resp *http.Response
@@ -101,12 +110,18 @@ func (c *Client) UpdateAnnotation(token string, a Annotation) (err error) {
 }
 
 func (c *Client) streamStatus(token, uid string, status bool) (err error) {
-	err = c.UpdateAnnotation(token, Annotation{
-		Type: StreamAnnotation,
-		Value: Stream{
-			Online: status,
-		},
-	})
+	var anos []Annotation
+	anos, err = c.GetAnnotations(token)
+	if err == nil {
+		for _, a := range anos {
+			if a.Type == StreamAnnotation {
+				a.Value = Stream{
+					Online: status,
+				}
+			}
+		}
+		err = c.putAnnotations(token, anos)
+	}
 	return
 }
 
@@ -158,11 +173,12 @@ func (c *Client) GetUser(token string) (user *User, err error) {
 			err = json.NewDecoder(resp.Body).Decode(&tokenReq)
 			if err == nil {
 				user = &User{
-					ID:       tokenReq.Data.User.ID,
-					Username: tokenReq.Data.User.Username,
-					Token:    token,
-					Avatar:   tokenReq.Data.User.Avatar,
-					Cover:    tokenReq.Data.User.Cover,
+					ID:          tokenReq.Data.User.ID,
+					Username:    tokenReq.Data.User.Username,
+					Token:       token,
+					Avatar:      tokenReq.Data.User.Avatar,
+					Cover:       tokenReq.Data.User.Cover,
+					Annotations: tokenReq.Data.User.Annotations,
 				}
 			}
 		}

@@ -5,11 +5,12 @@ import (
 )
 
 type User struct {
-	ID       string `json:"id"`
-	Username string `json:"username"`
-	Token    string `json:"-"`
-	Avatar   Image  `json:"avatar_image"`
-	Cover    Image  `json:"cover_image"`
+	ID          string       `json:"id"`
+	Username    string       `json:"username"`
+	Token       string       `json:"-"`
+	Avatar      Image        `json:"avatar_image"`
+	Cover       Image        `json:"cover_image"`
+	Annotations []Annotation `json:"annotations"`
 }
 
 func (u User) ToModel() *model.UserInfo {
