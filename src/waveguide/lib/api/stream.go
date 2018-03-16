@@ -43,14 +43,14 @@ func (s *Server) deleteTorrent(oldest string) {
 
 func (s *Server) APIStreamPublish(c *gin.Context) {
 	if s.Anon() {
-		s.ctx.Ensure("1", "anon", "5")
+		s.ctx.Ensure("1", "anon", 5)
 		return
 	}
 	user, token := extractUserToken(c.PostForm("name"))
 	if user != "" && token != "" {
 		u, err := s.oauth.GetUser(token)
 		if err == nil {
-			if user == u.ID {
+			if user == string(u.ID) {
 				chatid, err := s.oauth.EnsureStreamChat(token)
 				if err == nil {
 					s.ctx.Ensure(user, u.Username, chatid)

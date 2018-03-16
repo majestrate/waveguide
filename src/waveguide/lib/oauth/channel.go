@@ -1,7 +1,7 @@
 package oauth
 
 type ChannelMembers struct {
-	Users []string `json:"user_ids"`
+	//Users []string `json:"user_ids"`
 }
 
 type ChannelStats struct {
@@ -14,8 +14,8 @@ type Channel struct {
 	Type    string         `json:"type"`
 	Readers ChannelMembers `json:"readers"`
 	Writers ChannelMembers `json:"writers"`
-	ID      string         `json:"id"`
-	Owner   User           `json:"owner"`
+	ID      int64          `json:"id"`
+	//Owner   User           `json:"owner"`
 }
 
 type ChannelResponse struct {

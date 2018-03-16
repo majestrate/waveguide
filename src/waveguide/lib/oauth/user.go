@@ -1,6 +1,7 @@
 package oauth
 
 import (
+	"fmt"
 	"waveguide/lib/model"
 )
 
@@ -15,7 +16,7 @@ type User struct {
 
 func (u User) ToModel() *model.UserInfo {
 	return &model.UserInfo{
-		UserID:    u.ID,
+		UserID:    fmt.Sprintf("%d", u.ID),
 		Name:      u.Username,
 		Token:     u.Token,
 		AvatarURL: u.Avatar.URL,

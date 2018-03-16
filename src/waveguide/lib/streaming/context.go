@@ -29,7 +29,7 @@ func (ctx *Context) Online(limit int) (streams []*StreamInfo) {
 	return
 }
 
-func (ctx *Context) Ensure(k, username, chatid string) (i *StreamInfo) {
+func (ctx *Context) Ensure(k, username string, chatid int64) (i *StreamInfo) {
 	if len(k) > 0 {
 		ctx.mtx.Lock()
 		var ok bool

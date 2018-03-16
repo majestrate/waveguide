@@ -67,7 +67,7 @@ func (c *Client) SubmitComment(comment model.Comment) (err error) {
 	return
 }
 
-func (c *Client) EnsureStreamChat(token string) (chatid string, err error) {
+func (c *Client) EnsureStreamChat(token string) (chatid int64, err error) {
 	var chnl *Channel
 	chnl, err = c.CreateChannel(token, StreamAnnotation)
 	if err == nil {
@@ -80,8 +80,8 @@ func (c *Client) EnsureStreamChat(token string) (chatid string, err error) {
 	return
 }
 
-func (c *Client) DeleteChannel(token string, chnlID string) (err error) {
-	u, _ := url.Parse(c.conf.Provider + fmt.Sprintf("stream/0/channels/%s", chnlID))
+func (c *Client) DeleteChannel(token string, chnlID int64) (err error) {
+	u, _ := url.Parse(c.conf.Provider + fmt.Sprintf("stream/0/channels/%d", chnlID))
 	q := u.Query()
 	q.Set("access_token", token)
 	u.RawQuery = q.Encode()
@@ -198,8 +198,8 @@ func (c *Client) StreamOffline(token, uid string) (err error) {
 	return
 }
 
-func (c *Client) SubmitPost(token, channel string, post Post) (err error) {
-	u, _ := url.Parse(c.conf.Provider + fmt.Sprintf("channels/%s/messages?include_annotations=1", channel))
+func (c *Client) SubmitPost(token string, channel int64, post Post) (err error) {
+	u, _ := url.Parse(c.conf.Provider + fmt.Sprintf("channels/%d/messages?include_annotations=1", channel))
 	q := u.Query()
 	q.Set("access_token", token)
 	u.RawQuery = q.Encode()
