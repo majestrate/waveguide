@@ -36,15 +36,17 @@ func (c *Client) doHTTP(method, path, token string, data interface{}) (resp *htt
 		path = path[1:]
 	}
 	buff := new(util.Buffer)
-	if data == nil {
-		buff = nil
-	} else {
+	if data != nil {
 		err = json.NewEncoder(buff).Encode(data)
 	}
 	if err == nil {
 		var req *http.Request
-		req, err = http.NewRequest(method, c.conf.Provider+path, buff)
-		if req == nil {
+		if data == nil {
+			req, err = http.NewRequest(method, c.conf.Provider+path, nil)
+		} else {
+			req, err = http.NewRequest(method, c.conf.Provider+path, buff)
+		}
+		if err == nil {
 			if buff != nil {
 				req.Header.Set("Content-Size", fmt.Sprintf("%d", buff.Len()))
 				req.Header.Set("Content-Type", "application/json; encoding=UTF-8")

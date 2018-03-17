@@ -26,7 +26,7 @@ type Channel struct {
 	Readers ChannelMembers `json:"readers"`
 	Writers ChannelMembers `json:"writers"`
 	ID      ChanID         `json:"id"`
-	Owner   User           `json:"owner"`
+	//Owner   User           `json:"owner"`
 }
 
 type ChannelResponse struct {

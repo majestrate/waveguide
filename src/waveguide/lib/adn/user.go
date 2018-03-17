@@ -46,32 +46,29 @@ type TokenRequest struct {
 }
 
 func (c *Client) GetUserByID(token string, id UID) (user *User, err error) {
-	resp, e := c.doHTTP("GET", fmt.Sprintf("/stream/0/users/%s?include_annotations=1", id.String()), token, nil)
-	err = e
+	resp, err := c.doHTTP("GET", fmt.Sprintf("/stream/0/users/%s?include_annotations=1", id.String()), token, nil)
 	if err == nil {
+		var userReq UserRequest
+		err = json.NewDecoder(resp.Body).Decode(&userReq)
+		resp.Body.Close()
 		if err == nil {
-			defer resp.Body.Close()
-			var userReq UserRequest
-			err = json.NewDecoder(resp.Body).Decode(&userReq)
-			if err == nil {
-				if userReq.Meta.Code == 200 {
-					user = &userReq.Data
-				} else {
-					err = ErrInvalidBackendResponse
-				}
+			if userReq.Meta.Code == 200 {
+				user = &userReq.Data
+			} else {
+				err = ErrInvalidBackendResponse
 			}
+
 		}
 	}
 	return
 }
 
 func (c *Client) GetCurrentUser(token string) (user *User, err error) {
-	resp, e := c.doHTTP("GET", "/stream/0/token", token, nil)
-	err = e
+	resp, err := c.doHTTP("GET", "/stream/0/token", token, nil)
 	if err == nil {
-		defer resp.Body.Close()
 		var tokenReq TokenInfoRequest
 		err = json.NewDecoder(resp.Body).Decode(&tokenReq)
+		resp.Body.Close()
 		if err == nil {
 			user = &User{
 				ID:       tokenReq.Data.User.ID,
@@ -80,7 +77,6 @@ func (c *Client) GetCurrentUser(token string) (user *User, err error) {
 				Avatar:   tokenReq.Data.User.Avatar,
 				Cover:    tokenReq.Data.User.Cover,
 			}
-
 		}
 	}
 	return
