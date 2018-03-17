@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"waveguide/lib/log"
 	"waveguide/lib/util"
 )
@@ -18,6 +19,7 @@ func (f *FFProbe) Init() (err error) {
 }
 
 func (f *FFProbe) VideoNeedsEncoding(ifname string, wanted Info) (needs bool, err error) {
+	ext := filepath.Ext(ifname)
 	outbuff := new(util.Buffer)
 	errbuff := new(util.Buffer)
 	var args []string
@@ -41,6 +43,9 @@ func (f *FFProbe) VideoNeedsEncoding(ifname string, wanted Info) (needs bool, er
 		err = json.NewDecoder(outbuff).Decode(&probe)
 		if err == nil {
 			needs = !wanted.Matches(probe.Streams)
+			if wanted.Ext != "" {
+				needs = needs || (wanted.Ext != ext)
+			}
 		} else {
 			log.Errorf("failed to decode json: %s", err.Error())
 		}

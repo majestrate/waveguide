@@ -270,12 +270,10 @@ func (c *Client) GrantUser(code, callback string) (user *User, err error) {
 			err = json.NewDecoder(resp.Body).Decode(&tok)
 			if err == nil {
 				user = &User{
-					Token:    tok.AccessToken,
-					Username: tok.Token.User.Username,
 					ID:       tok.Token.User.ID,
+					Username: tok.Token.User.Username,
+					Token:    tok.AccessToken,
 				}
-			} else {
-				err = ErrInvalidBackendResponse
 			}
 			resp.Body.Close()
 		} else {

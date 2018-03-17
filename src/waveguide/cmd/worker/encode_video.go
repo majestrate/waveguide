@@ -16,9 +16,7 @@ var ErrNoFilePath = errors.New("no local filepath provided")
 var ErrNoVideoID = errors.New("no videoid provided")
 
 func (w *Worker) ApiEncodeVideo(r *api.Request) error {
-	outfile := w.TempFileName(".mp4")
 	fname := r.GetString(api.ParamFilename, "")
-
 	if fname == "" {
 		return ErrNoFileName
 	}
@@ -41,12 +39,13 @@ func (w *Worker) ApiEncodeVideo(r *api.Request) error {
 	encode, err = w.Prober.VideoNeedsEncoding(infile, video.Info{
 		VideoCodec: "h264",
 		AudioCodec: "aac",
+		Ext:        "mp4",
 	})
 	if err != nil {
 		log.Errorf("failed to probe %s: %s", infile, err.Error())
 		return err
 	}
-
+	outfile := w.TempFileName(".mp4")
 	if encode {
 		log.Infof("Encoding %s as %s to %s", fname, infile, outfile)
 		err = w.Encoder.EncodeFile(infile, outfile)

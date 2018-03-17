@@ -5,6 +5,7 @@ type Info struct {
 	AudioCodec string
 	Width      int
 	Height     int
+	Ext        string
 }
 
 type StreamInfo struct {
