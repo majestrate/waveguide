@@ -4,10 +4,19 @@ func (c *Client) streamStatus(token string, uid UID, status bool) (err error) {
 	var anos []Annotation
 	anos, err = c.GetAnnotations(token, uid)
 	if err == nil {
-		for idx := range anos {
-			if anos[idx].Type == StreamAnnotation {
-				anos[idx].Value = Stream{
+		if len(anos) == 0 {
+			anos = append(anos, Annotation{
+				Type: StreamAnnotation,
+				Value: Stream{
 					Online: status,
+				},
+			})
+		} else {
+			for idx := range anos {
+				if anos[idx].Type == StreamAnnotation {
+					anos[idx].Value = Stream{
+						Online: status,
+					}
 				}
 			}
 		}
