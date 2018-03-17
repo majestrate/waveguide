@@ -2,19 +2,20 @@ package streaming
 
 import (
 	"time"
+	"waveguide/lib/adn"
 )
 
 const StreamUpdateTimeout = time.Minute
 const PlaceholderThumbnail = "https://beam.sapphire.moe/assets/gitgudtv/GitGud.tv.png"
 
 type StreamInfo struct {
-	ID         string    `json:"id"`
-	Username   string    `json:"username"`
-	URLS       [5]string `json:"urls"`
-	Token      string    `json:"-"`
-	LastUpdate time.Time `json:"-"`
-	Segments   uint64    `json:"segments"`
-	ChatID     int64     `json:"chat_id"`
+	ID         adn.UID    `json:"id"`
+	Username   string     `json:"username"`
+	URLS       [5]string  `json:"urls"`
+	Token      string     `json:"-"`
+	LastUpdate time.Time  `json:"-"`
+	Segments   uint64     `json:"segments"`
+	ChatID     adn.ChanID `json:"chat_id"`
 }
 
 func (i *StreamInfo) ThumbnailURL() string {

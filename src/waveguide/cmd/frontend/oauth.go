@@ -14,15 +14,15 @@ func (r *Routes) oauthCallback() string {
 }
 
 func (r *Routes) ServeOAuthLogin(c *gin.Context) {
-	c.Redirect(http.StatusTemporaryRedirect, r.oauth.AuthURL(r.oauthCallback()))
+	c.Redirect(http.StatusTemporaryRedirect, r.adn.AuthURL(r.oauthCallback()))
 }
 
 func (r *Routes) HandleOAuthRedirect(c *gin.Context) {
-	if r.oauth == nil {
+	if r.adn == nil {
 		r.NotFound(c)
 	} else {
 		code := c.Query("code")
-		user, err := r.oauth.GrantUser(code, r.oauthCallback())
+		user, err := r.adn.GrantUser(code, r.oauthCallback())
 		if err == nil {
 			r.SetCurrentUser(*user, c)
 			c.Redirect(http.StatusTemporaryRedirect, "/")

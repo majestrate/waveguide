@@ -3,6 +3,7 @@ package streaming
 import (
 	"sync"
 	"time"
+	"waveguide/lib/adn"
 )
 
 type Context struct {
@@ -29,14 +30,15 @@ func (ctx *Context) Online(limit int) (streams []*StreamInfo) {
 	return
 }
 
-func (ctx *Context) Ensure(k, username string, chatid int64) (i *StreamInfo) {
+func (ctx *Context) Ensure(uid adn.UID, username string, chatid adn.ChanID) (i *StreamInfo) {
+	k := uid.String()
 	if len(k) > 0 {
 		ctx.mtx.Lock()
 		var ok bool
 		i, ok = ctx.streams[k]
 		if !ok {
 			i = new(StreamInfo)
-			i.ID = k
+			i.ID = uid
 			i.Username = username
 			i.ChatID = chatid
 			i.LastUpdate = time.Now()

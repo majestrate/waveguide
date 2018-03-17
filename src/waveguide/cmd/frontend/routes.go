@@ -4,9 +4,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"net/url"
+	"waveguide/lib/adn"
 	"waveguide/lib/config"
 	"waveguide/lib/database"
-	"waveguide/lib/oauth"
 	pomf "waveguide/lib/pomf/api"
 	"waveguide/lib/streaming"
 	"waveguide/lib/worker/api"
@@ -18,7 +18,7 @@ type Routes struct {
 	FrontendURL *url.URL
 	TempDir     string
 	Streaming   *streaming.Client
-	oauth       *oauth.Client
+	adn         *adn.Client
 	Pomf        *pomf.Server
 }
 
@@ -38,21 +38,21 @@ func (r *Routes) Reconfigure(c *config.Config) error {
 
 func (r *Routes) configure(c *config.Config, reload bool) (err error) {
 	r.Streaming = streaming.NewClient(c)
-	if c.OAuth.Enabled {
-		o := oauth.NewClient(c.OAuth)
-		if r.oauth == nil {
-			r.oauth = o
+	if c.ADN.Enabled {
+		o := adn.NewClient(c.ADN)
+		if r.adn == nil {
+			r.adn = o
 		} else {
 			// safe close
-			old := r.oauth
-			r.oauth = o
+			old := r.adn
+			r.adn = o
 			old.Close()
 		}
 	} else {
-		if r.oauth != nil {
+		if r.adn != nil {
 			// safe close
-			old := r.oauth
-			r.oauth = nil
+			old := r.adn
+			r.adn = nil
 			old.Close()
 		}
 	}

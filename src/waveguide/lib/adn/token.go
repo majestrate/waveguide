@@ -1,4 +1,4 @@
-package oauth
+package adn
 
 type TokenInfo struct {
 	Scopes []string `json:"scopes"`

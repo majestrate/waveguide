@@ -15,7 +15,7 @@ type Config struct {
 	MQ        MQConfig
 	Storage   StorageConfig
 	CDN       CDNConfig
-	OAuth     OAuthConfig
+	ADN       ADNConfig
 	ApiServer ApiServerConfig
 	RTMP      RTMPConfig
 }
@@ -28,7 +28,7 @@ func (c *Config) Load(fname string) error {
 		"rabbitmq":  &c.MQ,
 		"storage":   &c.Storage,
 		"cdn":       &c.CDN,
-		"oauth":     &c.OAuth,
+		"oauth":     &c.ADN,
 		"apiserver": &c.ApiServer,
 		"rtmp":      &c.RTMP,
 	}

@@ -6,7 +6,7 @@ import (
 )
 
 func (r *Routes) ServeLogin(c *gin.Context) {
-	if r.oauth == nil {
+	if r.adn == nil {
 		c.HTML(http.StatusOK, "login.html", map[string]interface{}{})
 	} else {
 		r.ServeOAuthLogin(c)

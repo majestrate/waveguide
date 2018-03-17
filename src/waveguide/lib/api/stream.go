@@ -9,8 +9,8 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"waveguide/lib/adn"
 	"waveguide/lib/log"
-	"waveguide/lib/oauth"
 	"waveguide/lib/util"
 	"waveguide/lib/worker/api"
 )
@@ -43,23 +43,29 @@ func (s *Server) deleteTorrent(oldest string) {
 
 func (s *Server) APIStreamPublish(c *gin.Context) {
 	if s.Anon() {
-		s.ctx.Ensure("1", "anon", 5)
+		s.ctx.Ensure(adn.UID(1), "anon", adn.ChanID(5))
 		return
 	}
 	user, token := extractUserToken(c.PostForm("name"))
 	if user != "" && token != "" {
-		u, err := s.oauth.GetUser(token)
+		uid, err := adn.ParseUID(user)
+		if err != nil {
+			log.Errorf("failed to parse userid: %s", err.Error())
+			c.String(http.StatusForbidden, "bad stream key")
+			return
+		}
+		u, err := s.adn.GetUserByID(token, uid)
 		if err == nil {
-			if user == string(u.ID) {
-				chatid, err := s.oauth.EnsureStreamChat(token)
-				if err == nil {
-					s.ctx.Ensure(user, u.Username, chatid)
+			if user == u.ID.String() {
+				chnl, err := s.adn.EnsureStreamChat(token)
+				if err == nil && chnl != nil {
+					s.ctx.Ensure(uid, u.Username, chnl.ID)
 				} else {
 					log.Errorf("failed to create chat for stream: %s", err.Error())
 					c.String(http.StatusInternalServerError, err.Error())
 				}
 			} else {
-				log.Errorf("user id missmatch, '%s' != '%s'", user, u.ID)
+				log.Errorf("user id missmatch, '%s' != '%s'", user, u.ID.String())
 				c.String(http.StatusForbidden, "")
 			}
 		} else {
@@ -89,11 +95,11 @@ func (s *Server) APIStreamDone(c *gin.Context) {
 				s.deleteTorrent(u)
 			}
 		}
-		s.oauth.SubmitPost(token, info.ChatID, oauth.Post{
+		s.adn.SubmitPost(token, info.ChatID, adn.Post{
 			Text: fmt.Sprintf("%s has ended streaming, press F to pay respects", info.Username),
 		})
-		s.oauth.StreamOffline(token, info.ID)
-		s.oauth.DeleteChannel(token, info.ChatID)
+		s.adn.StreamOffline(token, info.ID)
+		s.adn.DeleteChannel(token, info.ChatID)
 	}
 }
 
@@ -101,12 +107,12 @@ func (s *Server) APIStreamSegment(c *gin.Context) {
 	user, token := extractUserToken(c.PostForm("name"))
 	infile := c.PostForm("path")
 	info := s.ctx.Find(user)
-	if info != nil && info.Segments == 0 && s.oauth != nil {
+	if info != nil && info.Segments == 0 && s.adn != nil {
 		// got first segment
-		s.oauth.SubmitPost(token, info.ChatID, oauth.Post{
+		s.adn.SubmitPost(token, info.ChatID, adn.Post{
 			Text: "aw yeh, now heckin' streaming at http://gitgud.tv/watch/?u=" + user,
 		})
-		err := s.oauth.StreamOnline(token, user)
+		err := s.adn.StreamOnline(token, info.ID)
 		if err != nil {
 			log.Errorf("Failed to update stream state: %s", err.Error())
 		}
@@ -144,7 +150,7 @@ func (s *Server) APIStreamSegment(c *gin.Context) {
 	webseedURL := s.MakeWebseedURL(outfile)
 	publicURL := s.MakePublicURL(outfile)
 
-	if !s.ctx.Has(info.ID) {
+	if !s.ctx.Has(info.ID.String()) {
 		// stream is gone
 		log.Errorf("stream %s is gone, will not publish files", info.ID)
 		c.String(http.StatusNotFound, "stream is gone")

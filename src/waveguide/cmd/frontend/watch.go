@@ -3,6 +3,7 @@ package frontend
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"waveguide/lib/adn"
 )
 
 func (r *Routes) ServeWatch(c *gin.Context) {
@@ -11,9 +12,9 @@ func (r *Routes) ServeWatch(c *gin.Context) {
 		r.NotFound(c)
 	} else {
 		info := r.Streaming.Find(id)
-		var chatID int64
+		var chatID adn.ChanID
 		if info == nil {
-			chatID = int64(5)
+			chatID = adn.ChanID(5)
 		} else {
 			chatID = info.ChatID
 		}

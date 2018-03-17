@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/sessions"
+	"waveguide/lib/adn"
 	"waveguide/lib/config"
 	"waveguide/lib/log"
 	"waveguide/lib/model"
-	"waveguide/lib/oauth"
 )
 
 var sessionStore = sessions.NewCookieStore(config.GetAPISecret())
@@ -62,7 +62,7 @@ func (r *Routes) ResetUser(c *gin.Context) {
 	}
 }
 
-func (r *Routes) SetCurrentUser(u oauth.User, c *gin.Context) {
+func (r *Routes) SetCurrentUser(u adn.User, c *gin.Context) {
 	s, err := sessionStore.Get(c.Request, sessionName)
 	if err == nil {
 		log.Infof("set user object: %q", u)

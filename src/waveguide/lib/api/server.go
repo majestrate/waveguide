@@ -4,9 +4,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"net"
 	"net/http"
+	"waveguide/lib/adn"
 	"waveguide/lib/config"
 	"waveguide/lib/log"
-	"waveguide/lib/oauth"
 	"waveguide/lib/streaming"
 	"waveguide/lib/torrent"
 	"waveguide/lib/video"
@@ -15,7 +15,7 @@ import (
 type Server struct {
 	e       *gin.Engine
 	conf    config.Config
-	oauth   *oauth.Client
+	adn     *adn.Client
 	torrent *torrent.Factory
 	ctx     *streaming.Context
 	encoder video.Encoder
@@ -39,13 +39,13 @@ func (s *Server) Configure(conf config.Config) (err error) {
 
 func (s *Server) reconfigure(conf config.Config, fresh bool) (err error) {
 	s.conf = conf
-	o := oauth.NewClient(s.conf.OAuth)
-	if s.oauth == nil {
-		s.oauth = o
+	o := adn.NewClient(s.conf.ADN)
+	if s.adn == nil {
+		s.adn = o
 	} else {
 		// safe close
-		old := s.oauth
-		s.oauth = o
+		old := s.adn
+		s.adn = o
 		old.Close()
 	}
 	s.encoder, err = video.NewEncoder(&s.conf.Worker.Encoder)
